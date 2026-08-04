@@ -1,1 +1,22 @@
-
+name: bootstrap
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rebuild tree from zip
+        run: |
+          set -e
+          ZIP=$(find . -name "bot-arena-files.zip" -not -path "./.git/*" | head -1)
+          test -n "$ZIP" || { echo "ERROR: bot-arena-files.zip not found in repo"; exit 1; }
+          cp "$ZIP" /tmp/files.zip
+          find . -mindepth 1 -maxdepth 1 -not -name ".git" -not -name ".github" -exec rm -rf {} +
+          unzip -o /tmp/files.zip -x ".github/*" -d .
+          git config user.name bootstrap
+          git config user.email bootstrap@arena.local
+          git add -A
+          git commit -m "Rebuild proper tree from bot-arena-files.zip"
+          git push
