@@ -1,1 +1,29 @@
+name: backtest-validation
+on:
+  workflow_dispatch:
 
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt yfinance pyarrow
+      - name: Offline pipeline tests
+        run: python -m tests.test_pipeline
+      - name: Backtest both strategies (launch gate)
+        run: python backtest/run_backtest.py
+      - name: Commit reports
+        if: always()
+        run: |
+          git config user.name "backtester"
+          git config user.email "bots@arena.local"
+          git add reports || true
+          git diff --cached --quiet || git commit -m "backtest validation $(date -u +%Y%m%d)"
+          git pull --rebase origin main && git push
