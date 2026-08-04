@@ -1,0 +1,77 @@
+//@version=5
+// SCALPEL — TradingView cockpit port of the intraday session-momentum bot.
+// Canonical logic lives in bots/intraday/analyzer.py; this mirrors it for
+// chart display + TradingView backtesting. Use on a 1-HOUR chart, regular
+// session, on liquid US large caps / ETFs.
+//
+// Differences vs the live bot (single-symbol limits of Pine):
+//  - "RS top quintile of universe" is approximated by "return since open beats
+//    SPY by rs_edge".
+//  - Universe scan/ranking and account-level gates (daily breaker, kill switch)
+//    are not simulated here.
+strategy("SCALPEL cockpit", overlay=true, initial_capital=50000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=25,
+     commission_type=strategy.commission.percent, commission_value=0.005)
+
+// ---- inputs (mirror config/scalpel.yaml) ----
+stopAtrMult   = input.float(1.5, "Stop ATR mult")
+targetRMult   = input.float(2.0, "Target R mult")
+minVolPace    = input.float(1.3, "Min volume pace")
+rsEdge        = input.float(0.002, "RS edge vs SPY (ret since open)")
+lastEntryHour = input.int(14, "Last entry hour (ET)")
+
+// ---- session anchors ----
+newSession = ta.change(time("D")) != 0
+var float sessOpen  = na
+var float orHigh    = na
+var float orLow     = na
+var int   barInSess = 0
+if newSession
+    sessOpen  := open
+    orHigh    := high     // first hourly bar = 60-min opening range
+    orLow     := low
+    barInSess := 0
+else
+    barInSess += 1
+
+// ---- features ----
+sessVwap = ta.vwap(hlc3)
+atrD = request.security(syminfo.tickerid, "D", ta.atr(14), lookahead=barmerge.lookahead_off)
+retSinceOpen = close / sessOpen - 1
+spyClose = request.security("AMEX:SPY", timeframe.period, close, lookahead=barmerge.lookahead_off)
+spyOpenSess = request.security("AMEX:SPY", "D", open, lookahead=barmerge.lookahead_off)
+spyRet = spyClose / spyOpenSess - 1
+avgVol20d = request.security(syminfo.tickerid, "D", ta.sma(volume, 20), lookahead=barmerge.lookahead_off)
+var float cumVol = 0.0
+cumVol := newSession ? volume : cumVol + volume
+elapsedFrac = math.min(1.0, (barInSess + 1) * 60.0 / 390.0)
+volPace = cumVol / (avgVol20d * elapsedFrac)
+
+// ---- entry conditions (mirror analyzer checks) ----
+inEntryWindow = hour(time, "America/New_York") >= 10 and hour(time, "America/New_York") <= lastEntryHour and barInSess >= 1
+breakout   = close > orHigh
+aboveVwap  = close > sessVwap
+rsOk       = retSinceOpen - spyRet >= rsEdge
+paceOk     = volPace >= minVolPace
+entrySig   = inEntryWindow and breakout and aboveVwap and rsOk and paceOk and strategy.position_size == 0
+
+var float stopPx = na
+var float tgtPx  = na
+if entrySig
+    stopPx := close - stopAtrMult * atrD
+    tgtPx  := close + targetRMult * (close - stopPx)
+    strategy.entry("long", strategy.long)
+strategy.exit("bracket", "long", stop=stopPx, limit=tgtPx)
+
+// EOD flat: 15:30 ET cycle
+eod = hour(time, "America/New_York") == 15 and minute(time) >= 30 or hour(time, "America/New_York") > 15
+if eod
+    strategy.close_all(comment="EOD flat")
+
+// ---- cockpit plots ----
+plot(orHigh, "OR high", color=color.new(color.orange, 0), style=plot.style_linebr)
+plot(sessVwap, "Session VWAP", color=color.new(color.blue, 30))
+plot(strategy.position_size > 0 ? stopPx : na, "Stop", color=color.red, style=plot.style_linebr)
+plot(strategy.position_size > 0 ? tgtPx : na, "Target", color=color.green, style=plot.style_linebr)
+plotshape(entrySig, "Entry", shape.triangleup, location.belowbar, color.lime, size=size.small)
+bgcolor(inEntryWindow ? na : color.new(color.gray, 92))

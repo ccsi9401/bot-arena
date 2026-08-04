@@ -1,0 +1,32 @@
+# GLIDER — swing trend-pullback bot
+bot: glider
+execution_broker: alpaca
+account_env_prefix: GLIDER           # GLIDER_API_KEY / GLIDER_API_SECRET
+starting_equity: 50000
+
+schedule:
+  cycles_et: ["15:30"]
+
+strategy:
+  regime_filter: spy_above_200sma    # no new entries in bear regime
+  sma_fast: 50
+  sma_slow: 200
+  max_pct_below_52wk_high: 15
+  pullback_rsi2_max: 10              # RSI(2) < 10, OR touch of 20EMA
+  ema_touch_period: 20
+  atr_period: 14
+  stop_atr_mult: 2.0
+  target_r_mult: 2.0
+  breakeven_at_r: 1.0                # move stop to breakeven at +1R
+  max_hold_days: 15
+  min_price: 10.0
+  min_avg_dollar_vol: 50000000
+
+risk:
+  risk_per_trade_pct: 1.5
+  max_positions: 5
+  max_gross_exposure_pct: 100
+  daily_loss_limit_pct: null         # swing bot has no daily breaker
+  kill_switch_drawdown_pct: 15.0
+  data_freshness_minutes: 60
+  limit_price_tolerance_pct: 1.0

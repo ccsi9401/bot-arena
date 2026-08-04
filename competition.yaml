@@ -1,0 +1,21 @@
+# The current matchup. The scoreboard reads this — swap it for round 2.
+round: 1
+title: "Round 1 — Day traders: Claude (SCALPEL) vs ChatGPT"
+duration_days: 30
+start_date: null            # set on launch day (YYYY-MM-DD)
+competitors:
+  - slug: scalpel
+    label: "SCALPEL (Claude)"
+    kind: managed            # we run this bot's full pipeline
+    bot: scalpel
+  - slug: gpt_day
+    label: "GPT-DAY (ChatGPT)"
+    kind: external           # scored only: account is READ, never traded
+    env_prefix: GPTDAY       # GPTDAY_API_KEY / GPTDAY_API_SECRET
+    starting_equity: 50000
+
+# Round 2 (later): GLIDER (Claude) vs the GPT swing challenger
+# competitors:
+#   - {slug: glider, label: "GLIDER (Claude)", kind: managed, bot: glider}
+#   - {slug: gpt_swing, label: "GPT-SWING (ChatGPT)", kind: external,
+#      env_prefix: GPTSWING, starting_equity: 50000}

@@ -1,0 +1,44 @@
+name: nightly-scoreboard
+on:
+  schedule:
+    - cron: "15 21 * * 1-5"   # 17:15 ET, after settle
+  workflow_dispatch:
+
+concurrency:
+  group: arena-state
+  cancel-in-progress: false
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Update scoreboard
+        env:
+          SCALPEL_API_KEY: ${{ secrets.SCALPEL_API_KEY }}
+          SCALPEL_API_SECRET: ${{ secrets.SCALPEL_API_SECRET }}
+          GLIDER_API_KEY: ${{ secrets.GLIDER_API_KEY }}
+          GLIDER_API_SECRET: ${{ secrets.GLIDER_API_SECRET }}
+          # external competitors (READ-ONLY scoring)
+          GPTDAY_API_KEY: ${{ secrets.GPTDAY_API_KEY }}
+          GPTDAY_API_SECRET: ${{ secrets.GPTDAY_API_SECRET }}
+          GPTSWING_API_KEY: ${{ secrets.GPTSWING_API_KEY }}
+          GPTSWING_API_SECRET: ${{ secrets.GPTSWING_API_SECRET }}
+        run: |
+          python scoreboard.py
+          python dashboard.py
+      - name: Commit
+        run: |
+          git config user.name "scorekeeper"
+          git config user.email "bots@arena.local"
+          git add reports state || true
+          git diff --cached --quiet || git commit -m "scoreboard $(date -u +%Y%m%d)"
+          git pull --rebase origin main && git push

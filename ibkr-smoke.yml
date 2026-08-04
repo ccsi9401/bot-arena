@@ -1,0 +1,54 @@
+name: ibkr-smoke
+# Integration gate for the IBKR adapter, per bot: auth, account read, tiny bracket
+# order placed and immediately cancelled. Must pass for BOTH bots before their
+# trading workflows are enabled.
+on:
+  workflow_dispatch:
+    inputs:
+      bot:
+        description: "Which bot's IBKR account to smoke test"
+        type: choice
+        options: [scalpel, glider]
+        required: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Write IBKR OAuth key files (scalpel)
+        if: inputs.bot == 'scalpel'
+        run: |
+          mkdir -p .ibkr
+          echo "${{ secrets.SCALPEL_IBKR_ENCRYPTION_KEY_PEM }}" > .ibkr/key_encryption.pem
+          echo "${{ secrets.SCALPEL_IBKR_SIGNATURE_KEY_PEM }}" > .ibkr/key_signature.pem
+      - name: Write IBKR OAuth key files (glider)
+        if: inputs.bot == 'glider'
+        run: |
+          mkdir -p .ibkr
+          echo "${{ secrets.GLIDER_IBKR_ENCRYPTION_KEY_PEM }}" > .ibkr/key_encryption.pem
+          echo "${{ secrets.GLIDER_IBKR_SIGNATURE_KEY_PEM }}" > .ibkr/key_signature.pem
+      - name: Smoke test
+        env:
+          BOT: ${{ inputs.bot }}
+          SCALPEL_IBKR_ACCOUNT_ID: ${{ secrets.SCALPEL_IBKR_ACCOUNT_ID }}
+          SCALPEL_IBKR_CONSUMER_KEY: ${{ secrets.SCALPEL_IBKR_CONSUMER_KEY }}
+          SCALPEL_IBKR_ACCESS_TOKEN: ${{ secrets.SCALPEL_IBKR_ACCESS_TOKEN }}
+          SCALPEL_IBKR_ACCESS_TOKEN_SECRET: ${{ secrets.SCALPEL_IBKR_ACCESS_TOKEN_SECRET }}
+          SCALPEL_IBKR_DH_PRIME: ${{ secrets.SCALPEL_IBKR_DH_PRIME }}
+          SCALPEL_IBKR_ENCRYPTION_KEY_FP: .ibkr/key_encryption.pem
+          SCALPEL_IBKR_SIGNATURE_KEY_FP: .ibkr/key_signature.pem
+          GLIDER_IBKR_ACCOUNT_ID: ${{ secrets.GLIDER_IBKR_ACCOUNT_ID }}
+          GLIDER_IBKR_CONSUMER_KEY: ${{ secrets.GLIDER_IBKR_CONSUMER_KEY }}
+          GLIDER_IBKR_ACCESS_TOKEN: ${{ secrets.GLIDER_IBKR_ACCESS_TOKEN }}
+          GLIDER_IBKR_ACCESS_TOKEN_SECRET: ${{ secrets.GLIDER_IBKR_ACCESS_TOKEN_SECRET }}
+          GLIDER_IBKR_DH_PRIME: ${{ secrets.GLIDER_IBKR_DH_PRIME }}
+          GLIDER_IBKR_ENCRYPTION_KEY_FP: .ibkr/key_encryption.pem
+          GLIDER_IBKR_SIGNATURE_KEY_FP: .ibkr/key_signature.pem
+        run: python tests/ibkr_smoke.py --bot "$BOT"

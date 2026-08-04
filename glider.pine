@@ -1,0 +1,66 @@
+//@version=5
+// GLIDER — TradingView cockpit port of the swing trend-pullback bot.
+// Canonical logic lives in bots/swing/analyzer.py; this mirrors it for chart
+// display + TradingView backtesting. Use on a DAILY chart of US large caps/ETFs.
+//
+// Not simulated here (account-level, multi-symbol): 5-position cap, ranking by
+// trend strength across the universe, kill switch.
+strategy("GLIDER cockpit", overlay=true, initial_capital=50000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=20,
+     commission_type=strategy.commission.percent, commission_value=0.005)
+
+// ---- inputs (mirror config/glider.yaml) ----
+smaFast      = input.int(50, "Fast SMA")
+smaSlow      = input.int(200, "Slow SMA")
+maxPctBelowHi= input.float(15.0, "Max % below 52wk high")
+rsi2Max      = input.float(10.0, "RSI(2) pullback max")
+stopAtrMult  = input.float(2.0, "Stop ATR mult")
+targetRMult  = input.float(2.0, "Target R mult")
+breakevenR   = input.float(1.0, "Breakeven at R")
+maxHoldDays  = input.int(15, "Max hold (bars)")
+
+// ---- regime gate: SPY above its 200SMA ----
+spyC   = request.security("AMEX:SPY", "D", close, lookahead=barmerge.lookahead_off)
+spy200 = request.security("AMEX:SPY", "D", ta.sma(close, 200), lookahead=barmerge.lookahead_off)
+regimeOk = spyC > spy200
+
+// ---- setup conditions (mirror analyzer checks) ----
+f50  = ta.sma(close, smaFast)
+f200 = ta.sma(close, smaSlow)
+ema20 = ta.ema(close, 20)
+rsi2  = ta.rsi(close, 2)
+atr14 = ta.atr(14)
+hi52  = ta.highest(close, 252)
+uptrend  = f50 > f200 and close > f200
+nearHigh = (hi52 - close) / hi52 * 100 <= maxPctBelowHi
+pullback = rsi2 < rsi2Max or (low <= ema20 and close > ema20)
+entrySig = regimeOk and uptrend and nearHigh and pullback and strategy.position_size == 0
+
+var float entryPx = na
+var float stopPx  = na
+var float tgtPx   = na
+var int   entryBar = na
+if entrySig
+    entryPx  := close
+    stopPx   := close - stopAtrMult * atr14
+    tgtPx    := close + targetRMult * (close - stopPx)
+    entryBar := bar_index
+    strategy.entry("long", strategy.long)
+
+// breakeven ratchet at +1R (evaluated daily, like the live bot)
+if strategy.position_size > 0 and close >= entryPx + breakevenR * (entryPx - stopPx) and stopPx < entryPx
+    stopPx := entryPx
+strategy.exit("bracket", "long", stop=stopPx, limit=tgtPx)
+
+// time stop
+if strategy.position_size > 0 and bar_index - entryBar >= maxHoldDays
+    strategy.close_all(comment="time stop")
+
+// ---- cockpit plots ----
+plot(f50, "SMA50", color=color.new(color.orange, 0))
+plot(f200, "SMA200", color=color.new(color.red, 0))
+plot(ema20, "EMA20", color=color.new(color.blue, 40))
+plot(strategy.position_size > 0 ? stopPx : na, "Stop", color=color.red, style=plot.style_linebr)
+plot(strategy.position_size > 0 ? tgtPx : na, "Target", color=color.green, style=plot.style_linebr)
+plotshape(entrySig, "Entry", shape.triangleup, location.belowbar, color.lime, size=size.small)
+bgcolor(regimeOk ? na : color.new(color.red, 92))

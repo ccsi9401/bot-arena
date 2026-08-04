@@ -1,0 +1,47 @@
+name: glider-cycle
+# BENCHED until Round 2 (GLIDER vs GPT swing challenger): no cron, manual runs only.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (no orders)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: arena-state
+  cancel-in-progress: false
+
+jobs:
+  cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Run GLIDER cycle
+        env:
+          GLIDER_API_KEY: ${{ secrets.GLIDER_API_KEY }}
+          GLIDER_API_SECRET: ${{ secrets.GLIDER_API_SECRET }}
+          # market data reads use SCALPEL's keys (both bots see identical data)
+          SCALPEL_API_KEY: ${{ secrets.SCALPEL_API_KEY }}
+          SCALPEL_API_SECRET: ${{ secrets.SCALPEL_API_SECRET }}
+        run: |
+          python run_cycle.py --bot glider ${{ inputs.dry_run && '--dry-run' || '' }}
+      - name: Refresh dashboard
+        if: always()
+        run: python dashboard.py || true
+      - name: Commit journal + state
+        if: always()
+        run: |
+          git config user.name "glider-bot"
+          git config user.email "bots@arena.local"
+          git add journal state reports || true
+          git diff --cached --quiet || git commit -m "glider cycle $(date -u +%Y%m%d-%H%M)"
+          git pull --rebase origin main && git push
