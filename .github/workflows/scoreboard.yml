@@ -1,8 +1,8 @@
 name: nightly-scoreboard
 on:
   # LAUNCH DAY: remove the leading "#" from the next two lines to go live
-  # schedule:
-  #   - cron: "15 21 * * 1-5"
+   schedule:
+     - cron: "15 21 * * 1-5"
   workflow_dispatch:
 
 concurrency:
