@@ -70,6 +70,7 @@ def fresh_state(bot):
 def run():
     scan = fake_scan()
     scfg = load_config("scalpel")
+    scfg["strategy"]["style"] = "orb_momentum"
     gcfg = load_config("glider")
 
     # --- scalpel analyzer ---
