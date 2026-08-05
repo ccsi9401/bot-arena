@@ -1,8 +1,7 @@
 name: scalpel-cycle
 on:
-  # LAUNCH DAY: remove the leading "#" from the next two lines to go live
-   schedule:
-     - cron: "30 14-19 * * 1-5"
+  schedule:
+    - cron: "30 14-19 * * 1-5"
   workflow_dispatch:
     inputs:
       dry_run:
