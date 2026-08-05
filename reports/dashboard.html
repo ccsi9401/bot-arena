@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bot Arena — cockpit</title>
+<style>
+.viz-root {
+  color-scheme: light;
+  --surface-1:#fcfcfb; --page:#f9f9f7; --ink-1:#0b0b0b; --ink-2:#52514e;
+  --muted:#898781; --grid:#e1e0d9; --axis:#c3c2b7;
+  --series-1:#2a78d6; --series-2:#eb6834;
+  --good:#0ca30c; --good-text:#006300; --crit:#d03b3b;
+  --ring:rgba(11,11,11,0.10); --seq:#2a78d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme: dark;
+    --surface-1:#1a1a19; --page:#0d0d0d; --ink-1:#ffffff; --ink-2:#c3c2b7;
+    --muted:#898781; --grid:#2c2c2a; --axis:#383835;
+    --series-1:#3987e5; --series-2:#d95926;
+    --good:#0ca30c; --good-text:#0ca30c; --crit:#d03b3b;
+    --ring:rgba(255,255,255,0.10); --seq:#3987e5;
+  }
+}
+body{margin:0;background:var(--page);color:var(--ink-1);
+  font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+.viz-root{max-width:920px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:20px;margin:0 0 2px} h2{font-size:15px;margin:26px 0 8px}
+.sub{color:var(--ink-2);font-size:13px;margin-bottom:14px}
+.panel{background:var(--surface-1);border:1px solid var(--ring);
+  border-radius:10px;padding:14px 16px;margin-bottom:6px;overflow-x:auto}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:10px;margin:14px 0}
+.tile{background:var(--surface-1);border:1px solid var(--ring);border-radius:10px;
+  padding:12px 14px}
+.tlabel{color:var(--ink-2);font-size:12px} .tvalue{font-size:26px;font-weight:600}
+.delta{font-size:13px} .delta.up{color:var(--good-text)} .delta.down{color:var(--crit)}
+.tbl{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+.tbl th{text-align:left;color:var(--muted);font-weight:500;font-size:12px;
+  padding:4px 10px 6px 0;border-bottom:1px solid var(--axis)}
+.tbl td{padding:6px 10px 6px 0;border-bottom:1px solid var(--grid)}
+.sym{font-weight:600} .num{font-variant-numeric:tabular-nums}
+.rsbar{display:inline-block;width:64px;height:6px;background:var(--grid);
+  border-radius:3px;margin-right:6px;vertical-align:middle}
+.rsbar i{display:block;height:100%;background:var(--seq);border-radius:3px}
+.chip{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;
+  border:1px solid var(--ring);margin:1px 2px}
+.chip.good{color:var(--good-text)} .chip.crit{color:var(--crit)}
+.chip.mgmtc{color:var(--ink-2)}
+.cards{display:grid;gap:10px}
+.card{border:1px solid var(--ring);border-radius:10px;padding:10px 12px}
+.cardhead{display:flex;justify-content:space-between;align-items:center}
+.act{font-size:12px;font-weight:600;padding:1px 8px;border-radius:99px}
+.act.buy{color:var(--good-text);border:1px solid var(--good-text)}
+.act.mgmt{color:var(--ink-2);border:1px solid var(--ring)}
+.lvls{color:var(--ink-2);font-size:13px;margin:4px 0}
+.why{color:var(--ink-2);font-size:13px;margin:6px 0 2px}
+.chips{margin:4px 0}
+.empty{color:var(--muted);padding:16px 4px;font-size:13px}
+.halts{margin-bottom:8px}
+.grid{stroke:var(--grid);stroke-width:1} .axis{stroke:var(--axis);stroke-width:1}
+.tick{fill:var(--muted);font-size:11px} .endlbl{font-size:12px;font-weight:600}
+.linechart{width:100%;height:auto;display:block}
+.chartwrap{position:relative}
+.xhair{stroke:var(--axis);stroke-width:1;stroke-dasharray:3 3}
+.tooltip{position:absolute;pointer-events:none;background:var(--surface-1);
+  border:1px solid var(--ring);border-radius:8px;padding:6px 10px;font-size:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);white-space:nowrap}
+footer{color:var(--muted);font-size:12px;margin-top:28px}
+</style></head>
+<body><div class="viz-root">
+<h1>Round 1 — Day traders: Claude (SCALPEL) vs ChatGPT</h1>
+<div class="sub">Cockpit generated 2026-08-05 11:51 ET ·
+  latest run <b>scalpel_20260805_1151</b> </div>
+
+<div class="tiles"><div class="tile" style="border-top:3px solid var(--series-1)">
+  <div class="tlabel">SCALPEL (Claude)</div>
+  <div class="tvalue">$50,000</div><span class="delta up">▲ +0.00%</span></div><div class="tile" style="border-top:3px solid var(--series-2)">
+  <div class="tlabel">GPT-DAY (ChatGPT)</div>
+  <div class="tvalue">—</div></div></div>
+
+<h2>Equity curves</h2>
+<div class="panel"><div class="empty">Equity curves appear after the first scored trading day.</div></div>
+
+<h2>1 · Scanner — market snapshot the analyzer saw <span class="sub">(2026-08-05 11:51 ET)</span></h2>
+<div class="panel"><table class='tbl'><thead><tr><th>Sym</th><th>Last</th><th>RS pct</th><th>vs OR-high</th><th>vs VWAP</th><th>Vol pace</th><th>ATR14</th></tr></thead><tbody><tr><td class='sym'>MU</td><td class='num'>920.41</td><td><div class="rsbar"><i style="width:100%"></i></div><span class="num">1.00</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip good">✓ above</span></td><td class='num'>1.03×</td><td class='num'>83.95</td></tr><tr><td class='sym'>AMGN</td><td class='num'>406.49</td><td><div class="rsbar"><i style="width:99%"></i></div><span class="num">0.99</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip crit">✕ below</span></td><td class='num'>3.23×</td><td class='num'>11.17</td></tr><tr><td class='sym'>CAT</td><td class='num'>898.91</td><td><div class="rsbar"><i style="width:98%"></i></div><span class="num">0.98</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip good">✓ above</span></td><td class='num'>0.99×</td><td class='num'>42.99</td></tr><tr><td class='sym'>DHR</td><td class='num'>200.21</td><td><div class="rsbar"><i style="width:97%"></i></div><span class="num">0.97</span></td><td><span class="chip good">✓ above</span></td><td><span class="chip good">✓ above</span></td><td class='num'>0.43×</td><td class='num'>6.80</td></tr><tr><td class='sym'>UNH</td><td class='num'>411.30</td><td><div class="rsbar"><i style="width:96%"></i></div><span class="num">0.96</span></td><td><span class="chip good">✓ above</span></td><td><span class="chip good">✓ above</span></td><td class='num'>1.27×</td><td class='num'>11.28</td></tr><tr><td class='sym'>TMO</td><td class='num'>576.46</td><td><div class="rsbar"><i style="width:95%"></i></div><span class="num">0.95</span></td><td><span class="chip good">✓ above</span></td><td><span class="chip good">✓ above</span></td><td class='num'>0.64×</td><td class='num'>15.87</td></tr><tr><td class='sym'>GDX</td><td class='num'>83.72</td><td><div class="rsbar"><i style="width:93%"></i></div><span class="num">0.93</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip good">✓ above</span></td><td class='num'>2.76×</td><td class='num'>3.23</td></tr><tr><td class='sym'>NVDA</td><td class='num'>219.62</td><td><div class="rsbar"><i style="width:92%"></i></div><span class="num">0.92</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip crit">✕ below</span></td><td class='num'>1.40×</td><td class='num'>7.82</td></tr><tr><td class='sym'>INTC</td><td class='num'>100.64</td><td><div class="rsbar"><i style="width:91%"></i></div><span class="num">0.91</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip good">✓ above</span></td><td class='num'>0.71×</td><td class='num'>8.22</td></tr><tr><td class='sym'>MCD</td><td class='num'>274.26</td><td><div class="rsbar"><i style="width:90%"></i></div><span class="num">0.90</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip good">✓ above</span></td><td class='num'>1.26×</td><td class='num'>5.91</td></tr><tr><td class='sym'>GE</td><td class='num'>382.02</td><td><div class="rsbar"><i style="width:89%"></i></div><span class="num">0.89</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip crit">✕ below</span></td><td class='num'>0.65×</td><td class='num'>9.84</td></tr><tr><td class='sym'>T</td><td class='num'>22.91</td><td><div class="rsbar"><i style="width:88%"></i></div><span class="num">0.88</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip good">✓ above</span></td><td class='num'>1.62×</td><td class='num'>0.72</td></tr><tr><td class='sym'>SCHW</td><td class='num'>107.81</td><td><div class="rsbar"><i style="width:87%"></i></div><span class="num">0.87</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip good">✓ above</span></td><td class='num'>0.81×</td><td class='num'>2.08</td></tr><tr><td class='sym'>HD</td><td class='num'>351.69</td><td><div class="rsbar"><i style="width:86%"></i></div><span class="num">0.86</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip good">✓ above</span></td><td class='num'>1.25×</td><td class='num'>8.57</td></tr><tr><td class='sym'>JNJ</td><td class='num'>257.82</td><td><div class="rsbar"><i style="width:85%"></i></div><span class="num">0.85</span></td><td><span class="chip good">✓ above</span></td><td><span class="chip good">✓ above</span></td><td class='num'>0.74×</td><td class='num'>5.92</td></tr><tr><td class='sym'>UNP</td><td class='num'>295.25</td><td><div class="rsbar"><i style="width:84%"></i></div><span class="num">0.84</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip good">✓ above</span></td><td class='num'>0.61×</td><td class='num'>6.44</td></tr><tr><td class='sym'>LOW</td><td class='num'>219.12</td><td><div class="rsbar"><i style="width:82%"></i></div><span class="num">0.82</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip good">✓ above</span></td><td class='num'>0.53×</td><td class='num'>5.67</td></tr><tr><td class='sym'>GS</td><td class='num'>1,069.45</td><td><div class="rsbar"><i style="width:81%"></i></div><span class="num">0.81</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip crit">✕ below</span></td><td class='num'>1.51×</td><td class='num'>35.77</td></tr><tr><td class='sym'>NKE</td><td class='num'>41.66</td><td><div class="rsbar"><i style="width:80%"></i></div><span class="num">0.80</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip crit">✕ below</span></td><td class='num'>3.26×</td><td class='num'>1.33</td></tr><tr><td class='sym'>DIA</td><td class='num'>544.61</td><td><div class="rsbar"><i style="width:79%"></i></div><span class="num">0.79</span></td><td><span class="chip crit">✕ below</span></td><td><span class="chip crit">✕ below</span></td><td class='num'>1.44×</td><td class='num'>6.42</td></tr></tbody></table></div>
+
+<h2>2 · Analyzer — trade intents &amp; reasoning</h2>
+<div class="panel"><div class="empty">No trade intents this cycle — 0 passed filters; proposing top 0.</div></div>
+
+<h2>3 · Validator — risk-gate verdicts</h2>
+<div class="panel"><div class="empty">Nothing to validate this cycle.</div></div>
+
+<h2>4 · Executor — broker acks</h2>
+<div class="panel"><div class="empty">Dry run — no orders sent.</div></div>
+
+<footer>scan → analyze → validate → execute · every stage journaled ·
+RULES.md governs the round</footer>
+</div>
+<script>
+document.querySelectorAll('.chartwrap').forEach(w => {
+  const data = JSON.parse(w.dataset.series || '[]');
+  if (!data.length) return;
+  const svg = w.querySelector('svg'), tip = w.querySelector('.tooltip'),
+        xh = w.querySelector('.xhair'), vb = svg.viewBox.baseVal;
+  svg.addEventListener('mousemove', e => {
+    const r = svg.getBoundingClientRect();
+    const mx = (e.clientX - r.left) * vb.width / r.width;
+    let best = null;
+    data.forEach(s => s.points.forEach(p => {
+      const d = Math.abs(p[2] - mx);
+      if (!best || d < best.d) best = {d, date: p[0]};
+    }));
+    if (!best) return;
+    const rows = data.map(s => {
+      const p = s.points.find(q => q[0] === best.date);
+      return p ? `<div><span style="color:${s.color}">●</span> ${s.label}: ` +
+             `$${p[1].toLocaleString(undefined,{maximumFractionDigits:0})}</div>` : '';
+    }).join('');
+    const px = data[0].points.find(q => q[0] === best.date) ||
+               data.flatMap(s=>s.points).find(q => q[0] === best.date);
+    xh.setAttribute('x1', px[2]); xh.setAttribute('x2', px[2]);
+    xh.style.display = '';
+    tip.innerHTML = `<b>${best.date}</b>${rows}`;
+    tip.style.display = 'block';
+    const lx = px[2] * r.width / vb.width;
+    tip.style.left = Math.min(lx + 12, r.width - tip.offsetWidth - 4) + 'px';
+    tip.style.top = '20px';
+  });
+  svg.addEventListener('mouseleave', () => {
+    tip.style.display = 'none'; xh.style.display = 'none';
+  });
+});
+</script></body></html>
