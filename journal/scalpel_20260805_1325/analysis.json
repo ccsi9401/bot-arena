@@ -1,0 +1,27 @@
+{
+  "cycle_et": "13:25",
+  "style": "dip_reversion",
+  "intents": [
+    {
+      "action": "buy",
+      "symbol": "GOOGL",
+      "entry_limit": 362.9,
+      "stop": 341.79,
+      "target": 387.44,
+      "score": 2.930085617240952,
+      "reasoning": "Dip-buy: daily uptrend (50>200 SMA), down -5.35% since open = 1.40x its daily ATR (3.82%), below VWAP 368.54 on 2.09x volume. Betting on the bounce; stop 1.5xATR below, flat by close.",
+      "checks": {
+        "daily_uptrend": true,
+        "deep_dip": true,
+        "below_vwap": true,
+        "volume_pace": true,
+        "not_etf": true
+      }
+    }
+  ],
+  "notes": [
+    "1 passed filters; proposing top 1"
+  ],
+  "candidates_considered": 1,
+  "_written_et": "2026-08-05T13:25:49.242386-04:00"
+}
