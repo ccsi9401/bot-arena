@@ -1,4 +1,4 @@
-# SCALPEL — intraday bot, v3: dip-reversion (buy morning weakness in strong stocks)
+# SCALPEL — intraday bot, v3.1: dip-reversion, panic-only entries
 bot: scalpel
 execution_broker: alpaca
 account_env_prefix: SCALPEL          # SCALPEL_API_KEY / SCALPEL_API_SECRET
@@ -12,13 +12,13 @@ schedule:
 strategy:
   style: dip_reversion
   opening_range_minutes: 60
-  dip_atr_frac: 0.7                  # down >= 0.7x its daily ATR since open
+  dip_atr_frac: 1.0                  # down >= 1.0x its full daily ATR since open
   min_volume_pace: 1.2               # real selling, not thin drift
   min_rel_strength_quintile: 0.9     # (orb style only; unused by dip)
   require_above_vwap: true           # (orb style only; unused by dip)
   atr_period: 14
   stop_atr_mult: 1.5
-  target_r_mult: 1.0                 # mean reversion: frequent modest wins
+  target_r_mult: 1.2                 # capture more of the snapback
   min_price: 10.0
   min_avg_dollar_vol: 50000000
 
