@@ -2,7 +2,7 @@
 round: 1
 title: "Round 1 — Day traders: Claude (SCALPEL) vs ChatGPT"
 duration_days: 30
-start_date: null            # set on launch day (YYYY-MM-DD)
+start_date: null            # set on launch day "2026-08-06"
 competitors:
   - slug: scalpel
     label: "SCALPEL (Claude)"
