@@ -1,4 +1,4 @@
-# SCALPEL — intraday session-momentum bot (v2: morning-only, higher selectivity)
+# SCALPEL — intraday bot, v3: dip-reversion (buy morning weakness in strong stocks)
 bot: scalpel
 execution_broker: alpaca
 account_env_prefix: SCALPEL          # SCALPEL_API_KEY / SCALPEL_API_SECRET
@@ -6,25 +6,27 @@ starting_equity: 50000
 
 schedule:
   cycles_et: ["10:30", "11:30", "12:30", "13:30", "14:30", "15:30"]
-  last_entry_cycle_et: "11:30"       # morning entries only; rest of day manages
+  last_entry_cycle_et: "13:30"       # dips bought morning through early afternoon
   liquidate_cycle_et: "15:30"
 
 strategy:
-  opening_range_minutes: 60          # first hour high/low
-  min_rel_strength_quintile: 0.9     # top 10% RS vs universe since open
-  min_volume_pace: 1.5               # vs 20-day avg for time of day
-  require_above_vwap: true
+  style: dip_reversion
+  opening_range_minutes: 60
+  dip_atr_frac: 0.7                  # down >= 0.7x its daily ATR since open
+  min_volume_pace: 1.2               # real selling, not thin drift
+  min_rel_strength_quintile: 0.9     # (orb style only; unused by dip)
+  require_above_vwap: true           # (orb style only; unused by dip)
   atr_period: 14
   stop_atr_mult: 1.5
-  target_r_mult: 1.5                 # take profits sooner intraday
+  target_r_mult: 1.0                 # mean reversion: frequent modest wins
   min_price: 10.0
-  min_avg_dollar_vol: 50000000       # $50M/day
+  min_avg_dollar_vol: 50000000
 
 risk:
   risk_per_trade_pct: 1.5
-  max_positions: 2                   # concentrate on the best setups
+  max_positions: 3
   max_gross_exposure_pct: 100
-  daily_loss_limit_pct: 3.0          # halt entries + flatten for the day
-  kill_switch_drawdown_pct: 15.0     # from starting equity; permanent halt
+  daily_loss_limit_pct: 3.0
+  kill_switch_drawdown_pct: 15.0
   data_freshness_minutes: 20
   limit_price_tolerance_pct: 1.0

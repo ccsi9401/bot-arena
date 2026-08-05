@@ -1,4 +1,4 @@
-# GLIDER — swing trend-pullback bot (v2: 1.0% risk to hold drawdown inside the gate)
+# GLIDER — swing trend-pullback bot
 bot: glider
 execution_broker: alpaca
 account_env_prefix: GLIDER           # GLIDER_API_KEY / GLIDER_API_SECRET
@@ -23,7 +23,7 @@ strategy:
   min_avg_dollar_vol: 50000000
 
 risk:
-  risk_per_trade_pct: 1.0
+  risk_per_trade_pct: 0.9
   max_positions: 5
   max_gross_exposure_pct: 100
   daily_loss_limit_pct: null         # swing bot has no daily breaker
