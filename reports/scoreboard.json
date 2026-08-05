@@ -1,0 +1,35 @@
+{
+  "round": 1,
+  "title": "Round 1 \u2014 Day traders: Claude (SCALPEL) vs ChatGPT",
+  "start_date": null,
+  "asof_et": "2026-08-05T19:07:20.771846-04:00",
+  "competitors": [
+    {
+      "slug": "scalpel",
+      "label": "SCALPEL (Claude)",
+      "equity": 50000.0,
+      "cash": 50000.0,
+      "total_return_pct": 0.0,
+      "day_pl_pct": 0.0,
+      "max_drawdown_pct": 0.0,
+      "sharpe_daily_ann": null,
+      "trading_days": 1,
+      "open_positions": [],
+      "kill_switch": false
+    },
+    {
+      "slug": "gpt_day",
+      "label": "GPT-DAY (ChatGPT)",
+      "equity": 50000.0,
+      "cash": 50000.0,
+      "total_return_pct": 0.0,
+      "day_pl_pct": 0.0,
+      "max_drawdown_pct": 0.0,
+      "sharpe_daily_ann": null,
+      "trading_days": 1,
+      "open_positions": [],
+      "kill_switch": null
+    }
+  ],
+  "leader": "SCALPEL (Claude)"
+}
