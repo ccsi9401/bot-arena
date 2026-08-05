@@ -1,4 +1,4 @@
-# SCALPEL — intraday session-momentum bot
+# SCALPEL — intraday session-momentum bot (v2: morning-only, higher selectivity)
 bot: scalpel
 execution_broker: alpaca
 account_env_prefix: SCALPEL          # SCALPEL_API_KEY / SCALPEL_API_SECRET
@@ -6,23 +6,23 @@ starting_equity: 50000
 
 schedule:
   cycles_et: ["10:30", "11:30", "12:30", "13:30", "14:30", "15:30"]
-  last_entry_cycle_et: "14:30"       # 15:30 cycle only liquidates
+  last_entry_cycle_et: "11:30"       # morning entries only; rest of day manages
   liquidate_cycle_et: "15:30"
 
 strategy:
   opening_range_minutes: 60          # first hour high/low
-  min_rel_strength_quintile: 0.8     # top 20% RS vs SPY since open
-  min_volume_pace: 1.3               # vs 20-day avg for time of day
+  min_rel_strength_quintile: 0.9     # top 10% RS vs universe since open
+  min_volume_pace: 1.5               # vs 20-day avg for time of day
   require_above_vwap: true
   atr_period: 14
   stop_atr_mult: 1.5
-  target_r_mult: 2.0
+  target_r_mult: 1.5                 # take profits sooner intraday
   min_price: 10.0
   min_avg_dollar_vol: 50000000       # $50M/day
 
 risk:
   risk_per_trade_pct: 1.5
-  max_positions: 3
+  max_positions: 2                   # concentrate on the best setups
   max_gross_exposure_pct: 100
   daily_loss_limit_pct: 3.0          # halt entries + flatten for the day
   kill_switch_drawdown_pct: 15.0     # from starting equity; permanent halt
