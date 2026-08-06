@@ -1,0 +1,39 @@
+# STEWARD — Claude's portfolio manager (3rd Alpaca paper account)
+# Posture: "more than balanced, not too aggressive" — ~70% equities in healthy
+# regimes with a permanent defensive ballast; retreats to defense in downtrends.
+bot: steward
+account_env_prefix: STEWARD          # STEWARD_API_KEY / STEWARD_API_SECRET
+starting_equity: 50000
+benchmark: SPY
+
+# Self-contained universe (separate from the traders' shared universe on purpose:
+# SCALPEL's code and inputs are frozen during Round 1).
+universe:
+  stocks: [AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA, AVGO, LLY, JPM, V, XOM,
+           UNH, MA, PG, COST, HD, JNJ, ABBV, WMT, NFLX, CRM, BAC, ORCL, CVX,
+           MRK, KO, AMD, PEP, ADBE, TMO, LIN, WFC, CSCO, ACN, MCD, ABT, PM,
+           IBM, GE, TXN, QCOM, INTU, DHR, CAT, AMGN, VZ, PFE, NEE, DIS, CMCSA,
+           RTX, GS, SPGI, HON, UNP, AMAT, LOW, T, BLK, BKNG, ISRG, COP, PANW,
+           SBUX, MS, SCHW, NKE, UBER, MU, PLTR, LRCX, INTC, BA]
+  index_etfs: [SPY, QQQ]
+  defensive_etfs: [IEF, GLD, SHY]     # bonds, gold, T-bills — the ballast
+
+strategy:
+  momentum_lookback_days: 252         # 12-month momentum...
+  momentum_skip_days: 21              # ...skipping the most recent month (12-1)
+  top_n_stocks: 6
+  min_price: 10.0
+  min_avg_dollar_vol: 50000000
+  regime: spy_above_200sma            # risk-on only when SPY > its 200-day SMA
+  stock_filter: above_own_200sma_and_positive_momentum
+  index_trend_lookback_days: 126      # 6-month momentum splits the index sleeve
+  weights:
+    risk_on:  {stocks: 0.45, index: 0.25, defensive: 0.20, cash: 0.10}
+    risk_off: {stocks: 0.00, index: 0.00, defensive: 0.60, cash: 0.40}
+  drift_band_abs: 0.015               # rebalance a position only if >1.5% off target
+
+risk:
+  max_position_weight: 0.12           # no single holding above 12%
+  max_equity_weight: 0.75             # stocks + index ETFs capped at 75%
+  min_cash_weight: 0.05
+  kill_switch_drawdown_pct: 20.0      # -20% from start: forced risk-off + halt flag
