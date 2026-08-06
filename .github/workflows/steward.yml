@@ -1,8 +1,8 @@
 name: steward
 on:
   schedule:
-    - cron: "45 19 * * 5"
-    - cron: "25 21 * * 1-5"
+    - cron: "45 19 * * 5"    # Friday 15:45 ET — full weekly rebalance cycle
+    - cron: "25 21 * * 1-5"  # weekdays 17:25 ET — nightly pulse (snapshot + report)
   workflow_dispatch:
     inputs:
       mode:
@@ -46,6 +46,21 @@ jobs:
           fi
           echo "mode=$MODE"
           python run_steward.py --mode "$MODE" $DRY
+      - name: Publish steward phone page
+        if: always()
+        env:
+          BOARD_TOKEN: ${{ secrets.BOARD_TOKEN }}
+        run: |
+          if [ -z "$BOARD_TOKEN" ]; then echo "no BOARD_TOKEN secret; skipping"; exit 0; fi
+          python steward_board.py
+          git clone --depth 1 "https://x-access-token:${BOARD_TOKEN}@github.com/ccsi9401/bot-arena-board.git" /tmp/boardrepo
+          cp board/steward.html /tmp/boardrepo/steward.html
+          cd /tmp/boardrepo
+          git config user.name "steward-bot"
+          git config user.email "bots@arena.local"
+          git add steward.html
+          git diff --cached --quiet || git commit -m "steward board $(date -u +%Y%m%d-%H%M)"
+          git push
       - name: Commit journal + state + reports
         if: always()
         run: |
