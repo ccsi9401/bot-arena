@@ -1,0 +1,22 @@
+STEWARD SETUP — upload each item into the matching GitHub folder
+(same drill as before: navigate INTO the folder first, then Add file -> Upload files)
+
+1. run_steward.py and steward_report.py  ->  repo ROOT (front page)
+2. the whole "portfolio" folder          ->  drag it into the "bots" folder page
+3. steward.yaml                          ->  into "config"
+4. steward_backtest.py                   ->  into "backtest"
+5. test_steward.py                       ->  into "tests"
+6. steward.yml AND steward-backtest.yml  ->  into ".github/workflows"
+
+Then two secrets (bot-arena -> Settings -> Secrets and variables -> Actions):
+   STEWARD_API_KEY     = the 3rd paper account's API key
+   STEWARD_API_SECRET  = its secret key
+(The account should be set to $50,000 and flat.)
+
+Finally: Actions -> steward-backtest -> Run workflow.
+Green = STEWARD is licensed and starts managing on the next Friday cycle.
+Red   = paste Claude the summary and iteration begins.
+
+Safety notes: STEWARD refuses to trade until the backtest gate passes (a marker
+file the green run writes). Its schedules are live but harmless before that.
+Nothing in this package touches SCALPEL's frozen competition code.
