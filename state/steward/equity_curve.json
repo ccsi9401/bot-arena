@@ -10,5 +10,11 @@
     "equity": 50000.0,
     "cash": 50000.0,
     "note": "nightly pulse"
+  },
+  {
+    "ts_et": "2026-08-06T13:34:35.734047-04:00",
+    "equity": 50000.0,
+    "cash": 50000.0,
+    "note": "nightly pulse"
   }
 ]
