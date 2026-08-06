@@ -151,7 +151,7 @@ def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "steward.json").write_text(json.dumps(
         {"summary": s, "benchmark": spy, "gate": gate, "passed": passed,
-         "rebalance_trades": rebalances}, indent=2))
+         "rebalance_trades": rebalances}, indent=2, default=str))
     md = [f"# STEWARD pre-launch validation\n", f"## {s['label']}\n"]
     for k, v in s.items():
         if k != "label":
