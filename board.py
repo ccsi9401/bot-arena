@@ -107,6 +107,7 @@ body{{margin:0;background:var(--page);color:var(--ink-1);
 .viz-root{{max-width:640px;margin:0 auto;padding:18px 14px 40px}}
 h1{{font-size:19px;margin:0 0 2px}}
 .sub{{color:var(--ink-2);font-size:13px;margin-bottom:12px}}
+.nav{{font-size:13px;margin-bottom:8px}} .nav a{{color:var(--ink-2)}}
 .leader{{font-size:14px;margin:6px 0 10px}}
 .tiles{{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}}
 .tile{{background:var(--surface-1);border:1px solid var(--ring);border-radius:12px;
@@ -135,6 +136,7 @@ h1{{font-size:19px;margin:0 0 2px}}
 footer{{color:var(--muted);font-size:12px;margin-top:22px}}
 </style></head>
 <body><div class="viz-root">
+<div class="nav"><a href="steward.html">STEWARD portfolio →</a></div>
 <h1>{html.escape(comp["title"])}</h1>
 <div class="sub">Started {html.escape(str(start))} · updated
   {now_et():%b %d, %I:%M %p} ET · refreshes nightly after the close</div>
