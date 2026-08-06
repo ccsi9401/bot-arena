@@ -1,0 +1,56 @@
+name: steward
+on:
+  schedule:
+    - cron: "45 19 * * 5"
+    - cron: "25 21 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "cycle (rebalance) or pulse (snapshot only)"
+        type: choice
+        options: [pulse, cycle]
+        default: pulse
+      dry_run:
+        description: "Dry run (plan only, no orders)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: arena-state
+  cancel-in-progress: false
+
+jobs:
+  steward:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Run STEWARD
+        env:
+          STEWARD_API_KEY: ${{ secrets.STEWARD_API_KEY }}
+          STEWARD_API_SECRET: ${{ secrets.STEWARD_API_SECRET }}
+          DATA_API_KEY: ${{ secrets.STEWARD_API_KEY }}
+          DATA_API_SECRET: ${{ secrets.STEWARD_API_SECRET }}
+        run: |
+          MODE="${{ inputs.mode }}"
+          DRY="${{ inputs.dry_run && '--dry-run' || '' }}"
+          if [ -z "$MODE" ]; then
+            if [ "$(date -u +%H)" = "19" ]; then MODE=cycle; else MODE=pulse; fi
+          fi
+          echo "mode=$MODE"
+          python run_steward.py --mode "$MODE" $DRY
+      - name: Commit journal + state + reports
+        if: always()
+        run: |
+          git config user.name "steward-bot"
+          git config user.email "bots@arena.local"
+          git add journal state reports || true
+          git diff --cached --quiet || git commit -m "steward $(date -u +%Y%m%d-%H%M)"
+          git pull --rebase origin main && git push
