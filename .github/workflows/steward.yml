@@ -1,11 +1,17 @@
-name: scalpel-cycle
+name: steward
 on:
   schedule:
-    - cron: "30 14-19 * * 1-5"
+    - cron: "45 19 * * 5"    # Friday 15:45 ET — full weekly rebalance cycle
+    - cron: "25 21 * * 1-5"  # weekdays 17:25 ET — nightly pulse (snapshot + report)
   workflow_dispatch:
     inputs:
+      mode:
+        description: "cycle (rebalance) or pulse (snapshot only)"
+        type: choice
+        options: [pulse, cycle]
+        default: pulse
       dry_run:
-        description: "Dry run (no orders)"
+        description: "Dry run (plan only, no orders)"
         type: boolean
         default: false
 
@@ -14,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  cycle:
+  steward:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -26,19 +32,39 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: pip install -r requirements.txt
-      - name: Run SCALPEL cycle
+      - name: Run STEWARD
         env:
-          SCALPEL_API_KEY: ${{ secrets.SCALPEL_API_KEY }}
-          SCALPEL_API_SECRET: ${{ secrets.SCALPEL_API_SECRET }}
+          STEWARD_API_KEY: ${{ secrets.STEWARD_API_KEY }}
+          STEWARD_API_SECRET: ${{ secrets.STEWARD_API_SECRET }}
+          DATA_API_KEY: ${{ secrets.STEWARD_API_KEY }}
+          DATA_API_SECRET: ${{ secrets.STEWARD_API_SECRET }}
         run: |
-          python run_cycle.py --bot scalpel ${{ inputs.dry_run && '--dry-run' || '' }}
-      - name: Refresh dashboard
+          MODE="${{ inputs.mode }}"
+          DRY="${{ inputs.dry_run && '--dry-run' || '' }}"
+          if [ -z "$MODE" ]; then
+            if [ "$(date -u +%H)" = "19" ]; then MODE=cycle; else MODE=pulse; fi
+          fi
+          echo "mode=$MODE"
+          python run_steward.py --mode "$MODE" $DRY
+      - name: Publish steward phone page
         if: always()
-        run: python dashboard.py || true
-      - name: Commit journal + state
+        env:
+          BOARD_TOKEN: ${{ secrets.BOARD_TOKEN }}
+        run: |
+          if [ -z "$BOARD_TOKEN" ]; then echo "no BOARD_TOKEN secret; skipping"; exit 0; fi
+          python steward_board.py
+          git clone --depth 1 "https://x-access-token:${BOARD_TOKEN}@github.com/ccsi9401/bot-arena-board.git" /tmp/boardrepo
+          cp board/steward.html /tmp/boardrepo/steward.html
+          cd /tmp/boardrepo
+          git config user.name "steward-bot"
+          git config user.email "bots@arena.local"
+          git add steward.html
+          git diff --cached --quiet || git commit -m "steward board $(date -u +%Y%m%d-%H%M)"
+          git push
+      - name: Commit journal + state + reports
         if: always()
         run: |
-          git config user.name "scalpel-bot"
+          git config user.name "steward-bot"
           git config user.email "bots@arena.local"
           git add journal state reports || true
           if git diff --cached --quiet; then
