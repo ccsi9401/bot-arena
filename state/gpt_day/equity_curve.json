@@ -4,5 +4,11 @@
     "equity": 50000.0,
     "cash": 50000.0,
     "note": "nightly scoreboard"
+  },
+  {
+    "ts_et": "2026-08-06T21:02:35.081597-04:00",
+    "equity": 50000.0,
+    "cash": 50000.0,
+    "note": "nightly scoreboard"
   }
 ]

@@ -69,7 +69,7 @@ footer{color:var(--muted);font-size:12px;margin-top:28px}
 </style></head>
 <body><div class="viz-root">
 <h1>Round 1 — Day traders: Claude (SCALPEL) vs ChatGPT</h1>
-<div class="sub">Cockpit generated 2026-08-06 20:21 ET ·
+<div class="sub">Cockpit generated 2026-08-06 21:02 ET ·
   latest run <b>scalpel_20260806_2021</b> <span class="chip mgmtc">market closed — run skipped</span></div>
 
 <div class="tiles"><div class="tile" style="border-top:3px solid var(--series-1)">
@@ -79,7 +79,19 @@ footer{color:var(--muted);font-size:12px;margin-top:28px}
   <div class="tvalue">$50,000</div><span class="delta up">▲ +0.00%</span></div></div>
 
 <h2>Equity curves</h2>
-<div class="panel"><div class="empty">Equity curves appear after the first scored trading day.</div></div>
+<div class="panel">
+<div class="chartwrap" data-series='[{&quot;label&quot;: &quot;SCALPEL (Claude)&quot;, &quot;color&quot;: &quot;var(--series-1)&quot;, &quot;points&quot;: [[&quot;2026-08-05&quot;, 50000.0, 58.0, 132.6], [&quot;2026-08-06&quot;, 50000.0, 776.0, 132.6]]}, {&quot;label&quot;: &quot;GPT-DAY (ChatGPT)&quot;, &quot;color&quot;: &quot;var(--series-2)&quot;, &quot;points&quot;: [[&quot;2026-08-05&quot;, 50000.0, 58.0, 132.6], [&quot;2026-08-06&quot;, 50000.0, 776.0, 132.6]]}]'>
+<svg viewBox="0 0 860 280" class="linechart" role="img"
+     aria-label="Equity curves">
+  <line x1="58" y1="250.0" x2="776" y2="250.0" class="grid"/><line x1="58" y1="191.0" x2="776" y2="191.0" class="grid"/><line x1="58" y1="132.0" x2="776" y2="132.0" class="grid"/><line x1="58" y1="73.0" x2="776" y2="73.0" class="grid"/><line x1="58" y1="14.0" x2="776" y2="14.0" class="grid"/>
+  <line x1="58" y1="250" x2="776" y2="250" class="axis"/>
+  <text x="52" y="254.0" class="tick" text-anchor="end">$49,942</text><text x="52" y="195.0" class="tick" text-anchor="end">$49,971</text><text x="52" y="136.0" class="tick" text-anchor="end">$50,000</text><text x="52" y="77.0" class="tick" text-anchor="end">$50,029</text><text x="52" y="18.0" class="tick" text-anchor="end">$50,059</text><text x="58.0" y="270" class="tick" text-anchor="middle">08-05</text><text x="776.0" y="270" class="tick" text-anchor="middle">08-06</text>
+  <path d="M58.0,132.6 L776.0,132.6" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/><path d="M58.0,132.6 L776.0,132.6" fill="none" stroke="var(--series-2)" stroke-width="2" stroke-linejoin="round"/>
+  <text x="780.0" y="136.6" class="endlbl" fill="var(--series-1)">SCALPEL</text><text x="780.0" y="136.6" class="endlbl" fill="var(--series-2)">GPT-DAY</text>
+  <line class="xhair" x1="0" y1="14" x2="0" y2="250" style="display:none"/>
+</svg>
+<div class="tooltip" style="display:none"></div>
+</div></div>
 
 <h2>1 · Scanner — market snapshot the analyzer saw <span class="sub">(2026-08-06 20:21 ET)</span></h2>
 <div class="panel"><div class="empty">No scan yet — appears after the first cycle.</div></div>
