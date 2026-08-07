@@ -1,17 +1,11 @@
-name: steward
+name: scalpel-cycle
 on:
   schedule:
-    - cron: "45 19 * * 5"    # Friday 15:45 ET — full weekly rebalance cycle
-    - cron: "25 21 * * 1-5"  # weekdays 17:25 ET — nightly pulse (snapshot + report)
+    - cron: "30 14-19 * * 1-5"
   workflow_dispatch:
     inputs:
-      mode:
-        description: "cycle (rebalance) or pulse (snapshot only)"
-        type: choice
-        options: [pulse, cycle]
-        default: pulse
       dry_run:
-        description: "Dry run (plan only, no orders)"
+        description: "Dry run (no orders)"
         type: boolean
         default: false
 
@@ -20,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  steward:
+  cycle:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -32,40 +26,32 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: pip install -r requirements.txt
-      - name: Run STEWARD
+      - name: Run SCALPEL cycle
         env:
-          STEWARD_API_KEY: ${{ secrets.STEWARD_API_KEY }}
-          STEWARD_API_SECRET: ${{ secrets.STEWARD_API_SECRET }}
-          DATA_API_KEY: ${{ secrets.STEWARD_API_KEY }}
-          DATA_API_SECRET: ${{ secrets.STEWARD_API_SECRET }}
+          SCALPEL_API_KEY: ${{ secrets.SCALPEL_API_KEY }}
+          SCALPEL_API_SECRET: ${{ secrets.SCALPEL_API_SECRET }}
         run: |
-          MODE="${{ inputs.mode }}"
-          DRY="${{ inputs.dry_run && '--dry-run' || '' }}"
-          if [ -z "$MODE" ]; then
-            if [ "$(date -u +%H)" = "19" ]; then MODE=cycle; else MODE=pulse; fi
-          fi
-          echo "mode=$MODE"
-          python run_steward.py --mode "$MODE" $DRY
-      - name: Publish steward phone page
+          python run_cycle.py --bot scalpel ${{ inputs.dry_run && '--dry-run' || '' }}
+      - name: Refresh dashboard
         if: always()
-        env:
-          BOARD_TOKEN: ${{ secrets.BOARD_TOKEN }}
-        run: |
-          if [ -z "$BOARD_TOKEN" ]; then echo "no BOARD_TOKEN secret; skipping"; exit 0; fi
-          python steward_board.py
-          git clone --depth 1 "https://x-access-token:${BOARD_TOKEN}@github.com/ccsi9401/bot-arena-board.git" /tmp/boardrepo
-          cp board/steward.html /tmp/boardrepo/steward.html
-          cd /tmp/boardrepo
-          git config user.name "steward-bot"
-          git config user.email "bots@arena.local"
-          git add steward.html
-          git diff --cached --quiet || git commit -m "steward board $(date -u +%Y%m%d-%H%M)"
-          git push
-      - name: Commit journal + state + reports
+        run: python dashboard.py || true
+      - name: Commit journal + state
         if: always()
         run: |
-          git config user.name "steward-bot"
+          git config user.name "scalpel-bot"
           git config user.email "bots@arena.local"
           git add journal state reports || true
-          git diff --cached --quiet || git commit -m "steward $(date -u +%Y%m%d-%H%M)"
-          git pull --rebase origin main && git push
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+            exit 0
+          fi
+          git commit -m "steward $(date -u +%Y%m%d-%H%M)"
+          for i in 1 2 3; do
+            if git pull --rebase -X theirs origin main && git push origin main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 5))
+          done
+          echo "::error::could not push after 3 attempts"
+          exit 1
