@@ -1,22 +1,17 @@
-name: scalpel-cycle
+name: nightly-scoreboard
 on:
   schedule:
-    - cron: "30 14-19 * * 1-5"
+    - cron: "15 21 * * 1-5"   # 17:15 ET, after settle
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: "Dry run (no orders)"
-        type: boolean
-        default: false
 
 concurrency:
   group: arena-state
   cancel-in-progress: false
 
 jobs:
-  cycle:
+  score:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     permissions:
       contents: write
     steps:
@@ -26,21 +21,39 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: pip install -r requirements.txt
-      - name: Run SCALPEL cycle
+      - name: Update scoreboard
         env:
           SCALPEL_API_KEY: ${{ secrets.SCALPEL_API_KEY }}
           SCALPEL_API_SECRET: ${{ secrets.SCALPEL_API_SECRET }}
+          GLIDER_API_KEY: ${{ secrets.GLIDER_API_KEY }}
+          GLIDER_API_SECRET: ${{ secrets.GLIDER_API_SECRET }}
+          # external competitors (READ-ONLY scoring)
+          GPTDAY_API_KEY: ${{ secrets.GPTDAY_API_KEY }}
+          GPTDAY_API_SECRET: ${{ secrets.GPTDAY_API_SECRET }}
+          GPTSWING_API_KEY: ${{ secrets.GPTSWING_API_KEY }}
+          GPTSWING_API_SECRET: ${{ secrets.GPTSWING_API_SECRET }}
         run: |
-          python run_cycle.py --bot scalpel ${{ inputs.dry_run && '--dry-run' || '' }}
-      - name: Refresh dashboard
-        if: always()
-        run: python dashboard.py || true
-      - name: Commit journal + state
-        if: always()
+          python scoreboard.py
+          python dashboard.py
+      - name: Publish mobile board (GitHub Pages repo)
+        env:
+          BOARD_TOKEN: ${{ secrets.BOARD_TOKEN }}
         run: |
-          git config user.name "scalpel-bot"
+          if [ -z "$BOARD_TOKEN" ]; then echo "no BOARD_TOKEN secret; skipping board publish"; exit 0; fi
+          python board.py
+          git clone --depth 1 "https://x-access-token:${BOARD_TOKEN}@github.com/ccsi9401/bot-arena-board.git" /tmp/boardrepo
+          cp board/index.html /tmp/boardrepo/index.html
+          cd /tmp/boardrepo
+          git config user.name "scorekeeper"
           git config user.email "bots@arena.local"
-          git add journal state reports || true
+          git add index.html
+          git diff --cached --quiet || git commit -m "board $(date -u +%Y%m%d-%H%M)"
+          git push
+      - name: Commit
+        run: |
+          git config user.name "scorekeeper"
+          git config user.email "bots@arena.local"
+          git add reports state || true
           if git diff --cached --quiet; then
             echo "nothing to commit"
             exit 0
