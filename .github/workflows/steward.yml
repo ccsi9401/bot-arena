@@ -1,7 +1,7 @@
 name: steward
 on:
   schedule:
-    - cron: "45 19 * * 5"    # Friday 15:45 ET — full weekly rebalance cycle
+    - cron: "0 19 * * 5"     # Friday 15:00 ET — weekly rebalance (1h buffer before the close; GitHub cron can run late)
     - cron: "25 21 * * 1-5"  # weekdays 17:25 ET — nightly pulse (snapshot + report)
   workflow_dispatch:
     inputs:
@@ -42,7 +42,15 @@ jobs:
           MODE="${{ inputs.mode }}"
           DRY="${{ inputs.dry_run && '--dry-run' || '' }}"
           if [ -z "$MODE" ]; then
-            if [ "$(date -u +%H)" = "19" ]; then MODE=cycle; else MODE=pulse; fi
+            # Friday afternoon (delay-tolerant): hour 19 OR 20 UTC counts as the
+            # weekly cycle — GitHub cron regularly fires 20-40 min late, and on
+            # Aug 7 that turned the first cycle into a pulse. Anything else: pulse.
+            H="$(date -u +%H)"
+            if [ "$(date -u +%u)" = "5" ] && { [ "$H" = "19" ] || [ "$H" = "20" ]; }; then
+              MODE=cycle
+            else
+              MODE=pulse
+            fi
           fi
           echo "mode=$MODE"
           python run_steward.py --mode "$MODE" $DRY
