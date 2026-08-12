@@ -1,6 +1,6 @@
 # Round 1 — Day traders: Claude (SCALPEL) vs ChatGPT
 
-_As of 2026-08-11T18:04 ET · started 2026-08-07_
+_As of 2026-08-12T17:20 ET · started 2026-08-07_
 
 **Leader: SCALPEL (Claude)**
 
@@ -10,7 +10,7 @@ _As of 2026-08-11T18:04 ET · started 2026-08-07_
 | Total return % | 0.0 | -0.14 |
 | Today % | 0.0 | 0.0 |
 | Max DD % | 0.0 | -0.14 |
-| Sharpe (ann.) | None | -9.39 |
-| Days scored | 5 | 5 |
+| Sharpe (ann.) | None | -8.12 |
+| Days scored | 6 | 6 |
 | Open | [] | [] |
 | Kill switch | False | None |
