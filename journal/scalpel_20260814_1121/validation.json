@@ -1,0 +1,36 @@
+{
+  "approved": [
+    {
+      "action": "buy",
+      "symbol": "AVGO",
+      "entry_limit": 395.38,
+      "stop": 371.08,
+      "target": 423.68,
+      "score": 2.6273734471996097,
+      "reasoning": "Dip-buy: daily uptrend (50>200 SMA), down -4.13% since open = 1.02x its daily ATR (4.04%), below VWAP 401.23 on 2.57x volume. Betting on the bounce; stop 1.5xATR below, flat by close.",
+      "checks": {
+        "daily_uptrend": true,
+        "deep_dip": true,
+        "below_vwap": true,
+        "volume_pace": true,
+        "not_etf": true
+      },
+      "qty": 30,
+      "notional": 11861.4,
+      "risk_dollars": 729.0
+    }
+  ],
+  "rejected": [],
+  "halts": [],
+  "account_snapshot": {
+    "equity": 50000.0,
+    "cash": 50000.0,
+    "last_equity": 50000.0,
+    "buying_power": 200000.0,
+    "status": "AccountStatus.ACTIVE",
+    "gross_after": 11861.4,
+    "drawdown_pct": 0.0,
+    "day_pl_pct": 0.0
+  },
+  "_written_et": "2026-08-14T11:21:25.140875-04:00"
+}

@@ -1,0 +1,27 @@
+{
+  "cycle_et": "11:21",
+  "style": "dip_reversion",
+  "intents": [
+    {
+      "action": "buy",
+      "symbol": "AVGO",
+      "entry_limit": 395.38,
+      "stop": 371.08,
+      "target": 423.68,
+      "score": 2.6273734471996097,
+      "reasoning": "Dip-buy: daily uptrend (50>200 SMA), down -4.13% since open = 1.02x its daily ATR (4.04%), below VWAP 401.23 on 2.57x volume. Betting on the bounce; stop 1.5xATR below, flat by close.",
+      "checks": {
+        "daily_uptrend": true,
+        "deep_dip": true,
+        "below_vwap": true,
+        "volume_pace": true,
+        "not_etf": true
+      }
+    }
+  ],
+  "notes": [
+    "1 passed filters; proposing top 1"
+  ],
+  "candidates_considered": 1,
+  "_written_et": "2026-08-14T11:21:25.085767-04:00"
+}

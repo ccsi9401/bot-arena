@@ -1,0 +1,15 @@
+{
+  "results": [
+    {
+      "id": "c0a3b4dc-7168-4a1f-b90d-c080489a6027",
+      "symbol": "AVGO",
+      "qty": 30,
+      "status": "OrderStatus.PENDING_NEW",
+      "action": "buy",
+      "ok": true
+    }
+  ],
+  "placed": 1,
+  "failed": 0,
+  "_written_et": "2026-08-14T11:21:25.213771-04:00"
+}

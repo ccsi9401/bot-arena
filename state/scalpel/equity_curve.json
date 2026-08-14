@@ -220,5 +220,11 @@
     "equity": 50000.0,
     "cash": 50000.0,
     "note": "nightly scoreboard"
+  },
+  {
+    "ts_et": "2026-08-14T11:21:25.213883-04:00",
+    "equity": 50000.0,
+    "cash": 50000.0,
+    "note": "cycle scalpel_20260814_1121"
   }
 ]
