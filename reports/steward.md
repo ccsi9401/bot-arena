@@ -1,6 +1,10 @@
-# STEWARD — 2026-08-14 14:46 ET
+# STEWARD — 2026-08-14 15:51 ET
 
-Equity: $50,000
-SPY shadow: $50,329
-Regime: —
+Equity: $49,997
+SPY shadow: $50,350
+Regime: RISK-ON
 
+- Regime: RISK-ON — SPY above its 200-day SMA.
+- Stock sleeve: 6/6 qualified (MU +578%, INTC +298%, LRCX +192%, AMAT +181%, AMD +174%, CAT +111%); 0.0% of the sleeve falls back to cash.
+- Index sleeve: QQQ 12.0%, SPY 12.0% (per-position cap 12%).
+- Defensive ballast: 20% split across GLD, IEF, SHY — always on.

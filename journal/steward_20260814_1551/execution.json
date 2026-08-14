@@ -1,0 +1,95 @@
+{
+  "results": [
+    {
+      "symbol": "AMAT",
+      "side": "buy",
+      "qty": 7,
+      "id": "d96f83ea-6579-4a15-848f-5a918d9a5183",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "AMD",
+      "side": "buy",
+      "qty": 7,
+      "id": "29fddc5f-8a82-4660-b036-2bc2441af669",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "CAT",
+      "side": "buy",
+      "qty": 4,
+      "id": "f9318c11-165a-4562-b91c-79d0a36fd979",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "GLD",
+      "side": "buy",
+      "qty": 8,
+      "id": "1b740a8e-74f1-46a9-a93b-2021cd7fe2f0",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "IEF",
+      "side": "buy",
+      "qty": 35,
+      "id": "a376db6e-99e4-483e-bac9-48562c77a11b",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "INTC",
+      "side": "buy",
+      "qty": 36,
+      "id": "fcc4c257-edef-4e74-8942-665df40d5cbc",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "LRCX",
+      "side": "buy",
+      "qty": 11,
+      "id": "867b13a3-e7a4-4541-b268-bf41008d55ee",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "MU",
+      "side": "buy",
+      "qty": 3,
+      "id": "7e4c03e9-2cfa-4524-8555-66ff7fce5b4b",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "QQQ",
+      "side": "buy",
+      "qty": 8,
+      "id": "f95374d7-92f7-4782-9f19-3ca186d2fde0",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "SHY",
+      "side": "buy",
+      "qty": 40,
+      "id": "c4b0e261-31c0-45a7-8381-5ef094b1a7e4",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "SPY",
+      "side": "buy",
+      "qty": 7,
+      "id": "362a06f2-bc2e-41c5-b705-10a310aed27b",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    }
+  ],
+  "placed": 11,
+  "failed": 0,
+  "_written_et": "2026-08-14T15:51:21.617026-04:00"
+}

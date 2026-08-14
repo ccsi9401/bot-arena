@@ -1,0 +1,122 @@
+{
+  "targets_final": {
+    "AMAT": 0.075,
+    "AMD": 0.075,
+    "CAT": 0.075,
+    "GLD": 0.0667,
+    "IEF": 0.0667,
+    "INTC": 0.075,
+    "LRCX": 0.075,
+    "MU": 0.075,
+    "QQQ": 0.12,
+    "SHY": 0.0667,
+    "SPY": 0.12
+  },
+  "current_weights": {},
+  "cash_target": 0.1099,
+  "orders": [
+    {
+      "symbol": "AMAT",
+      "side": "buy",
+      "qty": 7,
+      "ref_price": 506.65,
+      "from_w": 0.0,
+      "to_w": 0.075,
+      "reason": "Add 0.0% \u2192 7.5%"
+    },
+    {
+      "symbol": "AMD",
+      "side": "buy",
+      "qty": 7,
+      "ref_price": 510.315,
+      "from_w": 0.0,
+      "to_w": 0.075,
+      "reason": "Add 0.0% \u2192 7.5%"
+    },
+    {
+      "symbol": "CAT",
+      "side": "buy",
+      "qty": 4,
+      "ref_price": 856.745,
+      "from_w": 0.0,
+      "to_w": 0.075,
+      "reason": "Add 0.0% \u2192 7.5%"
+    },
+    {
+      "symbol": "GLD",
+      "side": "buy",
+      "qty": 8,
+      "ref_price": 401.44,
+      "from_w": 0.0,
+      "to_w": 0.0667,
+      "reason": "Add 0.0% \u2192 6.7%"
+    },
+    {
+      "symbol": "IEF",
+      "side": "buy",
+      "qty": 35,
+      "ref_price": 93.04,
+      "from_w": 0.0,
+      "to_w": 0.0667,
+      "reason": "Add 0.0% \u2192 6.7%"
+    },
+    {
+      "symbol": "INTC",
+      "side": "buy",
+      "qty": 36,
+      "ref_price": 102.695,
+      "from_w": 0.0,
+      "to_w": 0.075,
+      "reason": "Add 0.0% \u2192 7.5%"
+    },
+    {
+      "symbol": "LRCX",
+      "side": "buy",
+      "qty": 11,
+      "ref_price": 332.82,
+      "from_w": 0.0,
+      "to_w": 0.075,
+      "reason": "Add 0.0% \u2192 7.5%"
+    },
+    {
+      "symbol": "MU",
+      "side": "buy",
+      "qty": 3,
+      "ref_price": 969.535,
+      "from_w": 0.0,
+      "to_w": 0.075,
+      "reason": "Add 0.0% \u2192 7.5%"
+    },
+    {
+      "symbol": "QQQ",
+      "side": "buy",
+      "qty": 8,
+      "ref_price": 730.55,
+      "from_w": 0.0,
+      "to_w": 0.12,
+      "reason": "Add 0.0% \u2192 12.0%"
+    },
+    {
+      "symbol": "SHY",
+      "side": "buy",
+      "qty": 40,
+      "ref_price": 82.015,
+      "from_w": 0.0,
+      "to_w": 0.0667,
+      "reason": "Add 0.0% \u2192 6.7%"
+    },
+    {
+      "symbol": "SPY",
+      "side": "buy",
+      "qty": 7,
+      "ref_price": 776.39,
+      "from_w": 0.0,
+      "to_w": 0.12,
+      "reason": "Add 0.0% \u2192 12.0%"
+    }
+  ],
+  "notes": [],
+  "halts": [],
+  "drawdown_pct": 0.0,
+  "_written_et": "2026-08-14T15:51:20.650666-04:00"
+}
