@@ -1,0 +1,16 @@
+{
+  "approved": [],
+  "rejected": [],
+  "halts": [],
+  "account_snapshot": {
+    "equity": 49960.04,
+    "cash": 38161.04,
+    "last_equity": 49950.74,
+    "buying_power": 185681.36,
+    "status": "AccountStatus.ACTIVE",
+    "gross_after": 11799.0,
+    "drawdown_pct": 0.08,
+    "day_pl_pct": 0.02
+  },
+  "_written_et": "2026-08-17T15:07:28.205925-04:00"
+}
