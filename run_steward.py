@@ -74,18 +74,26 @@ def snapshot(state: State, broker: AlpacaBroker, data: MarketData, cfg: dict,
 
 
 def execute(orders: list[dict], broker: AlpacaBroker) -> dict:
+    """Place the plan. Notional (dollar) orders where the planner asked for them,
+    share quantities otherwise — notional wins so fills land exactly on target
+    regardless of price drift between planning and execution."""
     broker.cancel_all_orders()
     results = []
     for o in orders:
+        notional = o.get("notional")
+        sizing = ({"notional": round(float(notional), 2)} if notional
+                  else {"qty": o["qty"]})
         try:
             ack = broker.trading.submit_order(MarketOrderRequest(
-                symbol=o["symbol"], qty=o["qty"],
+                symbol=o["symbol"],
                 side=OrderSide.BUY if o["side"] == "buy" else OrderSide.SELL,
-                time_in_force=TimeInForce.DAY))
-            results.append({"symbol": o["symbol"], "side": o["side"], "qty": o["qty"],
+                time_in_force=TimeInForce.DAY, **sizing))
+            results.append({"symbol": o["symbol"], "side": o["side"],
+                            "qty": o.get("qty"), "notional": notional,
                             "id": str(ack.id), "status": str(ack.status), "ok": True})
         except Exception as e:
-            results.append({"symbol": o["symbol"], "side": o["side"], "qty": o["qty"],
+            results.append({"symbol": o["symbol"], "side": o["side"],
+                            "qty": o.get("qty"), "notional": notional,
                             "ok": False, "error": f"{type(e).__name__}: {e}"})
     return {"results": results,
             "placed": sum(1 for x in results if x.get("ok")),
@@ -131,10 +139,12 @@ def main() -> int:
 
         acct = broker.account()
         positions = broker.positions()
-        prices = data.last_trades(sorted(set(
-            list(analysis["targets"]) + [p["symbol"] for p in positions])))
+        syms = sorted(set(list(analysis["targets"]) + [p["symbol"] for p in positions]))
+        prices = data.last_trades(syms)
+        fractionable = broker.fractionable(syms)
         kill = state.kill_switch_tripped()
-        p = plan(analysis["targets"], analysis, acct, positions, prices, cfg, kill)
+        p = plan(analysis["targets"], analysis, acct, positions, prices, cfg, kill,
+                 fractionable=fractionable)
         if any("KILL" in h for h in p["halts"]) and not kill:
             state.trip_kill_switch(p["halts"][0])
         journal.write("plan", p)
@@ -151,7 +161,9 @@ def main() -> int:
         print(json.dumps({"run_id": journal.run_id, "equity": acct["equity"],
                           "regime_on": analysis["regime_on"],
                           "orders": len(p["orders"]), "placed": execution["placed"],
-                          "failed": execution["failed"], "halts": p["halts"]}, indent=2))
+                          "failed": execution["failed"],
+                          "projected_cash_weight": p.get("projected_cash_weight"),
+                          "halts": p["halts"]}, indent=2))
         return 0
     except Exception:
         err = traceback.format_exc()
