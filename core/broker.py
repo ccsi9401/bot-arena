@@ -13,6 +13,7 @@ identical across venues; only execution differs. Adapter contract:
   submit_bracket_buy(symbol, qty, limit_price, stop_price, target_price) -> ack
   replace_stop(order_id|symbol, new_stop) ; close_position(symbol)
   close_all() ; cancel_all_orders()
+  fractionable(symbols) -> {symbol: bool}   # STEWARD's dollar-based sizing
 """
 from __future__ import annotations
 
@@ -55,6 +56,7 @@ class AlpacaBroker:
         _load_secrets_env()
         self.trading = TradingClient(os.environ[f"{env_prefix}_API_KEY"],
                                      os.environ[f"{env_prefix}_API_SECRET"], paper=True)
+        self._frac_cache: dict[str, bool] = {}
 
     def account(self) -> dict:
         a = self.trading.get_account()
@@ -78,6 +80,28 @@ class AlpacaBroker:
                  "limit_price": float(o.limit_price) if o.limit_price else None,
                  "order_class": str(o.order_class) if o.order_class else None}
                 for o in orders]
+
+    def fractionable(self, symbols: list[str]) -> dict[str, bool]:
+        """Which symbols Alpaca will accept fractional/notional orders for.
+
+        STEWARD sizes in dollars; anything not fractionable falls back to whole
+        shares in the planner. Unknown or erroring symbols are treated as NOT
+        fractionable — the conservative direction.
+        """
+        out: dict[str, bool] = {}
+        for s in symbols:
+            if s in self._frac_cache:
+                out[s] = self._frac_cache[s]
+                continue
+            try:
+                a = self.trading.get_asset(s)
+                val = bool(getattr(a, "fractionable", False)
+                           and getattr(a, "tradable", True))
+            except Exception:
+                val = False
+            self._frac_cache[s] = val
+            out[s] = val
+        return out
 
     def submit_bracket_buy(self, symbol: str, qty: int, limit_price: float,
                            stop_price: float, target_price: float,

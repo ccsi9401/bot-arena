@@ -52,6 +52,11 @@ def account(equity=50000, cash=50000):
             "buying_power": cash, "status": "ACTIVE"}
 
 
+def dollars(order):
+    return (order["notional"] if order.get("notional") is not None
+            else (order["qty"] or 0) * order["ref_price"])
+
+
 def run():
     c = cfg()
     # steward config uses its own universe naming; patch stocks list to fakes
@@ -80,7 +85,9 @@ def run():
 
     # ---- planner ----
     prices = {s: 100.0 for s in list(a["targets"]) + ["X"]}
-    p = plan(a["targets"], a, account(), [], prices, c, kill_tripped=False)
+    frac = {s: True for s in list(a["targets"]) + ["X"]}
+    p = plan(a["targets"], a, account(), [], prices, c, kill_tripped=False,
+             fractionable=frac)
     check("planner emits buys from flat", len(p["orders"]) >= 7
           and all(o["side"] == "buy" for o in p["orders"]))
     check("planner respects position cap",
@@ -91,12 +98,13 @@ def run():
     positions = [{"symbol": s, "qty": w * 50000 / 100, "avg_entry": 100,
                   "market_value": w * 50000 * 1.005, "unrealized_pl": 0,
                   "current_price": 100.5} for s, w in a["targets"].items()]
-    p2 = plan(a["targets"], a, account(), positions, prices, c, kill_tripped=False)
+    p2 = plan(a["targets"], a, account(), positions, prices, c, kill_tripped=False,
+              fractionable=frac)
     check("drift band suppresses fidgeting", len(p2["orders"]) == 0)
 
     # kill switch: -22% drawdown forces risk-off
     p3 = plan(a["targets"], a, account(equity=39000, cash=39000), [], prices, c,
-              kill_tripped=False)
+              kill_tripped=False, fractionable=frac)
     check("kill switch forces defense", any("KILL" in h for h in p3["halts"])
           and all(s in c["universe"]["defensive_etfs"] for s in p3["targets_final"]))
 
@@ -104,9 +112,64 @@ def run():
     positions2 = [{"symbol": "X", "qty": 100, "avg_entry": 100,
                    "market_value": 10000, "unrealized_pl": 0, "current_price": 100}]
     p4 = plan(a["targets"], a, account(equity=50000, cash=40000), positions2,
-              prices, c, kill_tripped=False)
+              prices, c, kill_tripped=False, fractionable=frac)
     sides = [o["side"] for o in p4["orders"]]
     check("sells ordered before buys", sides.index("sell") == 0 if "sell" in sides else False)
+    xo = next(o for o in p4["orders"] if o["symbol"] == "X")
+    check("full exit sells the exact position, no dust",
+          xo["side"] == "sell" and abs(xo["qty"] - 100) < 1e-9
+          and xo.get("notional") is None)
+
+    # ---- sizing v2: the 2026-08-14 truncation bug ----
+    # Real prices from journal/steward_20260814_1551 — expensive shares are where
+    # whole-share flooring parked 5.3% of the book in cash.
+    px_real = {"AMAT": 506.65, "AMD": 510.315, "CAT": 856.745, "GLD": 401.44,
+               "IEF": 93.04, "INTC": 102.695, "LRCX": 332.82, "MU": 969.535,
+               "QQQ": 730.55, "SHY": 82.015, "SPY": 776.39}
+    t_real = {"AMAT": 0.075, "AMD": 0.075, "CAT": 0.075, "GLD": 0.0667,
+              "IEF": 0.0667, "INTC": 0.075, "LRCX": 0.075, "MU": 0.075,
+              "QQQ": 0.12, "SHY": 0.0667, "SPY": 0.12}
+    eq = 49997.49
+    acct_real = account(equity=eq, cash=eq)
+
+    pf = plan(t_real, a, acct_real, [], px_real, c, kill_tripped=False,
+              fractionable={s: True for s in t_real})
+    invested = sum(dollars(o) for o in pf["orders"])
+    target_dollars = sum(t_real.values()) * eq
+    check("notional sizing invests to target within 0.1%",
+          abs(invested - target_dollars) / eq < 0.001)
+    check("notional sizing leaves planned cash, not 16%",
+          abs(pf["projected_cash_weight"] - pf["cash_target"]) < 0.002)
+    check("notional orders carry a dollar amount",
+          all(o["notional"] is not None for o in pf["orders"] if o["side"] == "buy"))
+
+    pw = plan(t_real, a, acct_real, [], px_real, c, kill_tripped=False)
+    invested_w = sum(dollars(o) for o in pw["orders"])
+    check("whole-share fallback recovers most of the truncation drag",
+          invested_w / eq > 0.87)  # v1 floored to 83.7%
+    check("whole-share sweep is logged",
+          any("sweep" in n for n in pw["notes"]))
+
+    # v1 could never top up a gap smaller than one share (int() -> 0 -> skipped)
+    mu_short = [{"symbol": "MU", "qty": 3, "avg_entry": 969.535,
+                 "market_value": 2908.61, "unrealized_pl": 0,
+                 "current_price": 969.535}]
+    p5 = plan({"MU": 0.075}, a, account(), mu_short, {"MU": 969.535}, c,
+              kill_tripped=False, fractionable={"MU": True})
+    check("sub-one-share top-up is no longer dropped",
+          len(p5["orders"]) == 1
+          and abs(dollars(p5["orders"][0]) - (0.075 * 50000 - 2908.61)) < 1.0)
+
+    # cash guard: never plan more buying than the account can fund
+    p6 = plan(t_real, a, account(equity=eq, cash=5000), [], px_real, c,
+              kill_tripped=False, fractionable={s: True for s in t_real})
+    check("cash guard keeps buys within available cash",
+          sum(dollars(o) for o in p6["orders"] if o["side"] == "buy") <= 5000)
+
+    # missing price is skipped, not guessed
+    p7 = plan({"ZZZ": 0.12}, a, account(), [], {}, c, kill_tripped=False)
+    check("missing price skipped safely",
+          not p7["orders"] and any("no live price" in n for n in p7["notes"]))
 
     print(f"\n{len(FAILURES)} failures" if FAILURES else "\nALL STEWARD TESTS PASS")
     return 1 if FAILURES else 0
