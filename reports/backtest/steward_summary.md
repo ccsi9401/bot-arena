@@ -2,17 +2,17 @@
 
 ## STEWARD 3y weekly
 
-- total_return_pct: 113.57
-- cagr_pct: 30.47
-- max_drawdown_pct: -19.21
-- sharpe_daily_ann: 1.43
-- rebalance_trades: 322
+- total_return_pct: 116.68
+- cagr_pct: 31.08
+- max_drawdown_pct: -18.76
+- sharpe_daily_ann: 1.46
+- rebalance_trades: 323
 
 ## SPY buy & hold (same window)
 
-- total_return_pct: 84.57
-- cagr_pct: 23.96
+- total_return_pct: 89.57
+- cagr_pct: 25.09
 - max_drawdown_pct: -18.76
-- sharpe_daily_ann: 1.46
+- sharpe_daily_ann: 1.53
 
 **GATE: PASSED** {'positive_return': np.True_, 'max_dd_under_20pct': True, 'sharpe_at_least_0_4': True}
