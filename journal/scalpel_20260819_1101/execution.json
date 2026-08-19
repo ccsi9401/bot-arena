@@ -1,0 +1,15 @@
+{
+  "results": [
+    {
+      "id": "5c0e874d-1b0f-4874-aac0-b96234877591",
+      "symbol": "GE",
+      "qty": 53,
+      "status": "OrderStatus.PENDING_NEW",
+      "action": "buy",
+      "ok": true
+    }
+  ],
+  "placed": 1,
+  "failed": 0,
+  "_written_et": "2026-08-19T11:01:31.962702-04:00"
+}

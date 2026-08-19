@@ -1,0 +1,27 @@
+{
+  "cycle_et": "11:01",
+  "style": "dip_reversion",
+  "intents": [
+    {
+      "action": "buy",
+      "symbol": "GE",
+      "entry_limit": 362.52,
+      "stop": 348.39,
+      "target": 378.68,
+      "score": 1.512159077990485,
+      "reasoning": "Dip-buy: daily uptrend (50>200 SMA), down -3.00% since open = 1.18x its daily ATR (2.53%), below VWAP 364.68 on 1.28x volume. Betting on the bounce; stop 1.5xATR below, flat by close.",
+      "checks": {
+        "daily_uptrend": true,
+        "deep_dip": true,
+        "below_vwap": true,
+        "volume_pace": true,
+        "not_etf": true
+      }
+    }
+  ],
+  "notes": [
+    "1 passed filters; proposing top 1"
+  ],
+  "candidates_considered": 1,
+  "_written_et": "2026-08-19T11:01:31.901967-04:00"
+}
