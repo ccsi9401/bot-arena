@@ -1,0 +1,16 @@
+{
+  "results": [
+    {
+      "symbol": "MU",
+      "side": "buy",
+      "qty": 0.7828,
+      "notional": 757.99,
+      "id": "c4ab7ae0-6565-4093-bb30-59005237bbad",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    }
+  ],
+  "placed": 1,
+  "failed": 0,
+  "_written_et": "2026-08-21T15:30:22.404376-04:00"
+}

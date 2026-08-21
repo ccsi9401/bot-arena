@@ -1,0 +1,47 @@
+{
+  "targets_final": {
+    "AMAT": 0.075,
+    "AMD": 0.075,
+    "CAT": 0.075,
+    "GLD": 0.0667,
+    "IEF": 0.0667,
+    "INTC": 0.075,
+    "LRCX": 0.075,
+    "MU": 0.075,
+    "QQQ": 0.12,
+    "SHY": 0.0667,
+    "SPY": 0.12
+  },
+  "current_weights": {
+    "AMAT": 0.0707,
+    "AMD": 0.0676,
+    "CAT": 0.0681,
+    "GLD": 0.0694,
+    "IEF": 0.0665,
+    "INTC": 0.0665,
+    "LRCX": 0.0707,
+    "MU": 0.0595,
+    "QQQ": 0.1169,
+    "SHY": 0.0672,
+    "SPY": 0.1098
+  },
+  "cash_target": 0.1099,
+  "projected_cash_weight": 0.1515,
+  "sizing_version": 2,
+  "orders": [
+    {
+      "symbol": "MU",
+      "side": "buy",
+      "qty": 0.7828,
+      "notional": 757.99,
+      "ref_price": 968.3,
+      "from_w": 0.0595,
+      "to_w": 0.075,
+      "reason": "Add 5.9% \u2192 7.5%"
+    }
+  ],
+  "notes": [],
+  "halts": [],
+  "drawdown_pct": 2.32,
+  "_written_et": "2026-08-21T15:30:22.350632-04:00"
+}
