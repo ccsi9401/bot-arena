@@ -1,7 +1,7 @@
-# STEWARD — 2026-08-21 15:30 ET
+# STEWARD — 2026-08-21 17:44 ET
 
-Equity: $48,839
-SPY shadow: $49,691
+Equity: $48,777
+SPY shadow: $49,647
 Regime: RISK-ON
 
 - Regime: RISK-ON — SPY above its 200-day SMA.
