@@ -2,25 +2,25 @@
 
 ## STEWARD 3y weekly
 
-- total_return_pct: 113.19
-- cagr_pct: 30.24
+- total_return_pct: 255.49
+- cagr_pct: 15.4
 - max_drawdown_pct: -19.4
-- sharpe_daily_ann: 1.38
-- avg_cash_weight_pct: 14.92
-- cash_gap_mean_pp: -0.91
-- cash_gap_worst_pp: 2.83
-- weeks_cash_over_target_1pp: 10
-- rebalance_weeks: 145
-- window_start: 2023-10-05
+- sharpe_daily_ann: 0.96
+- avg_cash_weight_pct: 20.45
+- cash_gap_mean_pp: -0.69
+- cash_gap_worst_pp: 2.93
+- weeks_cash_over_target_1pp: 19
+- rebalance_weeks: 448
+- window_start: 2017-10-04
 - window_end: 2026-08-21
-- trading_days: 722
-- rebalance_trades: 372
+- trading_days: 2232
+- rebalance_trades: 1082
 
 ## SPY buy & hold (same window)
 
-- total_return_pct: 86.58
-- cagr_pct: 24.32
-- max_drawdown_pct: -18.76
-- sharpe_daily_ann: 1.49
+- total_return_pct: 246.29
+- cagr_pct: 15.05
+- max_drawdown_pct: -33.72
+- sharpe_daily_ann: 0.84
 
 **GATE: PASSED** {'positive_return': True, 'max_dd_under_20pct': True, 'sharpe_at_least_0_4': True}
