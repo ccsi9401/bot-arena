@@ -166,6 +166,65 @@ def run():
     check("cash guard keeps buys within available cash",
           sum(dollars(o) for o in p6["orders"] if o["side"] == "buy") <= 5000)
 
+    # ---- cash-drag sweep: the 2026-08-21 stranded-cash bug ----
+    # Every holding sat 0.0-1.0pp under target — each inside the 1.5% band, together
+    # 4.5pp of the book stuck in cash, with no single position able to release it.
+    # current_weights verbatim from journal/steward_20260821_1530/plan.json.
+    w_drag = {"AMAT": 0.0707, "AMD": 0.0676, "CAT": 0.0681, "GLD": 0.0694,
+              "IEF": 0.0665, "INTC": 0.0665, "LRCX": 0.0707, "MU": 0.0595,
+              "QQQ": 0.1169, "SHY": 0.0672, "SPY": 0.1098}
+    eq_d = 48838.73
+    px_d = dict(px_real, MU=968.30)
+
+    def held(weights, equity=eq_d):
+        return [{"symbol": s, "qty": w * equity / px_d[s], "avg_entry": px_d[s],
+                 "market_value": w * equity, "unrealized_pl": 0.0,
+                 "current_price": px_d[s]} for s, w in weights.items()]
+
+    def acct_for(weights, equity=eq_d):
+        return account(equity=equity, cash=(1 - sum(weights.values())) * equity)
+
+    pd_ = plan(t_real, a, acct_for(w_drag), held(w_drag), px_d, c,
+               kill_tripped=False, fractionable={s: True for s in px_d})
+    check("cash-drag sweep fires when cash is stranded above target",
+          pd_["cash_drag_sweep"] is True)
+    check("cash-drag sweep closes the gap to target",
+          abs(pd_["projected_cash_weight"] - pd_["cash_target"]) < 0.005)
+    check("cash-drag sweep buys the sub-band underweights, not just MU",
+          len([o for o in pd_["orders"] if o["side"] == "buy"]) >= 7)
+    check("cash-drag sweep never sells to raise cash it already has",
+          not any(o["side"] == "sell" for o in pd_["orders"]))
+    check("cash-drag sweep skips dust below the minimum notional",
+          all(dollars(o) >= c["strategy"]["min_order_notional"] for o in pd_["orders"]))
+    check("cash-drag sweep is logged", any("Cash drag" in n for n in pd_["notes"]))
+
+    # ...and it must not become a new source of fidgeting: rerun on the post-sweep
+    # book (cash back at target) and nothing should trade.
+    pf2 = plan(t_real, a, acct_for(t_real), held(t_real), px_d, c,
+               kill_tripped=False, fractionable={s: True for s in px_d})
+    check("no sweep once cash is back at target", pf2["cash_drag_sweep"] is False)
+    check("sweep is idempotent — no churn on the next cycle", len(pf2["orders"]) == 0)
+
+    # cash slightly above target but inside cash_drag_band -> still no trading
+    w_near = {s: w * 0.995 for s, w in t_real.items()}   # ~0.45pp of drag
+    pn = plan(t_real, a, acct_for(w_near), held(w_near), px_d, c,
+              kill_tripped=False, fractionable={s: True for s in px_d})
+    check("small cash drag stays inside the band (no fidgeting)",
+          pn["cash_drag_sweep"] is False and len(pn["orders"]) == 0)
+
+    # a real sell signal still fires normally during a sweep
+    w_over = dict(w_drag, GLD=0.10)                      # GLD 3.3pp over target
+    po = plan(t_real, a, acct_for(w_over), held(w_over), px_d, c,
+              kill_tripped=False, fractionable={s: True for s in px_d})
+    check("out-of-band sells still fire during a sweep",
+          any(o["side"] == "sell" and o["symbol"] == "GLD" for o in po["orders"]))
+
+    # the sweep must still respect the cash floor
+    poor = plan(t_real, a, account(equity=eq_d, cash=400), held(w_drag), px_d, c,
+                kill_tripped=False, fractionable={s: True for s in px_d})
+    check("cash-drag sweep respects available cash",
+          sum(dollars(o) for o in poor["orders"] if o["side"] == "buy") <= 400)
+
     # missing price is skipped, not guessed
     p7 = plan({"ZZZ": 0.12}, a, account(), [], {}, c, kill_tripped=False)
     check("missing price skipped safely",
