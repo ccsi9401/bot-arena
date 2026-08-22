@@ -40,4 +40,13 @@ risk:
   max_position_weight: 0.12           # no single holding above 12%
   max_equity_weight: 0.75             # stocks + index ETFs capped at 75%
   min_cash_weight: 0.05
-  kill_switch_drawdown_pct: 20.0      # -20% from start: forced risk-off + halt flag
+  kill_switch_drawdown_pct: 20.0      # -20% from the ORIGINAL $50k: a hard floor.
+                                      # Meaningful early; once the book has grown it
+                                      # sits so far below the market value that it
+                                      # stops being a drawdown guard at all.
+  kill_switch_peak_drawdown_pct: 30.0 # -30% off the high-water mark: the measure that
+                                      # still means the same thing at any size. Set
+                                      # well clear of normal behaviour — the 3y
+                                      # validation window's worst peak-to-trough is
+                                      # 19.4%, so this is ~10pp of headroom above a
+                                      # bad-but-ordinary correction.
