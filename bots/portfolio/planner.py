@@ -12,6 +12,17 @@ Sizing (v2, 2026-08-18): orders are sized in dollars, not floored share counts.
 v1 floored every order to whole shares, which left the portfolio ~5 points
 under-invested (see journal/steward_20260814_1551) with no way to self-correct,
 because the top-up trades were themselves smaller than one share.
+
+Cash-drag sweep (2026-08-21): v2 fixed the sizing of orders that fire, but the
+per-position drift band decides WHICH orders fire, and it is blind to the total.
+After the v1 cycle every holding sat 0.0-1.0pp under target — each one inside the
+1.5% band, together 4.5pp of the book sitting in cash, and no single position
+could ever drift far enough to release it (journal/steward_20260821_1530:
+projected_cash_weight 0.1515 vs cash_target 0.1099). So the band is now checked
+against a portfolio-level invariant too: when total cash exceeds its target by
+more than strategy.cash_drag_band, the band is relaxed on the BUY side for that
+cycle and the idle cash is put back to work. Sells keep the full band — trimming
+would only add to the cash pile, and the point of the band is not to fidget.
 """
 from __future__ import annotations
 
@@ -72,12 +83,28 @@ def plan(targets: dict[str, float], analysis: dict, account: dict,
         current[p["symbol"]] = p["market_value"] / equity if equity > 0 else 0
         held_qty[p["symbol"]] = float(p["qty"])
 
+    # ---- portfolio-level cash check: is the band stranding idle cash? ----
+    # The per-position band can't see this: N holdings each 0.5pp light are all
+    # "in band" while together they leave several points of the book in cash.
+    cash_target_w = 1 - sum(targets.values())
+    cash_w = 1 - sum(current.values())
+    drag = cash_w - cash_target_w
+    drag_band = cfg["strategy"].get("cash_drag_band", 0.01)
+    min_notional = cfg["strategy"].get("min_order_notional", 25)
+    sweep_cash = drag > drag_band
+    if sweep_cash:
+        notes.append(f"Cash drag {drag*100:.1f}pp above target "
+                     f"({cash_w*100:.1f}% vs {cash_target_w*100:.1f}%) — relaxing the "
+                     f"{cfg['strategy']['drift_band_abs']*100:.1f}% band on buys to "
+                     "put idle cash back to work.")
+
     # ---- sizing: dollars first, shares only where forced ----
     band = cfg["strategy"]["drift_band_abs"]
     sells: list[dict] = []
     buys: list[dict] = []
     whole_share_gaps: list[tuple[str, float, float, float, float]] = []  # sym,resid$,px,cur,tgt
     skipped_dust: list[str] = []
+    skipped_tiny: list[str] = []
 
     for sym in sorted(set(current) | set(targets)):
         cur, tgt = current.get(sym, 0.0), targets.get(sym, 0.0)
@@ -87,10 +114,15 @@ def plan(targets: dict[str, float], analysis: dict, account: dict,
             if abs(drift) > band:
                 notes.append(f"{sym}: no live price — skipped this cycle.")
             continue
-        if abs(drift) <= band:
+        # Buys get the relaxed band while cash is dragging; sells never do.
+        eff_band = 0.0 if (sweep_cash and drift > 0) else band
+        if abs(drift) <= eff_band:
             continue
 
         delta = abs(drift) * equity
+        if drift > 0 and eff_band == 0.0 and delta < min_notional:
+            skipped_tiny.append(sym)
+            continue
         is_frac = bool(frac_map.get(sym, False))
         why = f"{'Trim' if drift < 0 else 'Add'} {cur*100:.1f}% → {tgt*100:.1f}%"
 
@@ -130,8 +162,8 @@ def plan(targets: dict[str, float], analysis: dict, account: dict,
     # Whole-share truncation is what parked 5.3% of the book in cash on 2026-08-14.
     # Spend the residue on whoever is furthest below target, while the cash floor holds.
     sell_proceeds = sum((o["qty"] or 0) * o["ref_price"] for o in sells)
-    budget = (account.get("cash", 0.0) + sell_proceeds
-              - r["min_cash_weight"] * equity - _BUY_BUFFER_FRAC * equity)
+    budget = max(0.0, account.get("cash", 0.0) + sell_proceeds
+                 - r["min_cash_weight"] * equity - _BUY_BUFFER_FRAC * equity)
     spent = sum(o["notional"] if o["notional"] is not None
                 else (o["qty"] or 0) * o["ref_price"] for o in buys)
     swept = 0
@@ -156,18 +188,29 @@ def plan(targets: dict[str, float], analysis: dict, account: dict,
                      f"rounding residue instead of leaving it in cash.")
 
     # ---- cash guard: never plan more buying than the account can fund ----
-    if spent > budget > 0:
-        scale = budget / spent
-        for o in buys:
-            if o["notional"] is not None:
-                o["notional"] = round(o["notional"] * scale, 2)
-            elif o["qty"] is not None:
-                o["qty"] = int(o["qty"] * scale)
-        buys = [o for o in buys if (o["notional"] or 0) > 1 or (o["qty"] or 0) >= 1]
-        notes.append(f"Buys scaled to {scale*100:.0f}% of plan to respect the "
-                     f"{r['min_cash_weight']*100:.0f}% cash floor.")
+    # NB: budget is clamped at 0 above. The old `spent > budget > 0` form skipped
+    # this guard entirely when the budget came out zero or negative — i.e. exactly
+    # when the account was already at its cash floor and could least afford to buy.
+    if spent > budget:
+        if budget <= 0:
+            buys = []
+            notes.append(f"No cash above the {r['min_cash_weight']*100:.0f}% floor — "
+                         "buys deferred this cycle.")
+        else:
+            scale = budget / spent
+            for o in buys:
+                if o["notional"] is not None:
+                    o["notional"] = round(o["notional"] * scale, 2)
+                elif o["qty"] is not None:
+                    o["qty"] = int(o["qty"] * scale)
+            buys = [o for o in buys if (o["notional"] or 0) > 1 or (o["qty"] or 0) >= 1]
+            notes.append(f"Buys scaled to {scale*100:.0f}% of plan to respect the "
+                         f"{r['min_cash_weight']*100:.0f}% cash floor.")
     if skipped_dust:
         notes.append("Below one share, left as-is: " + ", ".join(sorted(skipped_dust)) + ".")
+    if skipped_tiny:
+        notes.append(f"Cash sweep: under the ${min_notional:g} minimum, left as-is: "
+                     + ", ".join(sorted(skipped_tiny)) + ".")
 
     orders = sells + buys  # sells first so cash is available for buys
 
@@ -179,8 +222,9 @@ def plan(targets: dict[str, float], analysis: dict, account: dict,
 
     return {"targets_final": {k: round(v, 4) for k, v in sorted(targets.items())},
             "current_weights": {k: round(v, 4) for k, v in sorted(current.items())},
-            "cash_target": round(1 - sum(targets.values()), 4),
+            "cash_target": round(cash_target_w, 4),
             "projected_cash_weight": projected_cash_w,
             "sizing_version": SIZING_VERSION,
+            "cash_drag_sweep": sweep_cash,
             "orders": orders, "notes": notes, "halts": halts,
             "drawdown_pct": round(dd_pct, 2)}
