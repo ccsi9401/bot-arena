@@ -9,7 +9,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0          # full history; shallow clones cause phantom add/add conflicts
       - name: Place steward files from steward_package (first run only)
@@ -22,7 +22,7 @@ jobs:
             [ -f backtest/steward_backtest.py ] || cp steward_package/backtest/steward_backtest.py backtest/
             [ -f tests/test_steward.py ] || cp steward_package/tests/test_steward.py tests/
           fi
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
