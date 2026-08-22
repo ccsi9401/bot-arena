@@ -31,6 +31,10 @@ strategy:
     risk_on:  {stocks: 0.45, index: 0.25, defensive: 0.20, cash: 0.10}
     risk_off: {stocks: 0.00, index: 0.00, defensive: 0.60, cash: 0.40}
   drift_band_abs: 0.015               # rebalance a position only if >1.5% off target
+  cash_drag_band: 0.01                # ...but if TOTAL cash sits >1pp above its target,
+                                      # relax the band on buys and put the idle cash back
+                                      # to work — many sub-band underweights sum to real drag
+  min_order_notional: 25              # skip dust orders when that sweep runs
 
 risk:
   max_position_weight: 0.12           # no single holding above 12%
