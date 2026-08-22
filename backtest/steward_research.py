@@ -219,19 +219,22 @@ def sweep_regime(data, cfg, base_cfg):
     window than the shortest — that alone would manufacture a trend in the results.
     """
     warm = max(cfg["strategy"]["momentum_lookback_days"], max(SWEEP_PERIODS)) + 30
-    out = []
+    out, win = [], None
     for n in SWEEP_PERIODS:
         c = copy.deepcopy(base_cfg)
         c["strategy"]["trend_sma_days"] = n
         curve, orders = run_variant(data, c, slip=0.0025, fill_next_open=True,
                                     warmup_days=warm)
+        if win is None:
+            win = {"start": str(curve.index[0])[:10], "end": str(curve.index[-1])[:10],
+                   "trading_days": len(curve)}
         r = summarize(curve, f"sma_{n}")
         r["sma_days"] = n
         r["orders"] = orders
         out.append(r)
         print(f"  SMA {n:>3}d   {r['total_return_pct']:>8.2f}%   "
               f"DD {r['max_drawdown_pct']:>7.2f}%   Sharpe {r['sharpe_daily_ann']:>5.2f}")
-    return out
+    return out, win
 
 
 def main() -> int:
@@ -315,15 +318,18 @@ def main() -> int:
                 "bias-corrected figure sits between this and bias_corrected.")
 
     print("\nRegime-gate parameter sweep (index sleeve only, realistic fills):")
-    sweep = sweep_regime(data, cfg, idx_cfg)
+    sweep, sweep_win = sweep_regime(data, cfg, idx_cfg)
     shp = [r["sharpe_daily_ann"] or 0 for r in sweep]
     best = max(sweep, key=lambda r: r["sharpe_daily_ann"] or 0)
     spread = max(shp) - min(shp)
+    yrs = sweep_win["trading_days"] / 252
+    best_s = best["sharpe_daily_ann"] or 0
+    sharpe_se = ((1 + best_s ** 2 / 2) / yrs) ** 0.5
     verdict = ("PLATEAU — the result does not depend on the exact length"
                if spread < 0.25 else
                "PEAKED — sensitive to the exact length, treat 200 as fitted")
     print(f"  best Sharpe at {best['sma_days']}d ({best['sharpe_daily_ann']}); "
-          f"spread across the band {spread:.2f} -> {verdict}")
+          f"spread {spread:.2f} vs noise floor +/-{sharpe_se:.2f} -> {verdict}")
 
     # SPY over exactly the baseline's span, so the comparison is like for like.
     bc = curves["baseline"]
@@ -339,6 +345,8 @@ def main() -> int:
          "window": {"start": w0, "end": w1, "trading_days": len(bc),
                     "data_fetched_from": str(min(data[cfg["benchmark"]].index).date())},
          "regime_sweep": sweep,
+         "regime_sweep_window": sweep_win,
+         "regime_sweep_sharpe_se": round(sharpe_se, 3),
          "regime_sweep_verdict": verdict,
          "unfetchable_symbols": missing}, indent=2, default=str))
 
@@ -368,7 +376,13 @@ def main() -> int:
     md.append("\n## Regime-gate parameter sweep\n")
     md.append("The whole risk-reduction result rests on one number: the length of the trend "
               "filter. If only 200 works, it is a curve fit that caught one crash. All rows "
-              "use the index sleeve, realistic fills, and an identical window.\n")
+              "use the index sleeve and realistic fills.\n")
+    md.append(f"> **These rows are comparable to each other, NOT to the table above.** A "
+              f"300-day SMA has no value for its first 300 bars, so every row here shares a "
+              f"longer warmup and therefore a shorter window: **{sweep_win['start']} to "
+              f"{sweep_win['end']}** ({sweep_win['trading_days']} days) against the main "
+              f"table's {w0} to {w1} ({len(bc)} days). Comparing a return across the two "
+              f"tables compares two different spans of market history, not two strategies.\n")
     md.append("| trend SMA | return | max DD | Sharpe |")
     md.append("|---|---|---|---|")
     for r in sweep:
@@ -376,6 +390,12 @@ def main() -> int:
                   f"{r['max_drawdown_pct']}% | {r['sharpe_daily_ann']} |")
     md.append(f"\n**{verdict}.** Best Sharpe at {best['sma_days']}d "
               f"({best['sharpe_daily_ann']}); spread across the band {spread:.2f}.")
+    md.append(f"\n> **Do not read the ranking as a recommendation.** Over {yrs:.1f} years the "
+              f"standard error on an annualised Sharpe is roughly **±{sharpe_se:.2f}** — the "
+              f"entire {spread:.2f} spread fits inside it, so no length here is statistically "
+              f"distinguishable from any other. The finding is that the effect survives across "
+              f"the whole band; picking whichever length happened to win this window is the "
+              f"curve-fitting this test was built to detect.\n")
     if missing:
         md.append(f"\n**Residual bias:** {len(missing)} symbol(s) could not be fetched "
                   f"and are silently absent from every run: {missing}. Delisted names "
