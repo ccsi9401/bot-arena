@@ -54,8 +54,9 @@ def _next_day_map(days: list) -> dict:
 
 
 def run_variant(data, cfg, *, drop: set[str] | None = None, slip=0.0005,
-                fill_next_open=False, start_equity=50000.0):
+                fill_next_open=False, start_equity: float | None = None):
     """The gate's loop, with knobs. drop = symbols removed from the universe."""
+    start_equity = float(start_equity or cfg["starting_equity"])
     drop = drop or set()
     data = {s: df for s, df in data.items() if s not in drop}
     cfg = copy.deepcopy(cfg)
@@ -116,9 +117,10 @@ def run_variant(data, cfg, *, drop: set[str] | None = None, slip=0.0005,
     return pd.Series(curve).sort_index(), orders
 
 
-def run_static(data, cfg, targets: dict, *, slip=0.0005, start_equity=50000.0):
+def run_static(data, cfg, targets: dict, *, slip=0.0005, start_equity: float | None = None):
     """No regime gate, no stock picking: fixed weights, same weekly cadence and
     drift band. The control that asks whether any of the machinery earns its keep."""
+    start_equity = float(start_equity or cfg["starting_equity"])
     days = sorted(set().union(*[set(df.index) for df in data.values()]))
     days = [d for d in days if d in data[cfg["benchmark"]].index]
     days = days[cfg["strategy"]["momentum_lookback_days"] + 30:]
