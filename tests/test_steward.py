@@ -61,6 +61,13 @@ def run():
     c = cfg()
     # steward config uses its own universe naming; patch stocks list to fakes
     c["universe"]["stocks"] = [f"S{i}" for i in range(8)]
+    # The live config is INDEX-ONLY (stocks weighted 0), so this block has to supply
+    # its own stock-sleeve profile or it would silently test nothing. The sleeve code
+    # is still the revert path, so it stays covered here regardless of what ships.
+    # index_only_targets() below covers the config that is actually live.
+    c["strategy"]["weights"]["risk_on"] = {"stocks": 0.45, "index": 0.25,
+                                           "defensive": 0.20, "cash": 0.10}
+    c["risk"]["max_position_weight"] = 0.12
 
     # ---- risk-on ----
     a = analyze(fake_scan(c, spy_up=True), c)
@@ -335,8 +342,50 @@ def run():
     check("missing price skipped safely",
           not p7["orders"] and any("no live price" in n for n in p7["notes"]))
 
+    index_only_targets()
+
     print(f"\n{len(FAILURES)} failures" if FAILURES else "\nALL STEWARD TESTS PASS")
     return 1 if FAILURES else 0
+
+
+def index_only_targets():
+    """The SHIPPING config, unpatched — index-only + 200-day gate.
+
+    Guards a silent failure rather than a crash: max_position_weight is applied
+    per symbol and the overflow goes to CASH once every ETF is capped. With a 70%
+    index sleeve over two ETFs and the old 0.12 cap, the book quietly holds 24%
+    equity and 56% cash — the right-looking notes, an entirely different strategy.
+    Nothing raises, so only an assertion on the resulting weights catches it.
+    """
+    c = cfg()
+    if c["strategy"]["weights"]["risk_on"]["stocks"] > 0:
+        return  # stock sleeve was restored; this check no longer applies
+
+    idx = c["universe"]["index_etfs"]
+    dfn = c["universe"]["defensive_etfs"]
+    syms = {}
+    for s, m in zip(idx, (0.10, 0.15)):
+        syms[s] = {"sleeve": "index", "above_200sma": True, "mom_6m": m,
+                   "mom_12_1": m, "close": 500.0, "avg_dollar_vol_20d": 9e9}
+    for s in dfn:
+        syms[s] = {"sleeve": "defensive", "above_200sma": True, "mom_6m": 0.01,
+                   "mom_12_1": 0.01, "close": 100.0, "avg_dollar_vol_20d": 9e9}
+
+    a = analyze({"symbols": syms, "benchmark": c["benchmark"],
+                 "universe_size": len(syms)}, c)
+    t = a["targets"]
+    w = c["strategy"]["weights"]["risk_on"]
+    eq = sum(v for k, v in t.items() if k in idx)
+    de = sum(v for k, v in t.items() if k in dfn)
+
+    check("index-only: no stock positions", not any(k not in idx + dfn for k in t))
+    check("index-only: index sleeve reaches its full target weight",
+          abs(eq - w["index"]) < 0.005)
+    check("index-only: defensive ballast intact", abs(de - w["defensive"]) < 0.005)
+    check("index-only: cash near target, not starved by position caps",
+          abs((1 - eq - de) - w["cash"]) < 0.005)
+    check("index-only: position cap leaves room for the sleeve",
+          c["risk"]["max_position_weight"] * len(idx) >= w["index"] - 1e-9)
 
 
 if __name__ == "__main__":

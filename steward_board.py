@@ -176,7 +176,8 @@ nightly pulse</div>
 <h2>Manager's notes</h2>
 <div class="panel">{notes or '<div class="empty">Appear after the first cycle.</div>'}</div>
 <footer>momentum + trend regime + permanent defensive ballast ·
-kill switch −{cfg["risk"]["kill_switch_drawdown_pct"]:.0f}% · $50k paper account</footer>
+kill switch −{cfg["risk"]["kill_switch_drawdown_pct"]:.0f}% ·
+${cfg["starting_equity"]:,.0f} paper account</footer>
 </div>
 <script>
 document.querySelectorAll('.chartwrap').forEach(w => {{
