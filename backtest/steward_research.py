@@ -238,7 +238,7 @@ def sweep_regime(data, cfg, base_cfg):
 
 
 def main() -> int:
-    cfg = yaml.safe_load((ROOT / "config" / "steward.yaml").read_text())
+    cfg = yaml.safe_load((ROOT / "config" / "steward.yaml").read_text(encoding="utf-8"))
     uni = cfg["universe"]
     symbols = sorted(set(uni["stocks"] + uni["index_etfs"] + uni["defensive_etfs"]))
     period = cfg.get("backtest_period", "4y")
@@ -348,7 +348,7 @@ def main() -> int:
          "regime_sweep_window": sweep_win,
          "regime_sweep_sharpe_se": round(sharpe_se, 3),
          "regime_sweep_verdict": verdict,
-         "unfetchable_symbols": missing}, indent=2, default=str))
+         "unfetchable_symbols": missing}, indent=2, default=str), encoding="utf-8")
 
     md = ["# STEWARD research — what the gate cannot tell you\n",
           f"Tested window: **{w0} to {w1}** ({len(bc)/252:.1f}y, {len(bc)} trading days). "
@@ -401,7 +401,7 @@ def main() -> int:
                   f"and are silently absent from every run: {missing}. Delisted names "
                   "are the ones survivorship bias is made of, so treat these figures as "
                   "an upper bound on the true edge, not a measurement of it.")
-    (OUT / "steward_research.md").write_text("\n".join(md))
+    (OUT / "steward_research.md").write_text("\n".join(md), encoding="utf-8")
     print("\n" + "\n".join(md))
     return 0
 

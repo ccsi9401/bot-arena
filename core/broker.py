@@ -34,7 +34,7 @@ PAPER_ONLY = True  # never change
 def _load_secrets_env() -> None:
     f = ROOT / "secrets.env"
     if f.exists():
-        for line in f.read_text().splitlines():
+        for line in f.read_text(encoding="utf-8").splitlines():
             line = line.strip()
             if line and not line.startswith("#") and "=" in line:
                 k, v = line.split("=", 1)

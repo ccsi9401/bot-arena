@@ -27,7 +27,7 @@ def curve_from(name: str) -> list[tuple[str, float]]:
     if not f.exists():
         return []
     by_day: dict[str, float] = {}
-    for pt in json.loads(f.read_text()):
+    for pt in json.loads(f.read_text(encoding="utf-8")):
         by_day[pt["ts_et"][:10]] = pt["equity"]
     return sorted(by_day.items())
 
@@ -41,7 +41,7 @@ def latest_cycle() -> dict:
             f = rdir / f"{stage}.json"
             if f.exists():
                 try:
-                    out[stage] = json.loads(f.read_text())
+                    out[stage] = json.loads(f.read_text(encoding="utf-8"))
                 except Exception:
                     pass
         if len(out) > 1:
@@ -50,7 +50,7 @@ def latest_cycle() -> dict:
 
 
 def main() -> int:
-    cfg = yaml.safe_load((ROOT / "config" / "steward.yaml").read_text())
+    cfg = yaml.safe_load((ROOT / "config" / "steward.yaml").read_text(encoding="utf-8"))
     run = latest_cycle()
     analysis = run.get("analysis", {})
     p = run.get("plan", {})
@@ -219,7 +219,7 @@ document.querySelectorAll('.chartwrap').forEach(w => {{
 </script></body></html>"""
 
     OUT.parent.mkdir(exist_ok=True)
-    OUT.write_text(page)
+    OUT.write_text(page, encoding="utf-8")
     print(f"wrote {OUT}")
     return 0
 

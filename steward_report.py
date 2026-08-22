@@ -27,7 +27,7 @@ def curve_from(name: str) -> list[tuple[str, float]]:
     if not f.exists():
         return []
     by_day: dict[str, float] = {}
-    for pt in json.loads(f.read_text()):
+    for pt in json.loads(f.read_text(encoding="utf-8")):
         by_day[pt["ts_et"][:10]] = pt["equity"]
     return sorted(by_day.items())
 
@@ -42,7 +42,7 @@ def latest_cycle() -> dict:
             f = rdir / f"{stage}.json"
             if f.exists():
                 try:
-                    out[stage] = json.loads(f.read_text())
+                    out[stage] = json.loads(f.read_text(encoding="utf-8"))
                 except Exception:
                     pass
         if len(out) > 1:
@@ -51,7 +51,7 @@ def latest_cycle() -> dict:
 
 
 def main() -> int:
-    cfg = yaml.safe_load((ROOT / "config" / "steward.yaml").read_text())
+    cfg = yaml.safe_load((ROOT / "config" / "steward.yaml").read_text(encoding="utf-8"))
     run = latest_cycle()
     analysis = run.get("analysis", {})
     p = run.get("plan", {})
@@ -211,7 +211,7 @@ footer{{color:var(--muted);font-size:12px;margin-top:22px}}
 <h2>Manager's notes</h2>
 <div class="panel">{notes or '<div class="empty">Appear after the first cycle.</div>'}</div>
 <footer>scan → analyze → plan → execute · weekly decisions, nightly pulse ·
-kill switch at −{yaml.safe_load((ROOT / "config" / "steward.yaml").read_text())["risk"]["kill_switch_drawdown_pct"]:.0f}%</footer>
+kill switch at −{yaml.safe_load((ROOT / "config" / "steward.yaml").read_text(encoding="utf-8"))["risk"]["kill_switch_drawdown_pct"]:.0f}%</footer>
 </div>
 <script>
 document.querySelectorAll('.chartwrap').forEach(w => {{
@@ -249,7 +249,7 @@ document.querySelectorAll('.chartwrap').forEach(w => {{
 </script></body></html>"""
 
     OUT.parent.mkdir(exist_ok=True)
-    OUT.write_text(page)
+    OUT.write_text(page, encoding="utf-8")
 
     md = [f"# STEWARD — {now_et():%Y-%m-%d %H:%M} ET",
           f"\nEquity: {f'${eq:,.0f}' if eq else '—'}",
@@ -257,7 +257,7 @@ document.querySelectorAll('.chartwrap').forEach(w => {{
           f"Regime: {'RISK-ON' if regime else 'RISK-OFF' if regime is not None else '—'}\n"]
     for n in analysis.get("notes", []):
         md.append(f"- {n}")
-    OUT_MD.write_text("\n".join(md) + "\n")
+    OUT_MD.write_text("\n".join(md) + "\n", encoding="utf-8")
     print(f"wrote {OUT}")
     return 0
 

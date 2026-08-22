@@ -23,9 +23,9 @@ OUT = ROOT / "board" / "index.html"
 
 
 def build() -> str:
-    comp = yaml.safe_load((ROOT / "config" / "competition.yaml").read_text())
+    comp = yaml.safe_load((ROOT / "config" / "competition.yaml").read_text(encoding="utf-8"))
     sb_file = ROOT / "reports" / "scoreboard.json"
-    sb = json.loads(sb_file.read_text()) if sb_file.exists() else {}
+    sb = json.loads(sb_file.read_text(encoding="utf-8")) if sb_file.exists() else {}
     rows = sb.get("competitors", [])
     curves = {c["slug"]: equity_series(c["slug"]) for c in comp["competitors"]}
     colors = ["var(--series-1)", "var(--series-2)"]
@@ -189,7 +189,7 @@ document.querySelectorAll('.chartwrap').forEach(w => {{
 
 def main() -> int:
     OUT.parent.mkdir(exist_ok=True)
-    OUT.write_text(build())
+    OUT.write_text(build(), encoding="utf-8")
     print(f"wrote {OUT}")
     return 0
 

@@ -21,7 +21,7 @@ def check(name, cond):
 
 
 def cfg():
-    return yaml.safe_load((ROOT / "config" / "steward.yaml").read_text())
+    return yaml.safe_load((ROOT / "config" / "steward.yaml").read_text(encoding="utf-8"))
 
 
 def fake_scan(c, spy_up=True):

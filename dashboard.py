@@ -30,7 +30,7 @@ def latest_run(bot: str) -> dict | None:
             f = rdir / f"{stage}.json"
             if f.exists():
                 try:
-                    out[stage] = json.loads(f.read_text())
+                    out[stage] = json.loads(f.read_text(encoding="utf-8"))
                 except Exception:
                     pass
         if "scan" in out or "skipped" in out or "error" in out:
@@ -43,7 +43,7 @@ def equity_series(slug: str) -> list[tuple[str, float]]:
     if not f.exists():
         return []
     by_day: dict[str, float] = {}
-    for pt in json.loads(f.read_text()):
+    for pt in json.loads(f.read_text(encoding="utf-8")):
         by_day[pt["ts_et"][:10]] = pt["equity"]
     return sorted(by_day.items())
 
@@ -225,7 +225,7 @@ def tiles(comp: dict, curves: dict) -> str:
 
 # ---------------------------------------------------------------- assembly
 def build() -> str:
-    comp = yaml.safe_load((ROOT / "config" / "competition.yaml").read_text())
+    comp = yaml.safe_load((ROOT / "config" / "competition.yaml").read_text(encoding="utf-8"))
     managed = [c for c in comp["competitors"] if c["kind"] == "managed"]
     bot = managed[0]["bot"] if managed else "scalpel"
     run = latest_run(bot) or {}
@@ -397,7 +397,7 @@ def exec_block(execution: dict) -> str:
 
 def main() -> int:
     OUT.parent.mkdir(exist_ok=True)
-    OUT.write_text(build())
+    OUT.write_text(build(), encoding="utf-8")
     print(f"wrote {OUT}")
     return 0
 

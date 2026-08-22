@@ -64,14 +64,14 @@ def competitor_stats(c: dict) -> dict:
 
 
 def main() -> int:
-    comp = yaml.safe_load((ROOT / "config" / "competition.yaml").read_text())
+    comp = yaml.safe_load((ROOT / "config" / "competition.yaml").read_text(encoding="utf-8"))
     rows = [competitor_stats(c) for c in comp["competitors"]]
     leader = max(rows, key=lambda r: r["total_return_pct"])
     board = {"round": comp["round"], "title": comp["title"],
              "start_date": comp.get("start_date"),
              "asof_et": now_et().isoformat(), "competitors": rows,
              "leader": leader["label"]}
-    (REPORTS / "scoreboard.json").write_text(json.dumps(board, indent=2))
+    (REPORTS / "scoreboard.json").write_text(json.dumps(board, indent=2), encoding="utf-8")
 
     md = [f"# {comp['title']}",
           f"\n_As of {board['asof_et'][:16]} ET"
@@ -85,7 +85,7 @@ def main() -> int:
                        ("trading_days", "Days scored"), ("open_positions", "Open"),
                        ("kill_switch", "Kill switch")]:
         md.append(f"| {label} | " + " | ".join(str(r[key]) for r in rows) + " |")
-    (REPORTS / "scoreboard.md").write_text("\n".join(md) + "\n")
+    (REPORTS / "scoreboard.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print("\n".join(md))
     return 0
 

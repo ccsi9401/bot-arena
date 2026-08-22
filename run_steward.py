@@ -32,7 +32,7 @@ import yaml
 
 
 def load_cfg() -> dict:
-    return yaml.safe_load((ROOT / "config" / "steward.yaml").read_text())
+    return yaml.safe_load((ROOT / "config" / "steward.yaml").read_text(encoding="utf-8"))
 
 
 def gate_passed(state: State) -> bool:
@@ -174,7 +174,7 @@ def main() -> int:
         err = traceback.format_exc()
         (ROOT / "journal").mkdir(exist_ok=True)
         (ROOT / "journal" / f"steward_error_{now_et():%Y%m%d_%H%M}.json").write_text(
-            json.dumps({"traceback": err}))
+            json.dumps({"traceback": err}), encoding="utf-8")
         print(err, file=sys.stderr)
         return 1
 

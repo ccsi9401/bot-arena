@@ -185,7 +185,7 @@ def summarize(curve: pd.Series, label: str) -> dict:
 
 
 def main() -> int:
-    cfg = yaml.safe_load((ROOT / "config" / "steward.yaml").read_text())
+    cfg = yaml.safe_load((ROOT / "config" / "steward.yaml").read_text(encoding="utf-8"))
     uni = cfg["universe"]
     symbols = sorted(set(uni["stocks"] + uni["index_etfs"] + uni["defensive_etfs"]))
     period = cfg.get("backtest_period", "4y")
@@ -213,7 +213,7 @@ def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "steward.json").write_text(json.dumps(
         {"summary": s, "benchmark": spy, "gate": gate, "passed": passed,
-         "rebalance_trades": rebalances, "planner_driven": True}, indent=2, default=str))
+         "rebalance_trades": rebalances, "planner_driven": True}, indent=2, default=str), encoding="utf-8")
     md = [f"# STEWARD pre-launch validation\n", f"## {s['label']}\n"]
     for k, v in s.items():
         if k != "label":
@@ -224,7 +224,7 @@ def main() -> int:
         if k != "label":
             md.append(f"- {k}: {v}")
     md.append(f"\n**GATE: {'PASSED' if passed else 'FAILED'}** {gate}\n")
-    (OUT / "steward_summary.md").write_text("\n".join(md))
+    (OUT / "steward_summary.md").write_text("\n".join(md), encoding="utf-8")
     print("\n".join(md))
     return 0 if passed else 1
 

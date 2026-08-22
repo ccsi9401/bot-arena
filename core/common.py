@@ -26,8 +26,8 @@ def now_et() -> datetime:
 
 
 def load_config(bot: str) -> dict:
-    cfg = yaml.safe_load((ROOT / "config" / f"{bot}.yaml").read_text())
-    cfg["universe"] = yaml.safe_load((ROOT / "config" / "universe.yaml").read_text())
+    cfg = yaml.safe_load((ROOT / "config" / f"{bot}.yaml").read_text(encoding="utf-8"))
+    cfg["universe"] = yaml.safe_load((ROOT / "config" / "universe.yaml").read_text(encoding="utf-8"))
     return cfg
 
 
@@ -71,10 +71,10 @@ class Journal:
     def write(self, stage: str, payload: dict) -> None:
         payload = dict(payload)
         payload.setdefault("_written_et", now_et().isoformat())
-        (self.path / f"{stage}.json").write_text(json.dumps(payload, indent=2, default=str))
+        (self.path / f"{stage}.json").write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
 
     def read(self, stage: str) -> dict:
-        return json.loads((self.path / f"{stage}.json").read_text())
+        return json.loads((self.path / f"{stage}.json").read_text(encoding="utf-8"))
 
 
 class State:
@@ -89,10 +89,10 @@ class State:
 
     def read(self, name: str, default):
         f = self._file(name)
-        return json.loads(f.read_text()) if f.exists() else default
+        return json.loads(f.read_text(encoding="utf-8")) if f.exists() else default
 
     def write(self, name: str, payload) -> None:
-        self._file(name).write_text(json.dumps(payload, indent=2, default=str))
+        self._file(name).write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
 
     def append_equity_point(self, equity: float, cash: float, note: str = "") -> None:
         curve = self.read("equity_curve", [])

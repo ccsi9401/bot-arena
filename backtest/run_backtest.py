@@ -35,7 +35,7 @@ def main() -> int:
     g_curve, g_trades = run_glider(ddata, gcfg)
     g = metrics.summarize(g_curve, g_trades, "GLIDER 3y daily")
     (OUT / "glider.json").write_text(json.dumps(
-        {"summary": g, "trades": g_trades}, indent=2, default=str))
+        {"summary": g, "trades": g_trades}, indent=2, default=str), encoding="utf-8")
 
     print("Fetching hourly history (6mo)...")
     hdata = bd.hourly_history(uni, "6mo")
@@ -44,7 +44,7 @@ def main() -> int:
     s_curve, s_trades = run_scalpel(hdata, scfg)
     s = metrics.summarize(s_curve, s_trades, "SCALPEL 6mo hourly")
     (OUT / "scalpel.json").write_text(json.dumps(
-        {"summary": s, "trades": s_trades}, indent=2, default=str))
+        {"summary": s, "trades": s_trades}, indent=2, default=str), encoding="utf-8")
 
     md = ["# Pre-launch backtest validation\n"]
     for r in (s, g):
@@ -54,7 +54,7 @@ def main() -> int:
                 md.append(f"- {k}: {v}")
         md.append(f"- **GATE: {'PASSED' if r['gate']['passed'] else 'FAILED'}** "
                   f"{r['gate']['checks']}\n")
-    (OUT / "summary.md").write_text("\n".join(md))
+    (OUT / "summary.md").write_text("\n".join(md), encoding="utf-8")
     print("\n".join(md))
 
     ok = s["gate"]["passed"] and g["gate"]["passed"]
