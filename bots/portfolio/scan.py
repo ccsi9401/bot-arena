@@ -24,7 +24,12 @@ def scan(data, cfg: dict) -> dict:
     uni = cfg["universe"]
     symbols = sorted(set(uni["stocks"] + uni["index_etfs"] + uni["defensive_etfs"]))
     s = cfg["strategy"]
-    need = s["momentum_lookback_days"] + s["momentum_skip_days"] + 10
+    # Fetch enough bars for the LONGEST feature, not just momentum. The trend SMA is
+    # config-driven now, and a period longer than this window would leave every symbol
+    # with sma=None -> above_200sma False -> permanent risk-off, silently and with no
+    # error anywhere. The scanner must widen with the parameter, not assume 200.
+    need = max(s["momentum_lookback_days"] + s["momentum_skip_days"],
+               s.get("trend_sma_days", 200)) + 10
 
     daily = data.daily_bars(symbols, days=need)
     snapshot: dict[str, dict] = {}
