@@ -102,8 +102,11 @@ def run():
               fractionable=frac)
     check("drift band suppresses fidgeting", len(p2["orders"]) == 0)
 
-    # kill switch: -22% drawdown forces risk-off
-    p3 = plan(a["targets"], a, account(equity=39000, cash=39000), [], prices, c,
+    # kill switch: a drawdown past the inception floor forces risk-off.
+    # Derived from config — hardcoding $39k silently stopped testing anything
+    # the moment starting_equity changed.
+    below_floor = c["starting_equity"] * (1 - c["risk"]["kill_switch_drawdown_pct"] / 100) * 0.975
+    p3 = plan(a["targets"], a, account(equity=below_floor, cash=below_floor), [], prices, c,
               kill_tripped=False, fractionable=frac)
     check("kill switch forces defense", any("KILL" in h for h in p3["halts"])
           and all(s in c["universe"]["defensive_etfs"] for s in p3["targets_final"]))
@@ -195,7 +198,8 @@ def run():
     check("cash-drag sweep never sells to raise cash it already has",
           not any(o["side"] == "sell" for o in pd_["orders"]))
     check("cash-drag sweep skips dust below the minimum notional",
-          all(dollars(o) >= c["strategy"]["min_order_notional"] for o in pd_["orders"]))
+          all(dollars(o) >= c["strategy"]["min_order_notional_pct"] * eq_d
+              for o in pd_["orders"]))
     check("cash-drag sweep is logged", any("Cash drag" in n for n in pd_["notes"]))
 
     # ...and it must not become a new source of fidgeting: rerun on the post-sweep
@@ -225,6 +229,22 @@ def run():
     check("cash-drag sweep respects available cash",
           sum(dollars(o) for o in poor["orders"] if o["side"] == "buy") <= 400)
 
+    # ---- the dust floor must scale, or a small book silently strands cash ----
+    # A fixed $25 floor is 0.05% of $50k but 0.50% of $5k. At $5k that would block
+    # every sweep top-up under half a point of drift, which is the stranded-cash bug
+    # the sweep exists to prevent, reintroduced by account size alone.
+    small = plan(t_real, a, acct_for(w_drag, 5000), held(w_drag, 5000), px_d, c,
+                 kill_tripped=False, fractionable={s: True for s in px_d})
+    check("cash-drag sweep still fires on a small book", small["cash_drag_sweep"] is True)
+    check("small book still closes the gap to target",
+          abs(small["projected_cash_weight"] - small["cash_target"]) < 0.005)
+    check("small book is not blocked by a dollar dust floor",
+          len([o for o in small["orders"] if o["side"] == "buy"]) >= 7)
+    floor_pct = c["strategy"]["min_order_notional_pct"]
+    check("dust floor is proportional, not fixed", floor_pct < 0.001)
+    check("dust floor at $5k is well under a sweep top-up",
+          floor_pct * 5000 < 0.005 * 5000)
+
     # ---- kill switch: two measures, deliberately different thresholds ----
     peak_lim = c["risk"]["kill_switch_peak_drawdown_pct"]
 
@@ -253,7 +273,7 @@ def run():
           any("off peak" in h for h in crash["halts"]))
 
     # inception floor still works on its own, with no peak supplied at all
-    early = plan(t_real, a, account(equity=39000, cash=39000), [], px_d, c,
+    early = plan(t_real, a, account(equity=below_floor, cash=below_floor), [], px_d, c,
                  kill_tripped=False, fractionable={s: True for s in px_d})
     check("inception floor still fires with no peak reference",
           any("from inception" in h for h in early["halts"]))
