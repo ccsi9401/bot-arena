@@ -7,6 +7,10 @@
 - max_drawdown_pct: -19.4
 - sharpe_daily_ann: 1.38
 - avg_cash_weight_pct: 14.92
+- cash_gap_mean_pp: -0.91
+- cash_gap_worst_pp: 2.83
+- weeks_cash_over_target_1pp: 10
+- rebalance_weeks: 145
 - rebalance_trades: 373
 
 ## SPY buy & hold (same window)
@@ -16,4 +20,4 @@
 - max_drawdown_pct: -18.76
 - sharpe_daily_ann: 1.49
 
-**GATE: PASSED** {'positive_return': np.True_, 'max_dd_under_20pct': True, 'sharpe_at_least_0_4': True}
+**GATE: PASSED** {'positive_return': True, 'max_dd_under_20pct': True, 'sharpe_at_least_0_4': True}

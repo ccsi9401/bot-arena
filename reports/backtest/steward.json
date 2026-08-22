@@ -5,7 +5,11 @@
     "cagr_pct": 30.25,
     "max_drawdown_pct": -19.4,
     "sharpe_daily_ann": 1.38,
-    "avg_cash_weight_pct": 14.92
+    "avg_cash_weight_pct": 14.92,
+    "cash_gap_mean_pp": -0.91,
+    "cash_gap_worst_pp": 2.83,
+    "weeks_cash_over_target_1pp": 10,
+    "rebalance_weeks": 145
   },
   "benchmark": {
     "label": "SPY buy & hold (same window)",
@@ -15,7 +19,7 @@
     "sharpe_daily_ann": 1.49
   },
   "gate": {
-    "positive_return": "True",
+    "positive_return": true,
     "max_dd_under_20pct": true,
     "sharpe_at_least_0_4": true
   },
