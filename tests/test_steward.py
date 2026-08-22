@@ -280,6 +280,56 @@ def run():
     check("peak drawdown is None when no peak is supplied",
           early["peak_drawdown_pct"] is None)
 
+    # ---- the LIVE scanner: not covered by the gate, so cover it here ----
+    # scan.py never runs in CI (the backtest uses its own build_scan), so a mistake in
+    # it would surface on a Monday with the market open. Exercise it against fake bars.
+    import numpy as np
+    import pandas as pd
+    from bots.portfolio import scan as pscan
+
+    def fake_bars(symbols, days):
+        idx = pd.bdate_range("2024-01-01", periods=days)
+        frames = []
+        for i, sym in enumerate(symbols):
+            # np.arange, not pd.Series(range(...)): a Series carries its own integer
+            # index and pandas would REINDEX against the dates, silently yielding NaN.
+            px = pd.Series(100.0 + i + np.arange(days) * 0.05, index=idx)
+            frames.append(pd.DataFrame(
+                {"close": px, "volume": 5e6, "symbol": sym}).set_index("symbol", append=True))
+        return pd.concat(frames)
+
+    class FakeData:
+        requested = {}
+
+        def daily_bars(self, symbols, days):
+            FakeData.requested["days"] = days
+            return fake_bars(symbols, days)
+
+    c_scan = cfg()
+    c_scan["universe"]["stocks"] = ["AAPL"]
+    c_scan["universe"]["index_etfs"] = ["SPY"]
+    c_scan["universe"]["defensive_etfs"] = ["SHY"]
+    sc = pscan.scan(FakeData(), c_scan)
+    check("live scanner returns a symbol snapshot", len(sc["symbols"]) == 3)
+    check("live scanner computes the trend flag",
+          all("above_200sma" in f for f in sc["symbols"].values()))
+    check("rising series reads as above its trend SMA",
+          all(f["above_200sma"] for f in sc["symbols"].values()))
+
+    # the trap: a trend period longer than the fetch window would leave every symbol
+    # with no SMA, hence permanent risk-off, with nothing logged anywhere.
+    c_long = cfg()
+    c_long["universe"]["stocks"] = ["AAPL"]
+    c_long["universe"]["index_etfs"] = ["SPY"]
+    c_long["universe"]["defensive_etfs"] = ["SHY"]
+    c_long["strategy"]["trend_sma_days"] = 400
+    sc2 = pscan.scan(FakeData(), c_long)
+    check("scanner widens its fetch when the trend period grows",
+          FakeData.requested["days"] >= 400)
+    check("a long trend period still produces a usable flag",
+          all(f["sma200"] is not None and f["sma200"] == f["sma200"]   # not NaN
+              and f["above_200sma"] for f in sc2["symbols"].values()))
+
     # missing price is skipped, not guessed
     p7 = plan({"ZZZ": 0.12}, a, account(), [], {}, c, kill_tripped=False)
     check("missing price skipped safely",
