@@ -3,7 +3,7 @@
 # regimes with a permanent defensive ballast; retreats to defense in downtrends.
 bot: steward
 account_env_prefix: STEWARD          # STEWARD_API_KEY / STEWARD_API_SECRET
-starting_equity: 50000
+starting_equity: 5000               # rung 1 of a graduated ladder (was 50000)
 benchmark: SPY
 
 # Self-contained universe (separate from the traders' shared universe on purpose:
@@ -34,7 +34,9 @@ strategy:
   cash_drag_band: 0.01                # ...but if TOTAL cash sits >1pp above its target,
                                       # relax the band on buys and put the idle cash back
                                       # to work — many sub-band underweights sum to real drag
-  min_order_notional: 25              # skip dust orders when that sweep runs
+  min_order_notional_pct: 0.0005      # skip dust orders when that sweep runs — as a
+                                      # FRACTION of equity, not dollars. $2.50 at $5k,
+                                      # $25 at $50k: identical behaviour at any size.
 
 risk:
   max_position_weight: 0.12           # no single holding above 12%
