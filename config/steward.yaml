@@ -34,7 +34,11 @@ strategy:
   top_n_stocks: 6
   min_price: 10.0
   min_avg_dollar_vol: 50000000
-  regime: spy_above_200sma            # risk-on only when SPY > its 200-day SMA
+  regime: spy_above_200sma            # risk-on only when SPY > its trend SMA
+  trend_sma_days: 200                 # the length of that SMA, for BOTH the regime gate and
+                                      # the per-stock trend filter. The whole risk-reduction
+                                      # result rests on this one number, so it is a config
+                                      # value that can be swept, not a literal buried in code.
   stock_filter: above_own_200sma_and_positive_momentum
   index_trend_lookback_days: 126      # 6-month momentum splits the index sleeve
   weights:
