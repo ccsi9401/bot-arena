@@ -61,6 +61,16 @@
       "note": "filled at next open, 25bps each way"
     },
     {
+      "label": "bias_corrected",
+      "total_return_pct": 172.07,
+      "cagr_pct": 11.96,
+      "max_drawdown_pct": -22.02,
+      "sharpe_daily_ann": 0.79,
+      "question": "the closest thing to an unbiased estimate",
+      "orders": 1057,
+      "note": "frozen universe AND realistic fills \u2014 both are corrections for things that genuinely bias the result, with no stress test stacked on top. This is the row to weigh against SPY."
+    },
+    {
       "label": "honest_worst_case",
       "total_return_pct": 120.62,
       "cagr_pct": 9.34,
@@ -68,7 +78,7 @@
       "sharpe_daily_ann": 0.72,
       "question": "all of the above at once",
       "orders": 1085,
-      "note": ""
+      "note": "a FLOOR, not an estimate \u2014 it stacks the drop_top3 stress test on top of the real corrections, penalising the stock sleeve twice. The true bias-corrected figure sits between this and bias_corrected."
     }
   ],
   "benchmark": {
@@ -79,8 +89,10 @@
     "sharpe_daily_ann": 0.84
   },
   "window": {
-    "start": "2016-08-22",
-    "end": "2026-08-21"
+    "start": "2017-10-04",
+    "end": "2026-08-21",
+    "trading_days": 2232,
+    "data_fetched_from": "2016-08-22"
   },
   "unfetchable_symbols": []
 }
