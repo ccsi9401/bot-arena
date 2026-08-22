@@ -227,7 +227,8 @@ def main() -> int:
               f"DD {s['max_drawdown_pct']:>7.2f}%  Sharpe {s['sharpe_daily_ann']:>5.2f}")
         return s
 
-    print("\nRunning variants (each is a full 3y replay — this takes a few minutes):")
+    span_y = len(probe) / 252
+    print(f"\nRunning 7 variants, each a full {span_y:.1f}y replay — several minutes:")
     base = record("baseline", "what the gate measures", probe, probe_orders)
     record("index_only", "does stock picking beat the index at the same risk?",
            *run_variant(data, idx_cfg))
@@ -269,6 +270,11 @@ def main() -> int:
         md.append(f"| `{r['label']}` | {r['question']} | {r['total_return_pct']}% | "
                   f"{r['max_drawdown_pct']}% | {r['sharpe_daily_ann']} | "
                   f"{delta:+.2f} pts |")
+    # SPY belongs in the table, not a footnote: over a full cycle the drawdown gap is
+    # the whole argument for owning any of this machinery.
+    md.append(f"| **SPY buy & hold** | the thing to beat | {spy['total_return_pct']}% | "
+              f"{spy['max_drawdown_pct']}% | {spy['sharpe_daily_ann']} | "
+              f"{spy['total_return_pct'] - base['total_return_pct']:+.2f} pts |")
     md.append("")
     for r in runs:
         if r["note"]:
