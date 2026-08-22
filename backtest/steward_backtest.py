@@ -186,8 +186,9 @@ def main() -> int:
     cfg = yaml.safe_load((ROOT / "config" / "steward.yaml").read_text())
     uni = cfg["universe"]
     symbols = sorted(set(uni["stocks"] + uni["index_etfs"] + uni["defensive_etfs"]))
-    print("Fetching daily history (4y)...")
-    data = bd.daily_history(symbols, "4y")
+    period = cfg.get("backtest_period", "4y")
+    print(f"Fetching daily history ({period})...")
+    data = bd.daily_history(symbols, period)
     print(f"  {len(data)} symbols")
 
     curve, rebalances, cash_stats = run(data, cfg)
