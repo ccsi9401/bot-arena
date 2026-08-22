@@ -143,8 +143,13 @@ def main() -> int:
         prices = data.last_trades(syms)
         fractionable = broker.fractionable(syms)
         kill = state.kill_switch_tripped()
+        # High-water mark from the recorded curve, so the peak-drawdown gate has a
+        # reference that grows with the book rather than being pinned to inception.
+        curve = state.read("equity_curve", [])
+        peak_equity = max([float(pt.get("equity") or 0) for pt in curve]
+                          + [float(acct["equity"])])
         p = plan(analysis["targets"], analysis, acct, positions, prices, cfg, kill,
-                 fractionable=fractionable)
+                 fractionable=fractionable, peak_equity=peak_equity)
         if any("KILL" in h for h in p["halts"]) and not kill:
             state.trip_kill_switch(p["halts"][0])
         journal.write("plan", p)
