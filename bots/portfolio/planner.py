@@ -108,7 +108,15 @@ def plan(targets: dict[str, float], analysis: dict, account: dict,
     cash_w = 1 - sum(current.values())
     drag = cash_w - cash_target_w
     drag_band = cfg["strategy"].get("cash_drag_band", 0.01)
-    min_notional = cfg["strategy"].get("min_order_notional", 25)
+    # Scale the dust floor with the book. A FIXED dollar floor silently changes
+    # meaning with account size: $25 is 0.05% of $50k but 0.50% of $5k, which would
+    # block every sweep top-up under half a point of drift — reintroducing exactly
+    # the stranded-cash bug the sweep exists to prevent. Percentage keeps the
+    # behaviour identical at any size. The fixed key still works if present.
+    if "min_order_notional_pct" in cfg["strategy"]:
+        min_notional = cfg["strategy"]["min_order_notional_pct"] * equity
+    else:
+        min_notional = cfg["strategy"].get("min_order_notional", 25)
     sweep_cash = drag > drag_band
     if sweep_cash:
         notes.append(f"Cash drag {drag*100:.1f}pp above target "
@@ -227,7 +235,7 @@ def plan(targets: dict[str, float], analysis: dict, account: dict,
     if skipped_dust:
         notes.append("Below one share, left as-is: " + ", ".join(sorted(skipped_dust)) + ".")
     if skipped_tiny:
-        notes.append(f"Cash sweep: under the ${min_notional:g} minimum, left as-is: "
+        notes.append(f"Cash sweep: under the ${min_notional:,.2f} minimum, left as-is: "
                      + ", ".join(sorted(skipped_tiny)) + ".")
 
     orders = sells + buys  # sells first so cash is available for buys
