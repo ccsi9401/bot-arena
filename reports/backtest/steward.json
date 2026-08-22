@@ -1,10 +1,11 @@
 {
   "summary": {
     "label": "STEWARD 3y weekly",
-    "total_return_pct": 108.76,
-    "cagr_pct": 29.29,
-    "max_drawdown_pct": -18.75,
-    "sharpe_daily_ann": 1.38
+    "total_return_pct": 113.21,
+    "cagr_pct": 30.25,
+    "max_drawdown_pct": -19.4,
+    "sharpe_daily_ann": 1.38,
+    "avg_cash_weight_pct": 14.92
   },
   "benchmark": {
     "label": "SPY buy & hold (same window)",
@@ -19,5 +20,6 @@
     "sharpe_at_least_0_4": true
   },
   "passed": true,
-  "rebalance_trades": 323
+  "rebalance_trades": 373,
+  "planner_driven": true
 }
