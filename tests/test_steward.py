@@ -225,6 +225,41 @@ def run():
     check("cash-drag sweep respects available cash",
           sum(dollars(o) for o in poor["orders"] if o["side"] == "buy") <= 400)
 
+    # ---- kill switch: two measures, deliberately different thresholds ----
+    peak_lim = c["risk"]["kill_switch_peak_drawdown_pct"]
+
+    # a grown book, ordinary correction: must NOT halt. This is the case the old
+    # single-threshold design got wrong in the other direction (never fired at all).
+    grown = plan(t_real, a, account(equity=85000, cash=9000), held(w_drag, 85000),
+                 px_d, c, kill_tripped=False, fractionable={s: True for s in px_d},
+                 peak_equity=105000)                       # -19.0% off peak
+    check("ordinary correction on a grown book does not halt",
+          not grown["halts"] and abs(grown["peak_drawdown_pct"] + 0) > 0)
+    check("peak drawdown is reported for the journal",
+          abs(grown["peak_drawdown_pct"] - 19.05) < 0.1)
+
+    # the historical worst (-19.4%) must sit safely inside the limit
+    check("3y worst peak-to-trough is inside the peak limit", peak_lim > 19.4 + 5)
+
+    # a genuine collapse off the peak: MUST halt, even though equity is still
+    # far above the inception floor, which is exactly the hole being closed.
+    crash = plan(t_real, a, account(equity=70000, cash=9000), held(w_drag, 70000),
+                 px_d, c, kill_tripped=False, fractionable={s: True for s in px_d},
+                 peak_equity=105000)                       # -33.3% off peak
+    check("collapse off the peak halts even when above the inception floor",
+          any("KILL" in h for h in crash["halts"])
+          and all(s in c["universe"]["defensive_etfs"] for s in crash["targets_final"]))
+    check("halt names which measure fired",
+          any("off peak" in h for h in crash["halts"]))
+
+    # inception floor still works on its own, with no peak supplied at all
+    early = plan(t_real, a, account(equity=39000, cash=39000), [], px_d, c,
+                 kill_tripped=False, fractionable={s: True for s in px_d})
+    check("inception floor still fires with no peak reference",
+          any("from inception" in h for h in early["halts"]))
+    check("peak drawdown is None when no peak is supplied",
+          early["peak_drawdown_pct"] is None)
+
     # missing price is skipped, not guessed
     p7 = plan({"ZZZ": 0.12}, a, account(), [], {}, c, kill_tripped=False)
     check("missing price skipped safely",
