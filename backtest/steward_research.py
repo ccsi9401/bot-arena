@@ -72,8 +72,12 @@ def _next_day_map(days: list) -> dict:
 
 
 def run_variant(data, cfg, *, drop: set[str] | None = None, slip=0.0005,
-                fill_next_open=False, start_equity: float | None = None):
-    """The gate's loop, with knobs. drop = symbols removed from the universe."""
+                fill_next_open=False, start_equity: float | None = None,
+                warmup_days: int | None = None):
+    """The gate's loop, with knobs. drop = symbols removed from the universe.
+    warmup_days forces a common start date: a 300-day SMA has no value for its first
+    300 bars and would sit in risk-off, so sweeping the period without pinning the
+    warmup compares different windows and calls the difference a result."""
     start_equity = float(start_equity or cfg["starting_equity"])
     drop = drop or set()
     data = {s: df for s, df in data.items() if s not in drop}
@@ -82,7 +86,7 @@ def run_variant(data, cfg, *, drop: set[str] | None = None, slip=0.0005,
 
     days = sorted(set().union(*[set(df.index) for df in data.values()]))
     days = [d for d in days if d in data[cfg["benchmark"]].index]
-    days = days[cfg["strategy"]["momentum_lookback_days"] + 30:]
+    days = days[warmup_days or (cfg["strategy"]["momentum_lookback_days"] + 30):]
     fridays = [d for d in days if d.weekday() == 4]
     nxt = _next_day_map(days)
 
@@ -201,6 +205,35 @@ def top_performers(data, cfg, n: int) -> set[str]:
     return set(sorted(rets, key=rets.get, reverse=True)[:n])
 
 
+SWEEP_PERIODS = (100, 125, 150, 175, 200, 225, 250, 300)
+
+
+def sweep_regime(data, cfg, base_cfg):
+    """Vary the trend-filter length and see whether 200 is a peak or a plateau.
+
+    A signal that only works at one setting is a curve fit that caught one crash.
+    A signal that works across a wide band is a regime filter. This is the difference
+    between "the gate reduces drawdown" being a finding and being a coincidence.
+
+    Every row shares one warmup so the longest SMA does not get a shorter, different
+    window than the shortest — that alone would manufacture a trend in the results.
+    """
+    warm = max(cfg["strategy"]["momentum_lookback_days"], max(SWEEP_PERIODS)) + 30
+    out = []
+    for n in SWEEP_PERIODS:
+        c = copy.deepcopy(base_cfg)
+        c["strategy"]["trend_sma_days"] = n
+        curve, orders = run_variant(data, c, slip=0.0025, fill_next_open=True,
+                                    warmup_days=warm)
+        r = summarize(curve, f"sma_{n}")
+        r["sma_days"] = n
+        r["orders"] = orders
+        out.append(r)
+        print(f"  SMA {n:>3}d   {r['total_return_pct']:>8.2f}%   "
+              f"DD {r['max_drawdown_pct']:>7.2f}%   Sharpe {r['sharpe_daily_ann']:>5.2f}")
+    return out
+
+
 def main() -> int:
     cfg = yaml.safe_load((ROOT / "config" / "steward.yaml").read_text())
     uni = cfg["universe"]
@@ -281,6 +314,17 @@ def main() -> int:
                 "the real corrections, penalising the stock sleeve twice. The true "
                 "bias-corrected figure sits between this and bias_corrected.")
 
+    print("\nRegime-gate parameter sweep (index sleeve only, realistic fills):")
+    sweep = sweep_regime(data, cfg, idx_cfg)
+    shp = [r["sharpe_daily_ann"] or 0 for r in sweep]
+    best = max(sweep, key=lambda r: r["sharpe_daily_ann"] or 0)
+    spread = max(shp) - min(shp)
+    verdict = ("PLATEAU — the result does not depend on the exact length"
+               if spread < 0.25 else
+               "PEAKED — sensitive to the exact length, treat 200 as fitted")
+    print(f"  best Sharpe at {best['sma_days']}d ({best['sharpe_daily_ann']}); "
+          f"spread across the band {spread:.2f} -> {verdict}")
+
     # SPY over exactly the baseline's span, so the comparison is like for like.
     bc = curves["baseline"]
     spy = summarize(data[cfg["benchmark"]]["close"].loc[bc.index[0]:bc.index[-1]],
@@ -294,6 +338,8 @@ def main() -> int:
         {"variants": runs, "benchmark": spy,
          "window": {"start": w0, "end": w1, "trading_days": len(bc),
                     "data_fetched_from": str(min(data[cfg["benchmark"]].index).date())},
+         "regime_sweep": sweep,
+         "regime_sweep_verdict": verdict,
          "unfetchable_symbols": missing}, indent=2, default=str))
 
     md = ["# STEWARD research — what the gate cannot tell you\n",
@@ -319,6 +365,17 @@ def main() -> int:
     for r in runs:
         if r["note"]:
             md.append(f"- **{r['label']}**: {r['note']}")
+    md.append("\n## Regime-gate parameter sweep\n")
+    md.append("The whole risk-reduction result rests on one number: the length of the trend "
+              "filter. If only 200 works, it is a curve fit that caught one crash. All rows "
+              "use the index sleeve, realistic fills, and an identical window.\n")
+    md.append("| trend SMA | return | max DD | Sharpe |")
+    md.append("|---|---|---|---|")
+    for r in sweep:
+        md.append(f"| {r['sma_days']}d | {r['total_return_pct']}% | "
+                  f"{r['max_drawdown_pct']}% | {r['sharpe_daily_ann']} |")
+    md.append(f"\n**{verdict}.** Best Sharpe at {best['sma_days']}d "
+              f"({best['sharpe_daily_ann']}); spread across the band {spread:.2f}.")
     if missing:
         md.append(f"\n**Residual bias:** {len(missing)} symbol(s) could not be fetched "
                   f"and are silently absent from every run: {missing}. Delisted names "
