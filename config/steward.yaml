@@ -4,6 +4,16 @@
 bot: steward
 account_env_prefix: STEWARD          # STEWARD_API_KEY / STEWARD_API_SECRET
 starting_equity: 5000               # rung 1 of a graduated ladder (was 50000)
+
+# How much history the backtest fetches. The 252-day momentum lookback plus 30 days
+# of warmup consumes the first ~282 trading days, so the TESTED window is roughly
+# this minus 1.1 years. At "4y" that left Oct-2023 to Aug-2026 — 2.9 years that begin
+# almost exactly at the October 2023 low and contain no bear market at all, which is
+# the most flattering possible window for a long-only momentum strategy. "10y" reaches
+# back through the 2022 bear and the COVID crash, where the regime gate either earns
+# its keep or does not. Check the benchmark's max_drawdown_pct in the report to see
+# which regimes actually made it in: about -34% means COVID is included, -25% means 2022.
+backtest_period: "10y"
 benchmark: SPY
 
 # Self-contained universe (separate from the traders' shared universe on purpose:
