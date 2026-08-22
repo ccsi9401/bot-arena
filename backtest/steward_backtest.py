@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
-"""STEWARD pre-launch validation — replays the LIVE analyzer weekly over ~3 years
-of daily data (yfinance, runs on the GitHub Actions runner).
+"""STEWARD pre-launch validation — replays the LIVE analyzer AND the LIVE planner
+weekly over ~3 years of daily data (yfinance, runs on the GitHub Actions runner).
 
 Gate (must all pass before STEWARD may trade):
   - positive total return
   - max drawdown under 20%
   - annualized Sharpe >= 0.4
 Also reported (not gated): the same figures for SPY buy-and-hold, so we know
-whether the machinery adds anything over doing nothing.
+whether the machinery adds anything over doing nothing, plus the average cash
+weight — the invariant that has drifted twice now, so the gate should show it.
+
+2026-08-22: this file used to re-implement the sizing loop instead of calling
+plan(). The copy floored every order to whole shares and dropped any gap under
+one share, so the gate was validating a portfolio that behaved like the v1
+planner — which is precisely how both cash-drag bugs cleared it. The rebalance
+now goes through the real planner, so caps, the drift band, the cash floor, the
+kill switch and the cash-drag sweep are all exercised by the gate.
 
 On success the workflow commits state/steward/gate.json — run_steward.py refuses
 to trade until that file exists. Fills at close +5 bps each way.
@@ -26,6 +34,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import yaml
 from core.common import ROOT
 from bots.portfolio.analyzer import analyze
+from bots.portfolio.planner import plan
 from backtest import data as bd
 
 OUT = ROOT / "reports" / "backtest"
@@ -62,6 +71,36 @@ def build_scan(data: dict[str, pd.DataFrame], day, cfg: dict) -> dict:
             "universe_size": len(data), "scanned": len(snapshot), "symbols": snapshot}
 
 
+def fill(orders: list[dict], prices: dict[str, float], cash: float,
+         shares: dict[str, float]) -> float:
+    """Apply a planner order list to the simulated book. Sells first (the planner
+    already orders them that way) so their proceeds fund the buys, same as live."""
+    for o in orders:
+        p = prices.get(o["symbol"])
+        if not p:
+            continue
+        if o["side"] == "sell":
+            qty = min(o["qty"] or 0.0, shares.get(o["symbol"], 0.0))
+            if qty <= 0:
+                continue
+            cash += qty * p * (1 - SLIP)
+            shares[o["symbol"]] = shares.get(o["symbol"], 0.0) - qty
+            if shares[o["symbol"]] <= 1e-9:
+                shares.pop(o["symbol"], None)
+        else:
+            # notional where the planner priced in dollars, shares otherwise
+            want = o["notional"] if o["notional"] is not None else (o["qty"] or 0.0) * p
+            qty = want / p
+            cost = qty * p * (1 + SLIP)
+            if cost > cash:                     # slippage can push a funded plan over
+                qty, cost = cash / (p * (1 + SLIP)), cash
+            if qty <= 0:
+                continue
+            cash -= cost
+            shares[o["symbol"]] = shares.get(o["symbol"], 0.0) + qty
+    return cash
+
+
 def run(data: dict[str, pd.DataFrame], cfg: dict, start_equity=50000.0):
     days = sorted(set().union(*[set(df.index) for df in data.values()]))
     days = [d for d in days if d in data[cfg["benchmark"]].index]
@@ -71,8 +110,9 @@ def run(data: dict[str, pd.DataFrame], cfg: dict, start_equity=50000.0):
 
     cash = start_equity
     shares: dict[str, float] = {}
-    curve = {}
+    curve, cash_weights = {}, []
     rebalances = 0
+    kill = False
 
     def px(sym, d):
         return float(data[sym].loc[d, "close"]) if d in data[sym].index else None
@@ -80,42 +120,30 @@ def run(data: dict[str, pd.DataFrame], cfg: dict, start_equity=50000.0):
     for day in days:
         if day in fridays:
             scan = build_scan(data, day, cfg)
-            targets = analyze(scan, cfg)["targets"]
+            analysis = analyze(scan, cfg)
             equity = cash + sum(q * (px(s, day) or 0) for s, q in shares.items())
-            # cap check mirrors planner
-            r = cfg["risk"]
-            targets = {s: min(w, r["max_position_weight"]) for s, w in targets.items()}
-            band = cfg["strategy"]["drift_band_abs"]
-            for sym in sorted(set(shares) | set(targets)):
-                p = px(sym, day)
-                if not p:
-                    continue
-                cur_w = shares.get(sym, 0) * p / equity
-                tgt_w = targets.get(sym, 0)
-                if abs(tgt_w - cur_w) <= band:
-                    continue
-                delta_val = (tgt_w - cur_w) * equity
-                qty = int(abs(delta_val) / p)
-                if qty < 1:
-                    continue
-                if delta_val < 0:
-                    qty = min(qty, int(shares.get(sym, 0)))
-                    cash += qty * p * (1 - SLIP)
-                    shares[sym] = shares.get(sym, 0) - qty
-                    if shares[sym] <= 0:
-                        shares.pop(sym, None)
-                else:
-                    cost = qty * p * (1 + SLIP)
-                    if cost > cash:
-                        qty = int(cash / (p * (1 + SLIP)))
-                        cost = qty * p * (1 + SLIP)
-                    if qty >= 1:
-                        cash -= cost
-                        shares[sym] = shares.get(sym, 0) + qty
-                rebalances += 1
-        curve[day] = cash + sum(q * (px(s, day) or 0) for s, q in shares.items())
+            prices = {s: px(s, day) for s in set(shares) | set(analysis["targets"])}
+            prices = {s: p for s, p in prices.items() if p}
+            positions = [{"symbol": s, "qty": q, "avg_entry": prices[s],
+                          "market_value": q * prices[s], "unrealized_pl": 0.0,
+                          "current_price": prices[s]}
+                         for s, q in shares.items() if s in prices]
+            acct = {"equity": equity, "cash": cash, "last_equity": equity,
+                    "buying_power": cash, "status": "ACTIVE"}
+            # Alpaca fills these names fractionally, so the live path is notional.
+            p = plan(analysis["targets"], analysis, acct, positions, prices, cfg,
+                     kill_tripped=kill, fractionable={s: True for s in prices})
+            if any("KILL" in h for h in p["halts"]):
+                kill = True                     # latches, exactly as live state does
+            cash = fill(p["orders"], prices, cash, shares)
+            rebalances += len(p["orders"])
+        eq = cash + sum(q * (px(s, day) or 0) for s, q in shares.items())
+        curve[day] = eq
+        if eq > 0:
+            cash_weights.append(cash / eq)
 
-    return pd.Series(curve).sort_index(), rebalances
+    avg_cash = round(float(np.mean(cash_weights)) * 100, 2) if cash_weights else None
+    return pd.Series(curve).sort_index(), rebalances, avg_cash
 
 
 def summarize(curve: pd.Series, label: str) -> dict:
@@ -138,8 +166,9 @@ def main() -> int:
     data = bd.daily_history(symbols, "4y")
     print(f"  {len(data)} symbols")
 
-    curve, rebalances = run(data, cfg)
+    curve, rebalances, avg_cash = run(data, cfg)
     s = summarize(curve, "STEWARD 3y weekly")
+    s["avg_cash_weight_pct"] = avg_cash
     spy = summarize(data[cfg["benchmark"]].loc[curve.index[0]:curve.index[-1]]["close"],
                     "SPY buy & hold (same window)")
 
@@ -151,7 +180,7 @@ def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "steward.json").write_text(json.dumps(
         {"summary": s, "benchmark": spy, "gate": gate, "passed": passed,
-         "rebalance_trades": rebalances}, indent=2, default=str))
+         "rebalance_trades": rebalances, "planner_driven": True}, indent=2, default=str))
     md = [f"# STEWARD pre-launch validation\n", f"## {s['label']}\n"]
     for k, v in s.items():
         if k != "label":
