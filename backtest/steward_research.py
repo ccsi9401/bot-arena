@@ -244,25 +244,37 @@ def main() -> int:
     record("pessimistic_fills", "does the edge survive realistic execution?",
            *run_variant(data, cfg, slip=0.0025, fill_next_open=True),
            note="filled at next open, 25bps each way")
+    record("bias_corrected", "the closest thing to an unbiased estimate",
+           *run_variant(data, cfg, drop=frozen, slip=0.0025, fill_next_open=True),
+           note="frozen universe AND realistic fills — both are corrections for things "
+                "that genuinely bias the result, with no stress test stacked on top. "
+                "This is the row to weigh against SPY.")
     record("honest_worst_case", "all of the above at once",
-           *run_variant(data, cfg, drop=frozen | top3, slip=0.0025, fill_next_open=True))
+           *run_variant(data, cfg, drop=frozen | top3, slip=0.0025, fill_next_open=True),
+           note="a FLOOR, not an estimate — it stacks the drop_top3 stress test on top of "
+                "the real corrections, penalising the stock sleeve twice. The true "
+                "bias-corrected figure sits between this and bias_corrected.")
 
     # SPY over exactly the baseline's span, so the comparison is like for like.
     bc = curves["baseline"]
     spy = summarize(data[cfg["benchmark"]]["close"].loc[bc.index[0]:bc.index[-1]],
                     "SPY buy & hold")
 
+    # The TESTED window, not the raw fetch: the momentum lookback plus warmup consumes
+    # the first ~282 trading days, so the data range overstates what was actually replayed.
+    w0, w1 = str(bc.index[0])[:10], str(bc.index[-1])[:10]
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "steward_research.json").write_text(json.dumps(
         {"variants": runs, "benchmark": spy,
-         "window": {"start": str(min(data[cfg["benchmark"]].index).date()),
-                    "end": str(max(data[cfg["benchmark"]].index).date())},
+         "window": {"start": w0, "end": w1, "trading_days": len(bc),
+                    "data_fetched_from": str(min(data[cfg["benchmark"]].index).date())},
          "unfetchable_symbols": missing}, indent=2, default=str))
 
     md = ["# STEWARD research — what the gate cannot tell you\n",
-          f"Window: {min(data[cfg['benchmark']].index).date()} to "
-          f"{max(data[cfg['benchmark']].index).date()}. "
-          f"SPY buy & hold over the same span: {spy['total_return_pct']}%.\n",
+          f"Tested window: **{w0} to {w1}** ({len(bc)/252:.1f}y, {len(bc)} trading days). "
+          f"Data was fetched from {str(min(data[cfg['benchmark']].index).date())}; the momentum "
+          f"lookback and warmup consume the difference. SPY buy & hold over the tested span: "
+          f"**{spy['total_return_pct']}%**, max drawdown **{spy['max_drawdown_pct']}%**.\n",
           "| variant | question | return | max DD | Sharpe | vs baseline |",
           "|---|---|---|---|---|---|"]
     for r in runs:
