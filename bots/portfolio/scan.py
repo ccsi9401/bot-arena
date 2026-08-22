@@ -39,7 +39,11 @@ def scan(data, cfg: dict) -> dict:
                     if len(close) >= lb else None)
         mom_6m = (float(close.iloc[-1] / close.iloc[-s["index_trend_lookback_days"]] - 1)
                   if len(close) >= s["index_trend_lookback_days"] else None)
-        sma200 = float(close.rolling(200).mean().iloc[-1]) if len(close) >= 200 else None
+        # Trend filter length. The dict key stays "above_200sma" because the analyzer
+        # and every stored journal read that name — but the PERIOD is config-driven, so
+        # live and backtest can never silently disagree about what the gate means.
+        n_sma = s.get("trend_sma_days", 200)
+        sma200 = float(close.rolling(n_sma).mean().iloc[-1]) if len(close) >= n_sma else None
         snapshot[sym] = {
             "close": float(close.iloc[-1]),
             "last_bar_date": str(df.index[-1].date()),
