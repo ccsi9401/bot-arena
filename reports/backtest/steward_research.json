@@ -2,12 +2,12 @@
   "variants": [
     {
       "label": "baseline",
-      "total_return_pct": 255.49,
-      "cagr_pct": 15.4,
+      "total_return_pct": 262.12,
+      "cagr_pct": 15.64,
       "max_drawdown_pct": -19.4,
-      "sharpe_daily_ann": 0.96,
+      "sharpe_daily_ann": 0.97,
       "question": "what the gate measures",
-      "orders": 1082,
+      "orders": 1073,
       "note": "",
       "fills": "close +5bps"
     },
@@ -68,23 +68,23 @@
     },
     {
       "label": "drop_top3",
-      "total_return_pct": 191.15,
-      "cagr_pct": 12.82,
+      "total_return_pct": 189.86,
+      "cagr_pct": 12.77,
       "max_drawdown_pct": -15.66,
       "sharpe_daily_ann": 0.9,
       "question": "is the edge broad, or three lucky names?",
-      "orders": 1118,
+      "orders": 1103,
       "note": "dropped ['AMD', 'MU', 'NVDA'] \u2014 best performers, knowable only after the fact",
       "fills": "close +5bps"
     },
     {
       "label": "pessimistic_fills",
-      "total_return_pct": 202.52,
-      "cagr_pct": 13.31,
-      "max_drawdown_pct": -22.01,
-      "sharpe_daily_ann": 0.84,
+      "total_return_pct": 211.24,
+      "cagr_pct": 13.68,
+      "max_drawdown_pct": -21.99,
+      "sharpe_daily_ann": 0.86,
       "question": "does the edge survive realistic execution?",
-      "orders": 1098,
+      "orders": 1075,
       "note": "filled at next open, 25bps each way",
       "fills": "next open +25bps"
     },
@@ -198,6 +198,14 @@
       "orders": 341
     }
   ],
+  "regime_sweep_window": {
+    "start": "2017-12-12",
+    "end": "2026-08-21",
+    "trading_days": 2184
+  },
+  "regime_sweep_sharpe_se": 0.422,
   "regime_sweep_verdict": "PLATEAU \u2014 the result does not depend on the exact length",
-  "unfetchable_symbols": []
+  "unfetchable_symbols": [
+    "UBER"
+  ]
 }

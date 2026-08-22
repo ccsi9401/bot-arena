@@ -4,17 +4,17 @@ Tested window: **2017-10-04 to 2026-08-21** (8.9y, 2232 trading days). Data was 
 
 | variant | question | fills | return | max DD | Sharpe | vs baseline |
 |---|---|---|---|---|---|---|
-| `baseline` | what the gate measures | close +5bps | 255.49% | -19.4% | 0.96 | +0.00 pts |
-| `index_only` | does stock picking beat the index at the same risk? | close +5bps | 156.65% | -14.91% | 1.08 | -98.84 pts |
-| `static_70_20_10` | does ANY of the machinery earn its keep? | close +5bps | 171.72% | -24.41% | 0.92 | -83.77 pts |
-| `index_only_real` | the gate on index funds, at the same cost | next open +25bps | 144.12% | -16.74% | 1.02 | -111.37 pts |
-| `static_real` | the do-nothing blend, at the same cost | next open +25bps | 171.16% | -24.26% | 0.91 | -84.33 pts |
-| `frozen_universe` | how much is hindsight in the universe? | close +5bps | 219.17% | -19.4% | 0.91 | -36.32 pts |
-| `drop_top3` | is the edge broad, or three lucky names? | close +5bps | 191.15% | -15.66% | 0.9 | -64.34 pts |
-| `pessimistic_fills` | does the edge survive realistic execution? | next open +25bps | 202.52% | -22.01% | 0.84 | -52.97 pts |
-| `bias_corrected` | the closest thing to an unbiased estimate | next open +25bps | 172.07% | -22.02% | 0.79 | -83.42 pts |
-| `honest_worst_case` | all of the above at once | next open +25bps | 120.62% | -20.19% | 0.72 | -134.87 pts |
-| **SPY buy & hold** | the thing to beat | none (hold) | 246.29% | -33.72% | 0.84 | -9.20 pts |
+| `baseline` | what the gate measures | close +5bps | 262.12% | -19.4% | 0.97 | +0.00 pts |
+| `index_only` | does stock picking beat the index at the same risk? | close +5bps | 156.65% | -14.91% | 1.08 | -105.47 pts |
+| `static_70_20_10` | does ANY of the machinery earn its keep? | close +5bps | 171.72% | -24.41% | 0.92 | -90.40 pts |
+| `index_only_real` | the gate on index funds, at the same cost | next open +25bps | 144.12% | -16.74% | 1.02 | -118.00 pts |
+| `static_real` | the do-nothing blend, at the same cost | next open +25bps | 171.16% | -24.26% | 0.91 | -90.96 pts |
+| `frozen_universe` | how much is hindsight in the universe? | close +5bps | 219.17% | -19.4% | 0.91 | -42.95 pts |
+| `drop_top3` | is the edge broad, or three lucky names? | close +5bps | 189.86% | -15.66% | 0.9 | -72.26 pts |
+| `pessimistic_fills` | does the edge survive realistic execution? | next open +25bps | 211.24% | -21.99% | 0.86 | -50.88 pts |
+| `bias_corrected` | the closest thing to an unbiased estimate | next open +25bps | 172.07% | -22.02% | 0.79 | -90.05 pts |
+| `honest_worst_case` | all of the above at once | next open +25bps | 120.62% | -20.19% | 0.72 | -141.50 pts |
+| **SPY buy & hold** | the thing to beat | none (hold) | 246.29% | -33.72% | 0.84 | -15.83 pts |
 
 - **index_only_real**: index_only charged the same execution as bias_corrected — the only honest way to compare a low-turnover variant against a high-turnover one.
 - **static_real**: static_70_20_10 charged the same execution as bias_corrected. THIS is the row that says whether any of the machinery earns its keep.
@@ -26,7 +26,9 @@ Tested window: **2017-10-04 to 2026-08-21** (8.9y, 2232 trading days). Data was 
 
 ## Regime-gate parameter sweep
 
-The whole risk-reduction result rests on one number: the length of the trend filter. If only 200 works, it is a curve fit that caught one crash. All rows use the index sleeve, realistic fills, and an identical window.
+The whole risk-reduction result rests on one number: the length of the trend filter. If only 200 works, it is a curve fit that caught one crash. All rows use the index sleeve and realistic fills.
+
+> **These rows are comparable to each other, NOT to the table above.** A 300-day SMA has no value for its first 300 bars, so every row here shares a longer warmup and therefore a shorter window: **2017-12-12 to 2026-08-21** (2184 days) against the main table's 2017-10-04 to 2026-08-21 (2232 days). Comparing a return across the two tables compares two different spans of market history, not two strategies.
 
 | trend SMA | return | max DD | Sharpe |
 |---|---|---|---|
@@ -40,3 +42,8 @@ The whole risk-reduction result rests on one number: the length of the trend fil
 | 300d | 114.03% | -20.62% | 0.82 |
 
 **PLATEAU — the result does not depend on the exact length.** Best Sharpe at 150d (1.04); spread across the band 0.22.
+
+> **Do not read the ranking as a recommendation.** Over 8.7 years the standard error on an annualised Sharpe is roughly **±0.42** — the entire 0.22 spread fits inside it, so no length here is statistically distinguishable from any other. The finding is that the effect survives across the whole band; picking whichever length happened to win this window is the curve-fitting this test was built to detect.
+
+
+**Residual bias:** 1 symbol(s) could not be fetched and are silently absent from every run: ['UBER']. Delisted names are the ones survivorship bias is made of, so treat these figures as an upper bound on the true edge, not a measurement of it.
