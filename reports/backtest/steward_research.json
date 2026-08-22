@@ -124,5 +124,80 @@
     "trading_days": 2232,
     "data_fetched_from": "2016-08-22"
   },
+  "regime_sweep": [
+    {
+      "label": "sma_100",
+      "total_return_pct": 100.69,
+      "cagr_pct": 8.37,
+      "max_drawdown_pct": -19.96,
+      "sharpe_daily_ann": 0.84,
+      "sma_days": 100,
+      "orders": 409
+    },
+    {
+      "label": "sma_125",
+      "total_return_pct": 128.39,
+      "cagr_pct": 10.0,
+      "max_drawdown_pct": -20.88,
+      "sharpe_daily_ann": 0.98,
+      "sma_days": 125,
+      "orders": 385
+    },
+    {
+      "label": "sma_150",
+      "total_return_pct": 143.08,
+      "cagr_pct": 10.79,
+      "max_drawdown_pct": -19.43,
+      "sharpe_daily_ann": 1.04,
+      "sma_days": 150,
+      "orders": 369
+    },
+    {
+      "label": "sma_175",
+      "total_return_pct": 138.53,
+      "cagr_pct": 10.55,
+      "max_drawdown_pct": -17.39,
+      "sharpe_daily_ann": 1.02,
+      "sma_days": 175,
+      "orders": 371
+    },
+    {
+      "label": "sma_200",
+      "total_return_pct": 133.75,
+      "cagr_pct": 10.29,
+      "max_drawdown_pct": -16.74,
+      "sharpe_daily_ann": 0.98,
+      "sma_days": 200,
+      "orders": 360
+    },
+    {
+      "label": "sma_225",
+      "total_return_pct": 115.98,
+      "cagr_pct": 9.29,
+      "max_drawdown_pct": -18.6,
+      "sharpe_daily_ann": 0.9,
+      "sma_days": 225,
+      "orders": 368
+    },
+    {
+      "label": "sma_250",
+      "total_return_pct": 125.92,
+      "cagr_pct": 9.86,
+      "max_drawdown_pct": -20.13,
+      "sharpe_daily_ann": 0.93,
+      "sma_days": 250,
+      "orders": 362
+    },
+    {
+      "label": "sma_300",
+      "total_return_pct": 114.03,
+      "cagr_pct": 9.18,
+      "max_drawdown_pct": -20.62,
+      "sharpe_daily_ann": 0.82,
+      "sma_days": 300,
+      "orders": 341
+    }
+  ],
+  "regime_sweep_verdict": "PLATEAU \u2014 the result does not depend on the exact length",
   "unfetchable_symbols": []
 }

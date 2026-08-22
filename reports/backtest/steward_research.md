@@ -23,3 +23,20 @@ Tested window: **2017-10-04 to 2026-08-21** (8.9y, 2232 trading days). Data was 
 - **pessimistic_fills**: filled at next open, 25bps each way
 - **bias_corrected**: frozen universe AND realistic fills — both are corrections for things that genuinely bias the result, with no stress test stacked on top. This is the row to weigh against SPY.
 - **honest_worst_case**: a FLOOR, not an estimate — it stacks the drop_top3 stress test on top of the real corrections, penalising the stock sleeve twice. The true bias-corrected figure sits between this and bias_corrected.
+
+## Regime-gate parameter sweep
+
+The whole risk-reduction result rests on one number: the length of the trend filter. If only 200 works, it is a curve fit that caught one crash. All rows use the index sleeve, realistic fills, and an identical window.
+
+| trend SMA | return | max DD | Sharpe |
+|---|---|---|---|
+| 100d | 100.69% | -19.96% | 0.84 |
+| 125d | 128.39% | -20.88% | 0.98 |
+| 150d | 143.08% | -19.43% | 1.04 |
+| 175d | 138.53% | -17.39% | 1.02 |
+| 200d | 133.75% | -16.74% | 0.98 |
+| 225d | 115.98% | -18.6% | 0.9 |
+| 250d | 125.92% | -20.13% | 0.93 |
+| 300d | 114.03% | -20.62% | 0.82 |
+
+**PLATEAU — the result does not depend on the exact length.** Best Sharpe at 150d (1.04); spread across the band 0.22.
