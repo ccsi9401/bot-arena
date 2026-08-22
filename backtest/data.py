@@ -1,8 +1,13 @@
 """Backtest data layer — fetches free historical data (yfinance) and caches to parquet.
 
 Runs on the GitHub Actions runner (full network), not in the Claude sandbox.
-Cached parquet files are committed under backtest/cache/ so a backtest, too, is
-reproducible from the repo alone.
+
+NOTE: backtest/cache/ is in .gitignore, so the parquet cache is LOCAL ONLY and is
+not committed. Every CI run therefore re-downloads from yfinance and sees whatever
+window is current that day — two gate runs a week apart are not comparing like with
+like, and small shifts in the reported figures are expected. That is a deliberate
+trade (a gate should grade fresh data) but it means these numbers are not
+reproducible from the repo alone; commit the parquet if you ever need them to be.
 """
 from __future__ import annotations
 
