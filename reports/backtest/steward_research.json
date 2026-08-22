@@ -8,7 +8,8 @@
       "sharpe_daily_ann": 0.96,
       "question": "what the gate measures",
       "orders": 1082,
-      "note": ""
+      "note": "",
+      "fills": "close +5bps"
     },
     {
       "label": "index_only",
@@ -18,7 +19,8 @@
       "sharpe_daily_ann": 1.08,
       "question": "does stock picking beat the index at the same risk?",
       "orders": 367,
-      "note": ""
+      "note": "",
+      "fills": "close +5bps"
     },
     {
       "label": "static_70_20_10",
@@ -28,7 +30,30 @@
       "sharpe_daily_ann": 0.92,
       "question": "does ANY of the machinery earn its keep?",
       "orders": 45,
-      "note": ""
+      "note": "",
+      "fills": "close +5bps"
+    },
+    {
+      "label": "index_only_real",
+      "total_return_pct": 144.12,
+      "cagr_pct": 10.6,
+      "max_drawdown_pct": -16.74,
+      "sharpe_daily_ann": 1.02,
+      "question": "the gate on index funds, at the same cost",
+      "orders": 369,
+      "note": "index_only charged the same execution as bias_corrected \u2014 the only honest way to compare a low-turnover variant against a high-turnover one.",
+      "fills": "next open +25bps"
+    },
+    {
+      "label": "static_real",
+      "total_return_pct": 171.16,
+      "cagr_pct": 11.92,
+      "max_drawdown_pct": -24.26,
+      "sharpe_daily_ann": 0.91,
+      "question": "the do-nothing blend, at the same cost",
+      "orders": 45,
+      "note": "static_70_20_10 charged the same execution as bias_corrected. THIS is the row that says whether any of the machinery earns its keep.",
+      "fills": "next open +25bps"
     },
     {
       "label": "frozen_universe",
@@ -38,7 +63,8 @@
       "sharpe_daily_ann": 0.91,
       "question": "how much is hindsight in the universe?",
       "orders": 1058,
-      "note": "dropped ['PANW', 'PLTR', 'TSLA', 'UBER'] \u2014 joined the index after 2017-10-04, so the strategy could not have been picking them"
+      "note": "dropped ['PANW', 'PLTR', 'TSLA', 'UBER'] \u2014 joined the index after 2017-10-04, so the strategy could not have been picking them",
+      "fills": "close +5bps"
     },
     {
       "label": "drop_top3",
@@ -48,7 +74,8 @@
       "sharpe_daily_ann": 0.9,
       "question": "is the edge broad, or three lucky names?",
       "orders": 1118,
-      "note": "dropped ['AMD', 'MU', 'NVDA'] \u2014 best performers, knowable only after the fact"
+      "note": "dropped ['AMD', 'MU', 'NVDA'] \u2014 best performers, knowable only after the fact",
+      "fills": "close +5bps"
     },
     {
       "label": "pessimistic_fills",
@@ -58,7 +85,8 @@
       "sharpe_daily_ann": 0.84,
       "question": "does the edge survive realistic execution?",
       "orders": 1098,
-      "note": "filled at next open, 25bps each way"
+      "note": "filled at next open, 25bps each way",
+      "fills": "next open +25bps"
     },
     {
       "label": "bias_corrected",
@@ -68,7 +96,8 @@
       "sharpe_daily_ann": 0.79,
       "question": "the closest thing to an unbiased estimate",
       "orders": 1057,
-      "note": "frozen universe AND realistic fills \u2014 both are corrections for things that genuinely bias the result, with no stress test stacked on top. This is the row to weigh against SPY."
+      "note": "frozen universe AND realistic fills \u2014 both are corrections for things that genuinely bias the result, with no stress test stacked on top. This is the row to weigh against SPY.",
+      "fills": "next open +25bps"
     },
     {
       "label": "honest_worst_case",
@@ -78,7 +107,8 @@
       "sharpe_daily_ann": 0.72,
       "question": "all of the above at once",
       "orders": 1085,
-      "note": "a FLOOR, not an estimate \u2014 it stacks the drop_top3 stress test on top of the real corrections, penalising the stock sleeve twice. The true bias-corrected figure sits between this and bias_corrected."
+      "note": "a FLOOR, not an estimate \u2014 it stacks the drop_top3 stress test on top of the real corrections, penalising the stock sleeve twice. The true bias-corrected figure sits between this and bias_corrected.",
+      "fills": "next open +25bps"
     }
   ],
   "benchmark": {
