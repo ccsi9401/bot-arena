@@ -188,6 +188,12 @@ def main() -> int:
     curve, rebalances, cash_stats = run(data, cfg)
     s = summarize(curve, "STEWARD 3y weekly")
     s.update(cash_stats)
+    # Record the window. backtest/cache/ is gitignored, so each CI run pulls whatever
+    # yfinance serves that day: two runs a week apart are NOT comparing like with like,
+    # and without these dates there is no way to tell a strategy change from a data shift.
+    s["window_start"] = str(curve.index[0].date())
+    s["window_end"] = str(curve.index[-1].date())
+    s["trading_days"] = int(len(curve))
     spy = summarize(data[cfg["benchmark"]].loc[curve.index[0]:curve.index[-1]]["close"],
                     "SPY buy & hold (same window)")
 
