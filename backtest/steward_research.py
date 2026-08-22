@@ -44,9 +44,27 @@ from backtest.steward_backtest import build_scan, fill, summarize
 
 OUT = ROOT / "reports" / "backtest"
 
-# Universe names that were NOT S&P 500 members when the backtest window opens.
-# Source: Wikipedia "Selected changes to the list of S&P 500 components".
-JOINED_MID_WINDOW = {"PANW": "2023-06-20", "UBER": "2023-12-18", "PLTR": "2024-09-23"}
+# When each universe name joined the S&P 500, from Wikipedia's "Selected changes to
+# the list of S&P 500 components". Which of these count as mid-window depends on where
+# the window actually starts, so it is computed at runtime rather than hardcoded — the
+# window moves when backtest_period changes, and a stale list silently drops names that
+# were legitimately members all along (PANW joined Jun 2023; under a window opening in
+# Oct 2023 it is NOT a mid-window joiner, though under a 10y window it is).
+#
+# Caveat: this log begins in 2014. Anything absent is treated as a member throughout,
+# which is right for the old mega-caps and wrong for anything that joined pre-2014 —
+# so the correction is a floor on the bias, never the whole of it.
+ADDED_TO_INDEX = {
+    "AVGO": "2014-05-08", "AMD": "2017-03-20", "TSLA": "2020-12-21",
+    "PANW": "2023-06-20", "UBER": "2023-12-18", "PLTR": "2024-09-23",
+}
+
+
+def mid_window_joiners(universe, window_start) -> set[str]:
+    """Universe names that were not yet index members when the window opened —
+    i.e. names the strategy could not plausibly have been choosing among."""
+    start = str(window_start)[:10]
+    return {s for s in universe if s in ADDED_TO_INDEX and ADDED_TO_INDEX[s] > start}
 
 
 def _next_day_map(days: list) -> dict:
@@ -174,8 +192,9 @@ def main() -> int:
     cfg = yaml.safe_load((ROOT / "config" / "steward.yaml").read_text())
     uni = cfg["universe"]
     symbols = sorted(set(uni["stocks"] + uni["index_etfs"] + uni["defensive_etfs"]))
-    print("Fetching daily history (4y)...")
-    data = bd.daily_history(symbols, "4y")
+    period = cfg.get("backtest_period", "4y")
+    print(f"Fetching daily history ({period})...")
+    data = bd.daily_history(symbols, period)
     print(f"  {len(data)}/{len(symbols)} symbols returned data")
     missing = sorted(set(symbols) - set(data))
     if missing:
@@ -186,8 +205,13 @@ def main() -> int:
                                                  "defensive": 0.20, "cash": 0.10}
     idx_cfg["risk"]["max_position_weight"] = 0.40   # two ETFs cannot fill 70% at a 12% cap
 
+    # The window is only known after the warmup is trimmed, so take it from a real run.
+    probe, probe_orders = run_variant(data, cfg)
+    win_start = probe.index[0]
+    print(f"  tested window opens {str(win_start)[:10]}")
+
     top3 = top_performers(data, cfg, 3)
-    frozen = set(JOINED_MID_WINDOW) & set(uni["stocks"])
+    frozen = mid_window_joiners(uni["stocks"], win_start)
     ballast = {d: 0.20 / len(uni["defensive_etfs"]) for d in uni["defensive_etfs"]}
 
     runs = []
@@ -204,14 +228,15 @@ def main() -> int:
         return s
 
     print("\nRunning variants (each is a full 3y replay — this takes a few minutes):")
-    base = record("baseline", "what the gate measures", *run_variant(data, cfg))
+    base = record("baseline", "what the gate measures", probe, probe_orders)
     record("index_only", "does stock picking beat the index at the same risk?",
            *run_variant(data, idx_cfg))
     record("static_70_20_10", "does ANY of the machinery earn its keep?",
            *run_static(data, cfg, dict({cfg["benchmark"]: 0.70}, **ballast)))
     record("frozen_universe", "how much is hindsight in the universe?",
            *run_variant(data, cfg, drop=frozen),
-           note=f"dropped {sorted(frozen)} — joined the index mid-window")
+           note=f"dropped {sorted(frozen) or 'nothing'} — joined the index after "
+                f"{str(win_start)[:10]}, so the strategy could not have been picking them")
     record("drop_top3", "is the edge broad, or three lucky names?",
            *run_variant(data, cfg, drop=top3),
            note=f"dropped {sorted(top3)} — best performers, knowable only after the fact")
