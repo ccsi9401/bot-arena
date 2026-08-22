@@ -1,0 +1,86 @@
+{
+  "variants": [
+    {
+      "label": "baseline",
+      "total_return_pct": 255.49,
+      "cagr_pct": 15.4,
+      "max_drawdown_pct": -19.4,
+      "sharpe_daily_ann": 0.96,
+      "question": "what the gate measures",
+      "orders": 1082,
+      "note": ""
+    },
+    {
+      "label": "index_only",
+      "total_return_pct": 156.65,
+      "cagr_pct": 11.23,
+      "max_drawdown_pct": -14.91,
+      "sharpe_daily_ann": 1.08,
+      "question": "does stock picking beat the index at the same risk?",
+      "orders": 367,
+      "note": ""
+    },
+    {
+      "label": "static_70_20_10",
+      "total_return_pct": 171.72,
+      "cagr_pct": 11.95,
+      "max_drawdown_pct": -24.41,
+      "sharpe_daily_ann": 0.92,
+      "question": "does ANY of the machinery earn its keep?",
+      "orders": 45,
+      "note": ""
+    },
+    {
+      "label": "frozen_universe",
+      "total_return_pct": 219.17,
+      "cagr_pct": 14.0,
+      "max_drawdown_pct": -19.4,
+      "sharpe_daily_ann": 0.91,
+      "question": "how much is hindsight in the universe?",
+      "orders": 1058,
+      "note": "dropped ['PANW', 'PLTR', 'TSLA', 'UBER'] \u2014 joined the index after 2017-10-04, so the strategy could not have been picking them"
+    },
+    {
+      "label": "drop_top3",
+      "total_return_pct": 191.15,
+      "cagr_pct": 12.82,
+      "max_drawdown_pct": -15.66,
+      "sharpe_daily_ann": 0.9,
+      "question": "is the edge broad, or three lucky names?",
+      "orders": 1118,
+      "note": "dropped ['AMD', 'MU', 'NVDA'] \u2014 best performers, knowable only after the fact"
+    },
+    {
+      "label": "pessimistic_fills",
+      "total_return_pct": 202.52,
+      "cagr_pct": 13.31,
+      "max_drawdown_pct": -22.01,
+      "sharpe_daily_ann": 0.84,
+      "question": "does the edge survive realistic execution?",
+      "orders": 1098,
+      "note": "filled at next open, 25bps each way"
+    },
+    {
+      "label": "honest_worst_case",
+      "total_return_pct": 120.62,
+      "cagr_pct": 9.34,
+      "max_drawdown_pct": -20.19,
+      "sharpe_daily_ann": 0.72,
+      "question": "all of the above at once",
+      "orders": 1085,
+      "note": ""
+    }
+  ],
+  "benchmark": {
+    "label": "SPY buy & hold",
+    "total_return_pct": 246.29,
+    "cagr_pct": 15.05,
+    "max_drawdown_pct": -33.72,
+    "sharpe_daily_ann": 0.84
+  },
+  "window": {
+    "start": "2016-08-22",
+    "end": "2026-08-21"
+  },
+  "unfetchable_symbols": []
+}
