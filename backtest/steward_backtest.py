@@ -8,7 +8,10 @@ Gate (must all pass before STEWARD may trade):
   - annualized Sharpe >= 0.4
 Also reported (not gated): the same figures for SPY buy-and-hold, so we know
 whether the machinery adds anything over doing nothing, plus the average cash
-weight — the invariant that has drifted twice now, so the gate should show it.
+weight AND its gap against the planner's own cash_target — the invariant that has
+drifted twice now, so the gate should show it. Raw cash alone can't distinguish drag
+from a legitimately defensive week, because cash_target itself rises when fewer than
+six stocks qualify; the gap can.
 
 2026-08-22: this file used to re-implement the sizing loop instead of calling
 plan(). The copy floored every order to whole shares and dropped any gap under
@@ -110,9 +113,10 @@ def run(data: dict[str, pd.DataFrame], cfg: dict, start_equity=50000.0):
 
     cash = start_equity
     shares: dict[str, float] = {}
-    curve, cash_weights = {}, []
+    curve, cash_weights, cash_gaps = {}, [], []
     rebalances = 0
     kill = False
+    peak = start_equity
 
     def px(sym, d):
         return float(data[sym].loc[d, "close"]) if d in data[sym].index else None
@@ -132,18 +136,33 @@ def run(data: dict[str, pd.DataFrame], cfg: dict, start_equity=50000.0):
                     "buying_power": cash, "status": "ACTIVE"}
             # Alpaca fills these names fractionally, so the live path is notional.
             p = plan(analysis["targets"], analysis, acct, positions, prices, cfg,
-                     kill_tripped=kill, fractionable={s: True for s in prices})
+                     kill_tripped=kill, fractionable={s: True for s in prices},
+                     peak_equity=peak)
             if any("KILL" in h for h in p["halts"]):
                 kill = True                     # latches, exactly as live state does
             cash = fill(p["orders"], prices, cash, shares)
             rebalances += len(p["orders"])
+            # The invariant worth grading: cash against the planner's OWN target for
+            # that week, not raw cash. cash_target legitimately rises when fewer than
+            # six stocks qualify, so raw cash can't tell drag from a defensive week.
+            post = cash + sum(q * (px(s, day) or 0) for s, q in shares.items())
+            if post > 0:
+                cash_gaps.append(cash / post - p["cash_target"])
         eq = cash + sum(q * (px(s, day) or 0) for s, q in shares.items())
         curve[day] = eq
+        peak = max(peak, eq)
         if eq > 0:
             cash_weights.append(cash / eq)
 
-    avg_cash = round(float(np.mean(cash_weights)) * 100, 2) if cash_weights else None
-    return pd.Series(curve).sort_index(), rebalances, avg_cash
+    stats = {
+        "avg_cash_weight_pct": round(float(np.mean(cash_weights)) * 100, 2)
+        if cash_weights else None,
+        "cash_gap_mean_pp": round(float(np.mean(cash_gaps)) * 100, 2) if cash_gaps else None,
+        "cash_gap_worst_pp": round(float(np.max(cash_gaps)) * 100, 2) if cash_gaps else None,
+        "weeks_cash_over_target_1pp": int(sum(1 for g in cash_gaps if g > 0.01)),
+        "rebalance_weeks": len(cash_gaps),
+    }
+    return pd.Series(curve).sort_index(), rebalances, stats
 
 
 def summarize(curve: pd.Series, label: str) -> dict:
@@ -166,15 +185,15 @@ def main() -> int:
     data = bd.daily_history(symbols, "4y")
     print(f"  {len(data)} symbols")
 
-    curve, rebalances, avg_cash = run(data, cfg)
+    curve, rebalances, cash_stats = run(data, cfg)
     s = summarize(curve, "STEWARD 3y weekly")
-    s["avg_cash_weight_pct"] = avg_cash
+    s.update(cash_stats)
     spy = summarize(data[cfg["benchmark"]].loc[curve.index[0]:curve.index[-1]]["close"],
                     "SPY buy & hold (same window)")
 
-    gate = {"positive_return": s["total_return_pct"] > 0,
-            "max_dd_under_20pct": abs(s["max_drawdown_pct"]) < 20,
-            "sharpe_at_least_0_4": (s["sharpe_daily_ann"] or 0) >= 0.4}
+    gate = {"positive_return": bool(s["total_return_pct"] > 0),
+            "max_dd_under_20pct": bool(abs(s["max_drawdown_pct"]) < 20),
+            "sharpe_at_least_0_4": bool((s["sharpe_daily_ann"] or 0) >= 0.4)}
     passed = all(gate.values())
 
     OUT.mkdir(parents=True, exist_ok=True)
