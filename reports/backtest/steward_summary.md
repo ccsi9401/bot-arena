@@ -2,9 +2,9 @@
 
 ## STEWARD 3y weekly
 
-- total_return_pct: 109.02
-- cagr_pct: 29.35
-- max_drawdown_pct: -19.17
+- total_return_pct: 108.76
+- cagr_pct: 29.29
+- max_drawdown_pct: -18.75
 - sharpe_daily_ann: 1.38
 - rebalance_trades: 323
 
