@@ -135,30 +135,43 @@ def run_variant(data, cfg, *, drop: set[str] | None = None, slip=0.0005,
     return pd.Series(curve).sort_index(), orders
 
 
-def run_static(data, cfg, targets: dict, *, slip=0.0005, start_equity: float | None = None):
+def run_static(data, cfg, targets: dict, *, slip=0.0005, fill_next_open=False,
+               start_equity: float | None = None):
     """No regime gate, no stock picking: fixed weights, same weekly cadence and
-    drift band. The control that asks whether any of the machinery earns its keep."""
+    drift band. The control that asks whether any of the machinery earns its keep.
+    Takes the same fill knobs as run_variant so the comparison can be like for like —
+    charging one side realistic costs and the other idealised ones is how a control
+    quietly wins an argument it should have lost."""
     start_equity = float(start_equity or cfg["starting_equity"])
     days = sorted(set().union(*[set(df.index) for df in data.values()]))
     days = [d for d in days if d in data[cfg["benchmark"]].index]
     days = days[cfg["strategy"]["momentum_lookback_days"] + 30:]
     band = cfg["strategy"]["drift_band_abs"]
+    nxt = _next_day_map(days)
     cash, shares, curve, orders = start_equity, {}, {}, 0
 
-    def px(sym, d):
-        return float(data[sym].loc[d, "close"]) if d in data[sym].index else None
+    def px(sym, d, col="close"):
+        df = data.get(sym)
+        if df is None or d not in df.index:
+            return None
+        if col not in df.columns:
+            col = "close"
+        v = float(df.loc[d, col])
+        return v if v > 0 else None
 
     for day in days:
         if day.weekday() == 4:
             equity = cash + sum(q * (px(s, day) or 0) for s, q in shares.items())
             for sym, tgt in targets.items():
-                p = px(sym, day)
-                if not p:
+                ref = px(sym, day)
+                if not ref:
                     continue
-                cur = shares.get(sym, 0) * p / equity if equity else 0
+                cur = shares.get(sym, 0) * ref / equity if equity else 0
                 if abs(tgt - cur) <= band:
                     continue
                 delta = (tgt - cur) * equity
+                # decide on today's close, fill where the fill model says
+                p = (px(sym, nxt[day], "open") or ref) if (fill_next_open and day in nxt) else ref
                 if delta > 0:
                     spend = min(delta, cash / (1 + slip))
                     if spend <= 0:
@@ -218,10 +231,10 @@ def main() -> int:
 
     curves = {}
 
-    def record(name, question, curve, orders, note=""):
+    def record(name, question, curve, orders, note="", fills="close +5bps"):
         curves[name] = curve
         s = summarize(curve, name)
-        s.update({"question": question, "orders": orders, "note": note})
+        s.update({"question": question, "orders": orders, "note": note, "fills": fills})
         runs.append(s)
         print(f"  {name:<22} {s['total_return_pct']:>8.2f}%  "
               f"DD {s['max_drawdown_pct']:>7.2f}%  Sharpe {s['sharpe_daily_ann']:>5.2f}")
@@ -234,6 +247,17 @@ def main() -> int:
            *run_variant(data, idx_cfg))
     record("static_70_20_10", "does ANY of the machinery earn its keep?",
            *run_static(data, cfg, dict({cfg["benchmark"]: 0.70}, **ballast)))
+    record("index_only_real", "the gate on index funds, at the same cost",
+           *run_variant(data, idx_cfg, slip=0.0025, fill_next_open=True),
+           fills="next open +25bps",
+           note="index_only charged the same execution as bias_corrected — the only "
+                "honest way to compare a low-turnover variant against a high-turnover one.")
+    record("static_real", "the do-nothing blend, at the same cost",
+           *run_static(data, cfg, dict({cfg["benchmark"]: 0.70}, **ballast),
+                       slip=0.0025, fill_next_open=True),
+           fills="next open +25bps",
+           note="static_70_20_10 charged the same execution as bias_corrected. THIS is the "
+                "row that says whether any of the machinery earns its keep.")
     record("frozen_universe", "how much is hindsight in the universe?",
            *run_variant(data, cfg, drop=frozen),
            note=f"dropped {sorted(frozen) or 'nothing'} — joined the index after "
@@ -243,14 +267,16 @@ def main() -> int:
            note=f"dropped {sorted(top3)} — best performers, knowable only after the fact")
     record("pessimistic_fills", "does the edge survive realistic execution?",
            *run_variant(data, cfg, slip=0.0025, fill_next_open=True),
-           note="filled at next open, 25bps each way")
+           fills="next open +25bps", note="filled at next open, 25bps each way")
     record("bias_corrected", "the closest thing to an unbiased estimate",
            *run_variant(data, cfg, drop=frozen, slip=0.0025, fill_next_open=True),
+           fills="next open +25bps",
            note="frozen universe AND realistic fills — both are corrections for things "
                 "that genuinely bias the result, with no stress test stacked on top. "
                 "This is the row to weigh against SPY.")
     record("honest_worst_case", "all of the above at once",
            *run_variant(data, cfg, drop=frozen | top3, slip=0.0025, fill_next_open=True),
+           fills="next open +25bps",
            note="a FLOOR, not an estimate — it stacks the drop_top3 stress test on top of "
                 "the real corrections, penalising the stock sleeve twice. The true "
                 "bias-corrected figure sits between this and bias_corrected.")
@@ -275,16 +301,18 @@ def main() -> int:
           f"Data was fetched from {str(min(data[cfg['benchmark']].index).date())}; the momentum "
           f"lookback and warmup consume the difference. SPY buy & hold over the tested span: "
           f"**{spy['total_return_pct']}%**, max drawdown **{spy['max_drawdown_pct']}%**.\n",
-          "| variant | question | return | max DD | Sharpe | vs baseline |",
-          "|---|---|---|---|---|---|"]
+          "| variant | question | fills | return | max DD | Sharpe | vs baseline |",
+          "|---|---|---|---|---|---|---|"]
     for r in runs:
         delta = r["total_return_pct"] - base["total_return_pct"]
-        md.append(f"| `{r['label']}` | {r['question']} | {r['total_return_pct']}% | "
+        md.append(f"| `{r['label']}` | {r['question']} | {r['fills']} | "
+                  f"{r['total_return_pct']}% | "
                   f"{r['max_drawdown_pct']}% | {r['sharpe_daily_ann']} | "
                   f"{delta:+.2f} pts |")
     # SPY belongs in the table, not a footnote: over a full cycle the drawdown gap is
     # the whole argument for owning any of this machinery.
-    md.append(f"| **SPY buy & hold** | the thing to beat | {spy['total_return_pct']}% | "
+    md.append(f"| **SPY buy & hold** | the thing to beat | none (hold) | "
+              f"{spy['total_return_pct']}% | "
               f"{spy['max_drawdown_pct']}% | {spy['sharpe_daily_ann']} | "
               f"{spy['total_return_pct'] - base['total_return_pct']:+.2f} pts |")
     md.append("")
