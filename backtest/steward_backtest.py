@@ -54,7 +54,9 @@ def build_scan(data: dict[str, pd.DataFrame], day, cfg: dict) -> dict:
             continue
         close = hist["close"]
         lb, skip = s["momentum_lookback_days"], s["momentum_skip_days"]
-        sma200 = float(close.rolling(200).mean().iloc[-1]) if len(close) >= 200 else None
+        # Same config key as the live scanner, so a swept value changes both together.
+        n_sma = s.get("trend_sma_days", 200)
+        sma200 = float(close.rolling(n_sma).mean().iloc[-1]) if len(close) >= n_sma else None
         rets = close.pct_change().dropna()
         snapshot[sym] = {
             "close": float(close.iloc[-1]),
