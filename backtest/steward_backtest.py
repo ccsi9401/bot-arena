@@ -104,7 +104,12 @@ def fill(orders: list[dict], prices: dict[str, float], cash: float,
     return cash
 
 
-def run(data: dict[str, pd.DataFrame], cfg: dict, start_equity=50000.0):
+def run(data: dict[str, pd.DataFrame], cfg: dict, start_equity: float | None = None):
+    # Take the size from config. Hardcoding it meant the gate simulated a $50k book
+    # no matter what steward.yaml said — and since the planner measures inception
+    # drawdown against cfg["starting_equity"], a mismatched pair silently disables
+    # the kill switch inside the very backtest that is supposed to exercise it.
+    start_equity = float(start_equity or cfg["starting_equity"])
     days = sorted(set().union(*[set(df.index) for df in data.values()]))
     days = [d for d in days if d in data[cfg["benchmark"]].index]
     warm = cfg["strategy"]["momentum_lookback_days"] + 30
