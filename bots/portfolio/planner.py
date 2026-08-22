@@ -40,7 +40,8 @@ def _order(sym, side, *, qty=None, notional=None, px, cur, tgt, reason):
 
 def plan(targets: dict[str, float], analysis: dict, account: dict,
          positions: list[dict], prices: dict[str, float], cfg: dict,
-         kill_tripped: bool, fractionable: dict[str, bool] | None = None) -> dict:
+         kill_tripped: bool, fractionable: dict[str, bool] | None = None,
+         peak_equity: float | None = None) -> dict:
     r = cfg["risk"]
     equity = account["equity"]
     frac_map = fractionable or {}
@@ -49,9 +50,26 @@ def plan(targets: dict[str, float], analysis: dict, account: dict,
     targets = dict(targets)
 
     # ---- account-level gates ----
+    # Two drawdown measures, deliberately different and deliberately not the same
+    # number. Inception drawdown is distance below the original stake: a hard floor
+    # that stops carrying information once the book has grown well past it (at $105k
+    # equity the 20% line sits at $40k, which is a 62% collapse, not a drawdown).
+    # Peak drawdown is distance off the high-water mark, so it keeps meaning the same
+    # thing at any account size — which is exactly why it needs the WIDER threshold:
+    # the 3y validation window's worst peak-to-trough is ~19.4%, and that is normal
+    # behaviour for a 70%-equity book, not a failure. Tripping there would force
+    # risk-off through an ordinary correction and require manual review to resume.
     dd_pct = (cfg["starting_equity"] - equity) / cfg["starting_equity"] * 100
-    if kill_tripped or dd_pct >= r["kill_switch_drawdown_pct"]:
-        halts.append(f"KILL SWITCH: drawdown {dd_pct:.1f}% — forcing risk-off targets; "
+    peak_dd_pct = None
+    if peak_equity and peak_equity > 0:
+        peak_dd_pct = (peak_equity - equity) / peak_equity * 100
+    peak_limit = r.get("kill_switch_peak_drawdown_pct")
+    peak_hit = bool(peak_dd_pct is not None and peak_limit
+                    and peak_dd_pct >= peak_limit)
+    if kill_tripped or dd_pct >= r["kill_switch_drawdown_pct"] or peak_hit:
+        why = (f"{peak_dd_pct:.1f}% off peak" if peak_hit
+               else f"{dd_pct:.1f}% from inception")
+        halts.append(f"KILL SWITCH: drawdown {why} — forcing risk-off targets; "
                      "manual review required to resume risk-on.")
         w = cfg["strategy"]["weights"]["risk_off"]
         dfns = cfg["universe"]["defensive_etfs"]
@@ -227,4 +245,5 @@ def plan(targets: dict[str, float], analysis: dict, account: dict,
             "sizing_version": SIZING_VERSION,
             "cash_drag_sweep": sweep_cash,
             "orders": orders, "notes": notes, "halts": halts,
-            "drawdown_pct": round(dd_pct, 2)}
+            "drawdown_pct": round(dd_pct, 2),
+            "peak_drawdown_pct": round(peak_dd_pct, 2) if peak_dd_pct is not None else None}
