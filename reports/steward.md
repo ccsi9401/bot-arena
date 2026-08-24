@@ -1,6 +1,6 @@
-# STEWARD — 2026-08-22 14:56 ET
+# STEWARD — 2026-08-24 17:49 ET
 
-Equity: —
-SPY shadow: —
+Equity: $5,000
+SPY shadow: $5,000
 Regime: —
 
