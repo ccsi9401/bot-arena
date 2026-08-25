@@ -1,0 +1,15 @@
+{
+  "cycle_et": "15:55",
+  "style": "dip_reversion",
+  "intents": [
+    {
+      "action": "liquidate_all",
+      "reasoning": "End-of-day cycle: SCALPEL never holds overnight."
+    }
+  ],
+  "notes": [
+    "liquidation cycle"
+  ],
+  "candidates_considered": 0,
+  "_written_et": "2026-08-25T15:55:18.418248-04:00"
+}
