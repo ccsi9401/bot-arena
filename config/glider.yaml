@@ -8,21 +8,21 @@ schedule:
   cycles_et: ["15:30"]
 
 strategy:
-  regime_filter: spy_above_200sma    # no new entries in bear regime; alt: markov2 (stride-matrix P(bull)-P(bear) gate, core/markov2.py)
+  regime_filter: markov2    # no new entries in bear regime; alt: markov2 (stride-matrix P(bull)-P(bear) gate, core/markov2.py)
   markov2_min_signal: 0.0            # markov2 gate opens when signal > this (range -1..+1)
   sma_fast: 50
   sma_slow: 200
   max_pct_below_52wk_high: 15        # learnable
-  pullback_rsi2_max: 10              # learnable — RSI(2) < X, OR touch of 20EMA
+  pullback_rsi2_max: 5              # learnable — RSI(2) < X, OR touch of 20EMA
   ema_touch_period: 20
   atr_period: 14
-  stop_atr_mult: 2.0                 # learnable — initial stop distance
-  exit_mode: target                  # learnable — "target" (fixed R) or "trail" (chandelier)
+  stop_atr_mult: 3.0                 # learnable — initial stop distance
+  exit_mode: trail                  # learnable — "target" (fixed R) or "trail" (chandelier)
   target_r_mult: 2.0                 # learnable — used when exit_mode: target
-  trail_atr_mult: 3.0                # learnable — used when exit_mode: trail
+  trail_atr_mult: 3.5                # learnable — used when exit_mode: trail
   trail_target_r_mult: 8.0           # far take-profit leg so the bracket is valid in trail mode
   breakeven_at_r: 1.0                # move stop to breakeven at +1R (both modes)
-  max_hold_days: 15                  # learnable
+  max_hold_days: 10                  # learnable
   min_price: 10.0
   min_avg_dollar_vol: 50000000
 

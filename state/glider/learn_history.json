@@ -1,0 +1,49 @@
+[
+  {
+    "date": "2026-08-29",
+    "decision": "DRY RUN \u2014 winner found but config not written",
+    "changed": false,
+    "config_hash_before": "6f4cb07a3d42",
+    "winner": {
+      "regime_filter": "markov2",
+      "pullback_rsi2_max": 5,
+      "max_pct_below_52wk_high": 15,
+      "stop_atr_mult": 3.0,
+      "max_hold_days": 10,
+      "exit_mode": "trail",
+      "target_r_mult": 2.0,
+      "trail_atr_mult": 3.5
+    }
+  },
+  {
+    "date": "2026-08-29",
+    "decision": "config/glider.yaml UPDATED to winner (bounded: one change, gated, journaled)",
+    "changed": true,
+    "config_hash_before": "6f4cb07a3d42",
+    "from": {
+      "regime_filter": "spy_above_200sma",
+      "pullback_rsi2_max": 10,
+      "max_pct_below_52wk_high": 15,
+      "stop_atr_mult": 2.0,
+      "max_hold_days": 15,
+      "exit_mode": "target",
+      "target_r_mult": 2.0,
+      "trail_atr_mult": 3.0
+    },
+    "to": {
+      "regime_filter": "markov2",
+      "pullback_rsi2_max": 5,
+      "max_pct_below_52wk_high": 15,
+      "stop_atr_mult": 3.0,
+      "max_hold_days": 10,
+      "exit_mode": "trail",
+      "target_r_mult": 2.0,
+      "trail_atr_mult": 3.5
+    },
+    "noise_floor": 0.5908502925594175,
+    "incumbent_sel_sharpe": 0.03448834838452602,
+    "winner_sel_sharpe": 1.262103297482043,
+    "incumbent_hold_sharpe": 1.3122908700096663,
+    "winner_hold_sharpe": 2.260572835767462
+  }
+]
