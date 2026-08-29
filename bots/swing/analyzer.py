@@ -24,9 +24,20 @@ def analyze(scan: dict, cfg: dict, open_positions: list[dict]) -> dict:
 
     # ---- regime gate ----
     bench = scan["symbols"].get(scan["benchmark"])
-    regime_ok = bool(bench and bench["close"] > bench["sma200"])
-    if not regime_ok:
-        notes.append(f"Regime gate CLOSED: {scan['benchmark']} below 200SMA — no new entries.")
+    markov_sig = (bench or {}).get("markov2_signal")
+    if s.get("regime_filter") == "markov2" and markov_sig is not None:
+        min_sig = float(s.get("markov2_min_signal", 0.0))
+        regime_ok = markov_sig > min_sig
+        if not regime_ok:
+            notes.append(f"Regime gate CLOSED: markov2 P(bull)-P(bear) = {markov_sig:+.3f} "
+                         f"≤ {min_sig:+.3f} (state {bench.get('markov2_state', '?')}) — no new entries.")
+    else:
+        regime_ok = bool(bench and bench["close"] > bench["sma200"])
+        if s.get("regime_filter") == "markov2" and markov_sig is None:
+            notes.append("markov2 signal unavailable (immature matrix or missing history) — "
+                         "fell back to the 200SMA gate.")
+        if not regime_ok:
+            notes.append(f"Regime gate CLOSED: {scan['benchmark']} below 200SMA — no new entries.")
 
     # ---- manage existing positions ----
     for p in open_positions:

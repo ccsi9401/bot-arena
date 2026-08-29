@@ -20,6 +20,7 @@ import numpy as np
 import pandas as pd
 
 from core import indicators as ind
+from core import markov2
 from bots.swing.analyzer import analyze
 
 SLIP = 0.0005  # 5 bps each way
@@ -48,10 +49,21 @@ def precompute(data: dict[str, pd.DataFrame], etfs: set[str]) -> dict:
         }, index=df.index).iloc[WARMUP - 1:]
         recs = {}
         is_etf = sym in etfs
+        # walk-forward Markov 2.0 signal for ETFs (the analyzer reads it off the
+        # benchmark when regime_filter: markov2; days with an immature matrix get
+        # no key, so the analyzer falls back to the 200SMA gate — same as live)
+        mk: dict = {}
+        if is_etf and len(close) > markov2.VOL_LOOKBACK + markov2.WINDOW:
+            ms = markov2.signal_series(close)
+            for mday, sig, st in zip(ms.index, ms["signal"], ms["state"]):
+                if not np.isnan(sig):
+                    mk[mday] = (float(sig), markov2.NAMES[int(st)])
         for day, row in zip(f.index, f.to_dict("records")):
             row["last_bar_date"] = str(day.date())
             row["is_etf"] = is_etf
             row["session"] = None
+            if day in mk:
+                row["markov2_signal"], row["markov2_state"] = mk[day]
             recs[day] = row
         feats[sym] = recs
     return {"feats": feats, "bars": data}

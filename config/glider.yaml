@@ -8,7 +8,8 @@ schedule:
   cycles_et: ["15:30"]
 
 strategy:
-  regime_filter: spy_above_200sma    # no new entries in bear regime
+  regime_filter: spy_above_200sma    # no new entries in bear regime; alt: markov2 (stride-matrix P(bull)-P(bear) gate, core/markov2.py)
+  markov2_min_signal: 0.0            # markov2 gate opens when signal > this (range -1..+1)
   sma_fast: 50
   sma_slow: 200
   max_pct_below_52wk_high: 15        # learnable

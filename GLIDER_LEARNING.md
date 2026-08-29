@@ -75,6 +75,23 @@ Reports: `reports/glider_learn/<date>.md` (top-15 table every run).
 7. **Health check**: `state/glider/reflection.json` each Saturday tells you how many
    closed live trades exist and, once ≥30, where live sits inside the backtest distribution.
 
+## Markov 2.0 regime gate (optional, shipped dark 2026-08-29)
+
+`strategy.regime_filter: markov2` swaps the 200SMA gate for a Markov 2.0 signal
+(`core/markov2.py`): SPY days label BULL/BEAR/SIDEWAYS when the 20-day return
+beats ±1.1× its trailing-1y vol band (shifted 1 bar, no lookahead); a
+**stride-sampled** (non-overlapping, honest) transition matrix gives
+P(bull next) − P(bear next) from today's state; entries allowed when the signal
+> `markov2_min_signal` (default 0.0). Live, the scanner fetches ~5.6y of SPY for
+the matrix; in the engine the signal is walk-forward per day. While the matrix is
+immature (< 24 stride samples) both paths **fall back to the 200SMA gate**.
+
+**Why it ships dark:** 10y walk-forward A/B (2026-08-29, real data, 5 bps slip)
+— 200SMA gate +63.3% / DD −24.7% / Sharpe 0.45 vs markov2 +49.8% / DD −34.2% /
+Sharpe 0.43. Markov2 wins only the recent 5y slice (+19.3% vs +15.9%) with worse
+DD — recent-window shine, not evidence. It stays a config option (and a possible
+future learner dimension), not the default. Tests: `tests/test_markov2.py`.
+
 ## Sizing note at $5k
 
 0.9% risk = $45/trade. A stock with a $9 stop distance gets 5 shares; one with a $50 stop

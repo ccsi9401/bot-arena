@@ -12,6 +12,7 @@ import pandas as pd
 from .data import MarketData
 from .common import now_et
 from . import indicators as ind
+from . import markov2
 
 
 def _sym_df(bars: pd.DataFrame, symbol: str) -> pd.DataFrame | None:
@@ -53,6 +54,9 @@ def scan(data: MarketData, cfg: dict, mode: str) -> dict:
         }
         snapshot[sym] = feats
 
+    if cfg["strategy"].get("regime_filter") == "markov2" and benchmark in snapshot:
+        _add_markov2_regime(data, benchmark, snapshot)
+
     if mode == "intraday":
         _add_session_features(data, cfg, snapshot, benchmark)
 
@@ -64,6 +68,19 @@ def scan(data: MarketData, cfg: dict, mode: str) -> dict:
         "scanned": len(snapshot),
         "symbols": snapshot,
     }
+
+
+def _add_markov2_regime(data: MarketData, benchmark: str, snapshot: dict) -> None:
+    """Markov 2.0 signal for the benchmark — needs one extra long-history request,
+    because the default 320-day window is far too short for a stride-sampled
+    transition matrix. Leaves the snapshot untouched (analyzer falls back to the
+    200SMA gate) if history is short or the matrix immature."""
+    bdf = _sym_df(data.daily_bars([benchmark], days=markov2.HISTORY_DAYS), benchmark)
+    m = markov2.latest_signal(bdf["close"]) if bdf is not None else None
+    if m:
+        snapshot[benchmark]["markov2_signal"] = m["signal"]
+        snapshot[benchmark]["markov2_state"] = m["state"]
+        snapshot[benchmark]["markov2_n_transitions"] = m["n_transitions"]
 
 
 def _add_session_features(data: MarketData, cfg: dict, snapshot: dict, benchmark: str) -> None:
