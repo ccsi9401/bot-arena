@@ -1,20 +1,42 @@
 # STEWARD — Claude's portfolio manager (3rd Alpaca paper account)
 # Posture: "more than balanced, not too aggressive" — ~70% equities in healthy
 # regimes with a permanent defensive ballast; retreats to defense in downtrends.
+#
+# INDEX-ONLY since 2026-08-22. The 10y backtest said the stock-picking sleeve does
+# not beat a static 70/20/10 blend once survivorship bias is corrected, while the
+# 200-day regime gate DOES earn its keep (-19.4% max drawdown vs SPY's -33.7%). So
+# the sleeve that did not pay for itself is off and the gate that did is kept.
+# To restore stock picking: put the archived tickers back under universe.stocks,
+# set weights.risk_on to {stocks 0.45, index 0.25, defensive 0.20, cash 0.10}, and
+# put risk.max_position_weight back to 0.12 (see the note there — it is load-bearing).
 bot: steward
 account_env_prefix: STEWARD          # STEWARD_API_KEY / STEWARD_API_SECRET
-starting_equity: 50000
+starting_equity: 5000               # rung 1 of a graduated ladder (was 50000)
+
+# How much history the backtest fetches. The 252-day momentum lookback plus 30 days
+# of warmup consumes the first ~282 trading days, so the TESTED window is roughly
+# this minus 1.1 years. At "4y" that left Oct-2023 to Aug-2026 — 2.9 years that begin
+# almost exactly at the October 2023 low and contain no bear market at all, which is
+# the most flattering possible window for a long-only momentum strategy. "10y" reaches
+# back through the 2022 bear and the COVID crash, where the regime gate either earns
+# its keep or does not. Check the benchmark's max_drawdown_pct in the report to see
+# which regimes actually made it in: about -34% means COVID is included, -25% means 2022.
+backtest_period: "10y"
 benchmark: SPY
 
 # Self-contained universe (separate from the traders' shared universe on purpose:
 # SCALPEL's code and inputs are frozen during Round 1).
 universe:
-  stocks: [AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA, AVGO, LLY, JPM, V, XOM,
-           UNH, MA, PG, COST, HD, JNJ, ABBV, WMT, NFLX, CRM, BAC, ORCL, CVX,
-           MRK, KO, AMD, PEP, ADBE, TMO, LIN, WFC, CSCO, ACN, MCD, ABT, PM,
-           IBM, GE, TXN, QCOM, INTU, DHR, CAT, AMGN, VZ, PFE, NEE, DIS, CMCSA,
-           RTX, GS, SPGI, HON, UNP, AMAT, LOW, T, BLK, BKNG, ISRG, COP, PANW,
-           SBUX, MS, SCHW, NKE, UBER, MU, PLTR, LRCX, INTC, BA]
+  # Empty for index-only. The scanner fetches EVERY symbol listed here regardless of
+  # sleeve weights, so leaving the 72 tickers in place would cost 72 unused bar
+  # requests per cycle to feed a sleeve weighted 0. Archived for a one-line revert:
+  # [AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA, AVGO, LLY, JPM, V, XOM,
+  #  UNH, MA, PG, COST, HD, JNJ, ABBV, WMT, NFLX, CRM, BAC, ORCL, CVX,
+  #  MRK, KO, AMD, PEP, ADBE, TMO, LIN, WFC, CSCO, ACN, MCD, ABT, PM,
+  #  IBM, GE, TXN, QCOM, INTU, DHR, CAT, AMGN, VZ, PFE, NEE, DIS, CMCSA,
+  #  RTX, GS, SPGI, HON, UNP, AMAT, LOW, T, BLK, BKNG, ISRG, COP, PANW,
+  #  SBUX, MS, SCHW, NKE, UBER, MU, PLTR, LRCX, INTC, BA]
+  stocks: []
   index_etfs: [SPY, QQQ]
   defensive_etfs: [IEF, GLD, SHY]     # bonds, gold, T-bills — the ballast
 
@@ -24,20 +46,52 @@ strategy:
   top_n_stocks: 6
   min_price: 10.0
   min_avg_dollar_vol: 50000000
-  regime: spy_above_200sma            # risk-on only when SPY > its 200-day SMA
+  regime: spy_above_200sma            # risk-on only when SPY > its trend SMA
+  trend_sma_days: 200                 # the length of that SMA, for BOTH the regime gate and
+                                      # the per-stock trend filter. The whole risk-reduction
+                                      # result rests on this one number, so it is a config
+                                      # value that can be swept, not a literal buried in code.
   stock_filter: above_own_200sma_and_positive_momentum
   index_trend_lookback_days: 126      # 6-month momentum splits the index sleeve
   weights:
-    risk_on:  {stocks: 0.45, index: 0.25, defensive: 0.20, cash: 0.10}
+    # Index-only: the 45% that used to chase individual names is folded into the
+    # index sleeve, giving exactly the static 70/20/10 the backtest could not beat
+    # — but with the 200-day gate on top, which is the part that cut drawdown.
+    risk_on:  {stocks: 0.00, index: 0.70, defensive: 0.20, cash: 0.10}
     risk_off: {stocks: 0.00, index: 0.00, defensive: 0.60, cash: 0.40}
   drift_band_abs: 0.015               # rebalance a position only if >1.5% off target
   cash_drag_band: 0.01                # ...but if TOTAL cash sits >1pp above its target,
                                       # relax the band on buys and put the idle cash back
                                       # to work — many sub-band underweights sum to real drag
-  min_order_notional: 25              # skip dust orders when that sweep runs
+  min_order_notional_pct: 0.0005      # skip dust orders when that sweep runs — as a
+                                      # FRACTION of equity, not dollars. $2.50 at $5k,
+                                      # $25 at $50k: identical behaviour at any size.
 
 risk:
-  max_position_weight: 0.12           # no single holding above 12%
+  max_position_weight: 0.40           # LOAD-BEARING for index-only. The 12% that
+                                      # suited a 6-name stock sleeve is fatal here:
+                                      # a 70% index sleeve over two ETFs wants ~35%
+                                      # each, and the analyzer caps then sends the
+                                      # residue to CASH rather than to the other
+                                      # ETF once both are capped. At 0.12 the book
+                                      # would hold 24% equity and 56% cash — a
+                                      # different strategy entirely, arrived at
+                                      # silently, with only a "capped at 12%" note.
+                                      # 0.40 allows a momentum tilt up to 40/30
+                                      # while still blocking an all-in on one ETF.
+                                      # Restore 0.12 if the stock sleeve comes back.
   max_equity_weight: 0.75             # stocks + index ETFs capped at 75%
   min_cash_weight: 0.05
-  kill_switch_drawdown_pct: 20.0      # -20% from start: forced risk-off + halt flag
+  kill_switch_drawdown_pct: 20.0      # -20% from starting_equity (now $5,000, so the
+                                      # floor is $4,000 — it tracks the config, the
+                                      # planner reads cfg["starting_equity"]).
+                                      # A hard inception floor: meaningful early, but
+                                      # once the book has grown it sits so far below
+                                      # market value it stops guarding drawdown at all
+                                      # — which is what the peak measure below is for.
+  kill_switch_peak_drawdown_pct: 30.0 # -30% off the high-water mark: the measure that
+                                      # still means the same thing at any size. Set
+                                      # well clear of normal behaviour — the 3y
+                                      # validation window's worst peak-to-trough is
+                                      # 19.4%, so this is ~10pp of headroom above a
+                                      # bad-but-ordinary correction.
