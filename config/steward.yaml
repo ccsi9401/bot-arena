@@ -59,6 +59,25 @@ strategy:
     # — but with the 200-day gate on top, which is the part that cut drawdown.
     risk_on:  {stocks: 0.00, index: 0.70, defensive: 0.20, cash: 0.10}
     risk_off: {stocks: 0.00, index: 0.00, defensive: 0.60, cash: 0.40}
+  index_residue_to: defensive         # where the unallocated part of the index sleeve goes.
+                                      # The sleeve is 70% across SPY+QQQ under a 40%
+                                      # per-position cap, so it only fills completely when
+                                      # BOTH are above their own 200-day. Any week QQQ is
+                                      # not — a rotation out of tech, not a crisis — SPY
+                                      # caps at 40% and 30pp is left over. "cash" (the old
+                                      # implicit behaviour) parked that in cash: a 60%
+                                      # invested book in a RISK-ON regime, invisible to
+                                      # every check we have, because the planner derives
+                                      # cash_target from these targets — target and actual
+                                      # agreed at 40% and the cash-drag sweep stayed quiet.
+                                      # "defensive" adds it to the ballast instead: ~90%
+                                      # invested, cash_target stays 10%, and the cash
+                                      # invariant keeps its meaning. Set to "cash" to
+                                      # restore the old behaviour.
+  cycle_weekday: 4                    # Monday=0 … Friday=4. The rebalance week runs from
+                                      # this weekday: a cycle is "due" once none has run
+                                      # since the most recent one. Date-based on purpose —
+                                      # see run_steward.py cycle_due().
   drift_band_abs: 0.015               # rebalance a position only if >1.5% off target
   cash_drag_band: 0.01                # ...but if TOTAL cash sits >1pp above its target,
                                       # relax the band on buys and put the idle cash back

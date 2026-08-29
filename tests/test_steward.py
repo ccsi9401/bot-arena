@@ -343,6 +343,8 @@ def run():
           not p7["orders"] and any("no live price" in n for n in p7["notes"]))
 
     index_only_targets()
+    index_residue_disposal()
+    cycle_scheduling()
 
     print(f"\n{len(FAILURES)} failures" if FAILURES else "\nALL STEWARD TESTS PASS")
     return 1 if FAILURES else 0
@@ -386,6 +388,156 @@ def index_only_targets():
           abs((1 - eq - de) - w["cash"]) < 0.005)
     check("index-only: position cap leaves room for the sleeve",
           c["risk"]["max_position_weight"] * len(idx) >= w["index"] - 1e-9)
+
+
+def index_residue_disposal():
+    """The index sleeve only fills when EVERY index ETF is above its own trend.
+
+    Regression for the 2026-08-29 finding: risk-on requires SPY above its 200-day,
+    but QQQ is under no such obligation. One leg below trend left SPY capped at 40%,
+    defensive at 20% and 40% of the book in cash — during RISK-ON — and no check
+    could see it, because the planner derives cash_target from these very targets,
+    so target and actual agreed at 40% and the cash-drag sweep stayed silent.
+    """
+    c = cfg()
+    if c["strategy"]["weights"]["risk_on"]["stocks"] > 0:
+        return
+    idx = c["universe"]["index_etfs"]
+    dfn = c["universe"]["defensive_etfs"]
+    w = c["strategy"]["weights"]["risk_on"]
+
+    def book(up_flags, residue_to):
+        cc = cfg()
+        cc["strategy"]["index_residue_to"] = residue_to
+        syms = {}
+        for s, m, up in zip(idx, (0.10, 0.15), up_flags):
+            syms[s] = {"sleeve": "index", "above_200sma": up, "mom_6m": m,
+                       "mom_12_1": m, "close": 500.0, "avg_dollar_vol_20d": 9e9}
+        for s in dfn:
+            syms[s] = {"sleeve": "defensive", "above_200sma": True, "mom_6m": 0.01,
+                       "mom_12_1": 0.01, "close": 100.0, "avg_dollar_vol_20d": 9e9}
+        # SPY defines the regime, so it must be the one held above trend.
+        syms[c["benchmark"]]["above_200sma"] = True
+        return analyze({"symbols": syms, "benchmark": cc["benchmark"],
+                        "universe_size": len(syms)}, cc)
+
+    a = book((True, False), "defensive")
+    t = a["targets"]
+    eq = sum(v for k, v in t.items() if k in idx)
+    de = sum(v for k, v in t.items() if k in dfn)
+    cash = 1 - eq - de
+
+    check("residue: regime still reads risk-on with one index leg down",
+          a["regime_on"] is True)
+    check("residue: the lagging ETF is not held", idx[1] not in t)
+    check("residue: cash stays at target instead of absorbing the sleeve",
+          abs(cash - w["cash"]) < 0.005)
+    check("residue: ballast absorbs the unfilled sleeve",
+          de > w["defensive"] + 0.05)
+    check("residue: book stays fully invested",
+          abs((eq + de) - (1 - w["cash"])) < 0.005)
+    check("residue: disposal is reported in the notes",
+          any("residue routed" in n for n in a["notes"]))
+    check("residue: nothing left stranded once routed",
+          a["index_residue_pp"] == 0)
+
+    # the old behaviour, kept available and now explicit rather than accidental
+    b = book((True, False), "cash")
+    cash_b = 1 - sum(b["targets"].values())
+    check("residue: opting back into cash still works",
+          cash_b > w["cash"] + 0.05 and b["index_residue_pp"] > 0)
+    check("residue: the cash variant says so out loud",
+          any("held as cash" in n for n in b["notes"]))
+
+    # both legs healthy — unchanged from the shipping behaviour
+    d = book((True, True), "defensive")
+    check("residue: no residue when every index leg is above trend",
+          d["index_residue_pp"] == 0
+          and abs(sum(v for k, v in d["targets"].items() if k in dfn)
+                  - w["defensive"]) < 0.005)
+
+
+def cycle_scheduling():
+    """The rebalance must be decided by state, not by what time the runner woke up.
+
+    The old workflow asked 'is it Friday, UTC hour 19 or 20?'. Hour 20 UTC is past
+    the 16:00 ET close, so market_open() rejected it: a 59-minute window per week,
+    against cron drift measured at 3.5 and 8 hours. Cycles were skipped in silence.
+    """
+    import run_steward as rs
+    from datetime import datetime
+    from core.common import ET
+
+    c = cfg()
+
+    class FakeState:
+        def __init__(self, last=None):
+            self.d = {"last_cycle": {"date_et": last} if last else {}}
+        def read(self, name, default):
+            return self.d.get(name, default)
+        def write(self, name, payload):
+            self.d[name] = payload
+
+    def at(y, m, d, hh=12):
+        return datetime(y, m, d, hh, tzinfo=ET)
+
+    # Aug 2026: 28th is a Friday, 31st the following Monday.
+    fri, sat, mon, thu = at(2026, 8, 28), at(2026, 8, 29), at(2026, 8, 31), at(2026, 9, 3)
+
+    check("anchor: Friday anchors to itself",
+          f"{rs.week_anchor(c, fri):%Y-%m-%d}" == "2026-08-28")
+    check("anchor: the weekend still belongs to Friday's week",
+          f"{rs.week_anchor(c, sat):%Y-%m-%d}" == "2026-08-28")
+    check("anchor: Monday still belongs to Friday's week",
+          f"{rs.week_anchor(c, mon):%Y-%m-%d}" == "2026-08-28")
+    check("anchor: the next Thursday is still that same week",
+          f"{rs.week_anchor(c, thu):%Y-%m-%d}" == "2026-08-28")
+
+    fresh = FakeState()
+    check("due: a bot that has never cycled is due",
+          rs.cycle_status(fresh, c, fri)["due"] is True)
+    check("due: but not OVERDUE on the day of its slot",
+          rs.cycle_status(fresh, c, fri)["overdue"] is False)
+    check("due: a missed Friday is overdue by Monday",
+          rs.cycle_status(fresh, c, mon)["overdue"] is True)
+    check("due: overdue reports how far past the slot it is",
+          rs.cycle_status(fresh, c, mon)["days_since_anchor"] == 3)
+
+    done = FakeState("2026-08-28")
+    check("due: a completed Friday closes the week",
+          rs.cycle_status(done, c, mon)["due"] is False)
+    check("due: and stays closed to the end of the week",
+          rs.cycle_status(done, c, thu)["due"] is False)
+    check("due: the next Friday opens a new week",
+          rs.cycle_status(done, c, at(2026, 9, 4))["due"] is True)
+
+    late = FakeState("2026-08-31")   # Friday missed, caught up on the Monday
+    check("due: a catchup run satisfies the week it was owed",
+          rs.cycle_status(late, c, thu)["due"] is False)
+    check("due: and does not suppress the following Friday",
+          rs.cycle_status(late, c, at(2026, 9, 4))["due"] is True)
+
+    class Clock:
+        def __init__(self, is_open): self.is_open = is_open
+        def market_open(self): return self.is_open
+
+    OPEN, SHUT = Clock(True), Clock(False)
+    check("mode: auto rebalances when one is due and the market is open",
+          rs.resolve_mode("auto", FakeState(), c, OPEN)[0] == "cycle")
+    check("mode: auto falls back to a pulse when the market is shut",
+          rs.resolve_mode("auto", FakeState(), c, SHUT)[0] == "pulse")
+    check("mode: auto pulses once the week is already done",
+          rs.resolve_mode("auto", FakeState(f"{rs.week_anchor(c):%Y-%m-%d}"),
+                          c, OPEN)[0] == "pulse")
+    check("mode: catchup does nothing when nothing was missed",
+          rs.resolve_mode("catchup", FakeState(f"{rs.week_anchor(c):%Y-%m-%d}"),
+                          c, OPEN)[0] == "noop")
+    check("mode: an explicit cycle is still forced through",
+          rs.resolve_mode("cycle", FakeState(f"{rs.week_anchor(c):%Y-%m-%d}"),
+                          c, OPEN)[0] == "cycle")
+    check("mode: an explicit pulse never rebalances",
+          rs.resolve_mode("pulse", FakeState(), c, OPEN)[0] == "pulse")
+
 
 
 if __name__ == "__main__":

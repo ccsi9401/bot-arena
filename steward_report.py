@@ -32,6 +32,20 @@ def curve_from(name: str) -> list[tuple[str, float]]:
     return sorted(by_day.items())
 
 
+def cycle_status() -> dict:
+    """Written by run_steward.py every run. A missed rebalance used to be visible
+    only as the ABSENCE of a journal folder, which is exactly the kind of nothing
+    nobody notices — the Aug 24 restart sat in cash for five days behind a report
+    that looked perfectly healthy. Now it is a line on the page."""
+    f = ROOT / "state" / "steward" / "cycle_status.json"
+    if not f.exists():
+        return {}
+    try:
+        return json.loads(f.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
 def latest_cycle() -> dict:
     runs = sorted(ROOT.glob("journal/steward_2*"), reverse=True)
     for rdir in runs:
@@ -139,6 +153,17 @@ def main() -> int:
     regime_html = ("" if regime is None else
                    f'<div class="leader">Regime: <b>{"RISK-ON" if regime else "RISK-OFF"}</b></div>')
 
+    cyc = cycle_status()
+    overdue_html = ""
+    if cyc.get("overdue"):
+        overdue_html = (
+            '<div class="panel" style="border-color:var(--crit)">'
+            '<span class="chip crit">⚠ REBALANCE OVERDUE</span> '
+            f'No cycle since <b>{html.escape(str(cyc.get("last_cycle_date_et") or "inception"))}</b> — '
+            f'the week of {html.escape(str(cyc.get("week_anchor_et", "—")))} is '
+            f'{cyc.get("days_since_anchor", "?")} day(s) past its slot. '
+            'The portfolio is drifting unmanaged.</div>')
+
     page = f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -198,6 +223,7 @@ footer{{color:var(--muted);font-size:12px;margin-top:22px}}
 <h1>STEWARD — Claude's portfolio</h1>
 <div class="sub">Updated {now_et():%b %d, %I:%M %p} ET · latest cycle
   <b>{html.escape(run.get("run_id", "—"))}</b> {halts}</div>
+{overdue_html}
 {regime_html}
 <div class="tiles">{tiles}</div>
 <h2>Portfolio vs. the benchmark</h2>
@@ -251,10 +277,17 @@ document.querySelectorAll('.chartwrap').forEach(w => {{
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(page, encoding="utf-8")
 
-    md = [f"# STEWARD — {now_et():%Y-%m-%d %H:%M} ET",
-          f"\nEquity: {f'${eq:,.0f}' if eq else '—'}",
-          f"SPY shadow: {f'${bv:,.0f}' if bv else '—'}",
-          f"Regime: {'RISK-ON' if regime else 'RISK-OFF' if regime is not None else '—'}\n"]
+    md = [f"# STEWARD — {now_et():%Y-%m-%d %H:%M} ET"]
+    if cyc.get("overdue"):
+        md.append(f"\n> **REBALANCE OVERDUE** — no cycle since "
+                  f"{cyc.get('last_cycle_date_et') or 'inception'}; the week of "
+                  f"{cyc.get('week_anchor_et')} is {cyc.get('days_since_anchor')} "
+                  f"day(s) past its slot.")
+    md += [f"\nEquity: {f'${eq:,.0f}' if eq else '—'}",
+           f"SPY shadow: {f'${bv:,.0f}' if bv else '—'}",
+           f"Regime: {'RISK-ON' if regime else 'RISK-OFF' if regime is not None else '—'}",
+           f"Last cycle: {cyc.get('last_cycle_date_et') or '—'}"
+           f"{' (OVERDUE)' if cyc.get('overdue') else ''}\n"]
     for n in analysis.get("notes", []):
         md.append(f"- {n}")
     OUT_MD.write_text("\n".join(md) + "\n", encoding="utf-8")

@@ -2,9 +2,26 @@
 """STEWARD orchestrator — Claude's portfolio manager on the 3rd paper account.
 
 Usage:
-  python run_steward.py --mode cycle   # full scan→analyze→plan→execute (Fridays)
-  python run_steward.py --mode pulse   # snapshot equity + benchmark, refresh report
+  python run_steward.py --mode auto     # cycle if this week's rebalance is still due
+                                        # and the market is open, else pulse
+  python run_steward.py --mode catchup  # cycle ONLY if a past-due rebalance was missed,
+                                        # otherwise exit without touching anything
+  python run_steward.py --mode cycle    # force the full scan→analyze→plan→execute
+  python run_steward.py --mode pulse    # snapshot equity + benchmark, refresh report
   add --dry-run to plan without placing orders
+
+Scheduling (rewritten 2026-08-29). The workflow used to decide cycle-vs-pulse from
+the UTC clock: Friday, hour 19 or 20. Hour 20 UTC is 16:00 ET — after the close — so
+market_open() rejected it, leaving a real window of 59 minutes once a week. GitHub's
+cron drifts 20-40 minutes routinely and drifted 3.5 and 8 hours in the week of Aug 24,
+so runs landed outside the window, silently downgraded themselves to a pulse, and
+committed green. Two of roughly five scheduled cycles ever fired, and the $5,000
+restart sat in 100% cash for five days with nothing anywhere saying so.
+
+The clock is no longer the authority. State records the date of the last completed
+cycle and the bot asks the only question that matters — has this week's rebalance
+happened yet? A drifted run still works, a missed Friday is picked up by the next
+weekday-morning catchup, and the pulse reports an overdue cycle instead of hiding it.
 
 Self-contained: shares only read-only imports with the traders (data layer,
 broker adapter, chart helper). SCALPEL's frozen code path is untouched.
@@ -18,6 +35,7 @@ import argparse
 import json
 import sys
 import traceback
+from datetime import datetime, timedelta
 
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.trading.requests import MarketOrderRequest
@@ -37,6 +55,79 @@ def load_cfg() -> dict:
 
 def gate_passed(state: State) -> bool:
     return bool(state.read("gate", {}).get("passed", False))
+
+
+# ---------------------------------------------------------------------------
+# Cycle scheduling — date-based, deliberately not clock-based.
+# ---------------------------------------------------------------------------
+
+def week_anchor(cfg: dict, now: datetime | None = None) -> datetime:
+    """Start of the current rebalance week: the most recent cycle weekday, 00:00 ET.
+
+    With cycle_weekday=4 (Friday): on a Friday this is today; on the following
+    Monday it is still that same Friday. So one anchor covers Friday through
+    Thursday, and 'has a cycle run since the anchor?' is a stable question no
+    matter which day or hour the runner happens to wake up on.
+    """
+    now = now or now_et()
+    target = int(cfg["strategy"].get("cycle_weekday", 4))
+    days_since = (now.weekday() - target) % 7
+    return (now - timedelta(days=days_since)).replace(
+        hour=0, minute=0, second=0, microsecond=0)
+
+
+def cycle_status(state: State, cfg: dict, now: datetime | None = None) -> dict:
+    """Everything the runner, the report and the health check need to know.
+
+    due      — no cycle has completed since this week's anchor.
+    overdue  — due AND the anchor day itself has passed, i.e. the scheduled slot
+               came and went without a rebalance. On the anchor day this is False:
+               the cycle is due but its slot has not arrived yet, which is normal
+               and must not read as a fault.
+    """
+    now = now or now_et()
+    anchor = week_anchor(cfg, now)
+    last = state.read("last_cycle", {})
+    last_date = last.get("date_et")
+    days_since_anchor = (now.date() - anchor.date()).days
+    due = (not last_date) or last_date < f"{anchor:%Y-%m-%d}"
+    return {
+        "due": due,
+        "overdue": bool(due and days_since_anchor >= 1),
+        "week_anchor_et": f"{anchor:%Y-%m-%d}",
+        "days_since_anchor": days_since_anchor,
+        "last_cycle_date_et": last_date,
+        "last_cycle_run_id": last.get("run_id"),
+        "checked_et": now.isoformat(),
+    }
+
+
+def record_cycle(state: State, run_id: str) -> None:
+    """Mark this week's rebalance done. Written only on a cycle that actually
+    reached the market — a gate skip or a closed market leaves the week still due,
+    so the next catchup retries instead of silently swallowing the week."""
+    state.write("last_cycle", {"date_et": f"{now_et():%Y-%m-%d}",
+                               "run_id": run_id, "ts_et": now_et().isoformat()})
+
+
+def resolve_mode(requested: str, state: State, cfg: dict, data: MarketData) -> tuple[str, dict]:
+    """Turn auto/catchup into a concrete cycle-or-pulse decision.
+
+    auto     — the Friday slot and manual dispatch: rebalance if one is due and the
+               market is open, otherwise just take the pulse.
+    catchup  — the weekday-morning safety net: acts ONLY on an overdue cycle, so a
+               Friday-morning run never pre-empts the Friday-afternoon slot, and a
+               week that is already done costs one no-op run.
+    """
+    status = cycle_status(state, cfg)
+    if requested in ("cycle", "pulse"):
+        return requested, status
+    want = status["overdue"] if requested == "catchup" else status["due"]
+    if want and data.market_open():
+        return "cycle", status
+    if requested == "catchup":
+        return "noop", status
+    return "pulse", status
 
 
 def ensure_benchmark(state: State, data: MarketData, cfg: dict) -> dict:
@@ -102,7 +193,8 @@ def execute(orders: list[dict], broker: AlpacaBroker) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", required=True, choices=["cycle", "pulse"])
+    ap.add_argument("--mode", default="auto",
+                    choices=["auto", "catchup", "cycle", "pulse"])
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -112,11 +204,30 @@ def main() -> int:
         data = MarketData()
         broker = AlpacaBroker(cfg["account_env_prefix"])
 
-        if args.mode == "pulse":
+        mode, status = resolve_mode(args.mode, state, cfg, data)
+        # Persist it every run, whatever the outcome: this is what makes a missed
+        # cycle visible to the report and the weekly health check instead of being
+        # something you can only infer from an absent journal folder.
+        state.write("cycle_status", {**status, "requested_mode": args.mode,
+                                     "resolved_mode": mode})
+
+        if mode == "noop":
+            print(json.dumps({"mode": "catchup", "action": "noop",
+                              "reason": ("no overdue cycle" if not status["overdue"]
+                                         else "market closed — will retry"),
+                              **status}, indent=2))
+            return 0
+
+        if mode == "pulse":
             acct = snapshot(state, broker, data, cfg, "nightly pulse")
             import steward_report
             steward_report.main()
-            print(json.dumps({"mode": "pulse", "equity": acct["equity"]}))
+            out = {"mode": "pulse", "equity": acct["equity"], **status}
+            if status["overdue"]:
+                print(f"::warning::STEWARD weekly rebalance OVERDUE — none since "
+                      f"{status['last_cycle_date_et'] or 'inception'}, week of "
+                      f"{status['week_anchor_et']} ({status['days_since_anchor']}d).")
+            print(json.dumps(out, indent=2))
             return 0
 
         # ---- full weekly cycle ----
@@ -160,14 +271,25 @@ def main() -> int:
             execution = execute(p["orders"], broker)
         journal.write("execution", execution)
 
+        # The week is done once the plan has reached the market. A dry run is a
+        # rehearsal, not a rebalance, so it deliberately leaves the week open.
+        if not args.dry_run:
+            record_cycle(state, journal.run_id)
+            state.write("cycle_status", {**cycle_status(state, cfg),
+                                         "requested_mode": args.mode,
+                                         "resolved_mode": mode})
+
         snapshot(state, broker, data, cfg, f"cycle {journal.run_id}")
         import steward_report
         steward_report.main()
         print(json.dumps({"run_id": journal.run_id, "equity": acct["equity"],
                           "regime_on": analysis["regime_on"],
+                          "index_residue_pp": analysis.get("index_residue_pp"),
                           "orders": len(p["orders"]), "placed": execution["placed"],
                           "failed": execution["failed"],
+                          "cash_target": p.get("cash_target"),
                           "projected_cash_weight": p.get("projected_cash_weight"),
+                          "cash_drag_sweep": p.get("cash_drag_sweep"),
                           "halts": p["halts"]}, indent=2))
         return 0
     except Exception:

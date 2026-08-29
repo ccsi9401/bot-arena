@@ -25,6 +25,7 @@ to trade until that file exists. Fills at close +5 bps each way.
 """
 from __future__ import annotations
 
+import copy
 import json
 import sys
 from pathlib import Path
@@ -121,6 +122,13 @@ def run(data: dict[str, pd.DataFrame], cfg: dict, start_equity: float | None = N
     cash = start_equity
     shares: dict[str, float] = {}
     curve, cash_weights, cash_gaps = {}, [], []
+    # How often does the index sleeve actually fail to fill? This is the number that
+    # decides whether index_residue_to matters at all: the sleeve is 70% across two
+    # ETFs under a 40% cap, so it only fills completely when BOTH are above their own
+    # 200-day. If that is rare the setting is a footnote; if it is common it is a
+    # different strategy on those weeks. Guessing was not good enough — count it.
+    residue_weeks = 0
+    residue_pp_sum = 0.0
     rebalances = 0
     kill = False
     peak = start_equity
@@ -132,6 +140,13 @@ def run(data: dict[str, pd.DataFrame], cfg: dict, start_equity: float | None = N
         if day in fridays:
             scan = build_scan(data, day, cfg)
             analysis = analyze(scan, cfg)
+            idx_w = sum(w for sym, w in analysis["targets"].items()
+                        if sym in cfg["universe"]["index_etfs"])
+            want_idx = cfg["strategy"]["weights"][
+                "risk_on" if analysis["regime_on"] else "risk_off"]["index"]
+            if want_idx - idx_w > 1e-6:
+                residue_weeks += 1
+                residue_pp_sum += (want_idx - idx_w) * 100
             equity = cash + sum(q * (px(s, day) or 0) for s, q in shares.items())
             prices = {s: px(s, day) for s in set(shares) | set(analysis["targets"])}
             prices = {s: p for s, p in prices.items() if p}
@@ -168,6 +183,12 @@ def run(data: dict[str, pd.DataFrame], cfg: dict, start_equity: float | None = N
         "cash_gap_worst_pp": round(float(np.max(cash_gaps)) * 100, 2) if cash_gaps else None,
         "weeks_cash_over_target_1pp": int(sum(1 for g in cash_gaps if g > 0.01)),
         "rebalance_weeks": len(cash_gaps),
+        "index_residue_weeks": residue_weeks,
+        "index_residue_weeks_pct": round(residue_weeks / len(cash_gaps) * 100, 1)
+        if cash_gaps else None,
+        "index_residue_mean_pp": round(residue_pp_sum / residue_weeks, 2)
+        if residue_weeks else 0.0,
+        "index_residue_to": cfg["strategy"].get("index_residue_to", "cash"),
     }
     return pd.Series(curve).sort_index(), rebalances, stats
 
@@ -210,9 +231,32 @@ def main() -> int:
             "sharpe_at_least_0_4": bool((s["sharpe_daily_ann"] or 0) >= 0.4)}
     passed = all(gate.values())
 
+    # ---- counterfactual: the other index_residue_to, on the SAME data ----
+    # The gate grades the shipping config and nothing else. But backtest/cache/ is
+    # gitignored, so flipping the setting and re-running tomorrow compares two
+    # different windows as much as two different strategies — the docstring at the
+    # top of backtest/data.py is explicit about that. Running both arms over the one
+    # fetch is the only way the difference means anything. A gate failure then
+    # arrives with its alternative already measured instead of costing another day.
+    alt_cfg = copy.deepcopy(cfg)
+    current = cfg["strategy"].get("index_residue_to", "cash")
+    alt_name = "cash" if current == "defensive" else "defensive"
+    alt_cfg["strategy"]["index_residue_to"] = alt_name
+    print(f"Counterfactual: index_residue_to={alt_name} on the same window...")
+    alt_curve, alt_rebalances, alt_stats = run(data, alt_cfg)
+    alt = summarize(alt_curve, f"counterfactual — index_residue_to: {alt_name}")
+    alt.update(alt_stats)
+    alt["would_pass_gate"] = bool(
+        alt["total_return_pct"] > 0 and abs(alt["max_drawdown_pct"]) < 20
+        and (alt["sharpe_daily_ann"] or 0) >= 0.4)
+    alt["rebalance_trades"] = alt_rebalances
+    alt["max_dd_delta_pp"] = round(
+        abs(s["max_drawdown_pct"]) - abs(alt["max_drawdown_pct"]), 2)
+
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "steward.json").write_text(json.dumps(
         {"summary": s, "benchmark": spy, "gate": gate, "passed": passed,
+         "counterfactual": alt,
          "rebalance_trades": rebalances, "planner_driven": True}, indent=2, default=str), encoding="utf-8")
     md = [f"# STEWARD pre-launch validation\n", f"## {s['label']}\n"]
     for k, v in s.items():
@@ -223,7 +267,15 @@ def main() -> int:
     for k, v in spy.items():
         if k != "label":
             md.append(f"- {k}: {v}")
+    md.append(f"\n## {alt['label']}\n")
+    for k, v in alt.items():
+        if k != "label":
+            md.append(f"- {k}: {v}")
     md.append(f"\n**GATE: {'PASSED' if passed else 'FAILED'}** {gate}\n")
+    if not passed:
+        md.append(f"> Counterfactual `index_residue_to: {alt_name}` "
+                  f"{'WOULD' if alt['would_pass_gate'] else 'would NOT'} pass "
+                  f"(max DD {alt['max_drawdown_pct']}% vs {s['max_drawdown_pct']}%).\n")
     (OUT / "steward_summary.md").write_text("\n".join(md), encoding="utf-8")
     print("\n".join(md))
     return 0 if passed else 1
