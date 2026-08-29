@@ -1,22 +1,45 @@
 name: steward
 on:
   schedule:
-    - cron: "0 19 * * 5"     # Friday 15:00 ET — weekly rebalance (1h buffer before the close; GitHub cron can run late)
-    - cron: "25 21 * * 1-5"  # weekdays 17:25 ET — nightly pulse (snapshot + report)
+    # The bot decides cycle-vs-pulse from state, not from the clock — these are
+    # just opportunities to run. Two independent faults cost 3 of 5 cycles: the
+    # concurrency-group eviction described below (the primary one — it killed runs
+    # before they started), and the old "Friday, UTC hour 19 or 20" mode test,
+    # which gave a 59-minute window per week because hour 20 UTC is past the 16:00
+    # ET close. Either alone was enough to lose a rebalance silently.
+    # Times are also de-conflicted from the other bots. Even with a private
+    # concurrency group these all push to main, and the fewer simultaneous pushes
+    # the less the rebase-retry loop has to earn its keep. Avoid scalpel's
+    # "30 14-19 * * 1-5" and the scoreboard's "15 21 * * 1-5".
+    - cron: "0 19 * * 5"     # Friday 15:00 ET — the scheduled weekly rebalance slot
+    - cron: "50 14 * * 1-5"  # weekdays 10:50 ET — catchup: acts only on a MISSED cycle
+    - cron: "45 21 * * 1-5"  # weekdays 17:45 ET — nightly pulse (snapshot + report)
   workflow_dispatch:
     inputs:
       mode:
-        description: "cycle (rebalance) or pulse (snapshot only)"
+        description: "auto (decide from state) · catchup · cycle (force) · pulse"
         type: choice
-        options: [pulse, cycle]
-        default: pulse
+        options: [auto, catchup, cycle, pulse]
+        default: auto
       dry_run:
         description: "Dry run (plan only, no orders)"
         type: boolean
         default: false
 
 concurrency:
-  group: arena-state
+  # STEWARD gets its OWN group. It used to share `arena-state` with scalpel,
+  # scoreboard and steward-research — and GitHub permits exactly one PENDING run
+  # per group: when a run queues behind an in-progress one, the previously pending
+  # run is CANCELLED. Scalpel runs six times a day (30 14-19), the scoreboard at
+  # 15 21; STEWARD runs weekly. It was the low-frequency workflow in a group owned
+  # by a high-frequency one, so it kept getting evicted from the queue before
+  # Python ever started — which is why a missed cycle left no journal folder AND
+  # no steward_error_*.json: there was nothing running to write one.
+  #
+  # The shared group was protecting against concurrent pushes to main. That job is
+  # already done properly by the commit step's `git pull --rebase -X theirs` retry
+  # loop (hardened 2026-08-07). Belt-and-braces cost us the trousers.
+  group: arena-state-steward
   cancel-in-progress: false
 
 jobs:
@@ -42,17 +65,16 @@ jobs:
           MODE="${{ inputs.mode }}"
           DRY="${{ inputs.dry_run && '--dry-run' || '' }}"
           if [ -z "$MODE" ]; then
-            # Friday afternoon (delay-tolerant): hour 19 OR 20 UTC counts as the
-            # weekly cycle — GitHub cron regularly fires 20-40 min late, and on
-            # Aug 7 that turned the first cycle into a pulse. Anything else: pulse.
-            H="$(date -u +%H)"
-            if [ "$(date -u +%u)" = "5" ] && { [ "$H" = "19" ] || [ "$H" = "20" ]; }; then
-              MODE=cycle
-            else
-              MODE=pulse
-            fi
+            # Which cron woke us decides only which QUESTION to ask; whether a
+            # rebalance actually happens is settled in Python against recorded
+            # state, where it is testable and immune to cron drift.
+            case "${{ github.event.schedule }}" in
+              "0 19 * * 5")    MODE=auto ;;     # Friday slot: rebalance if still due
+              "50 14 * * 1-5") MODE=catchup ;;  # morning: only if a cycle was MISSED
+              *)               MODE=pulse ;;    # evening: snapshot only
+            esac
           fi
-          echo "mode=$MODE"
+          echo "requested mode=$MODE (schedule='${{ github.event.schedule }}')"
           python run_steward.py --mode "$MODE" $DRY
       - name: Publish steward phone page
         if: always()
