@@ -91,12 +91,20 @@ immature (< 24 stride samples) both paths **fall back to the 200SMA gate**.
 **Why it ships dark:** 10y walk-forward A/B (2026-08-29, real data, 5 bps slip)
 — 200SMA gate +63.3% / DD −24.7% / Sharpe 0.45 vs markov2 +49.8% / DD −34.2% /
 Sharpe 0.43. Markov2 wins only the recent 5y slice (+19.3% vs +15.9%) with worse
-DD — recent-window shine, not evidence. It stays off by default, but since
-2026-08-29 `regime_filter` IS a learner grid dimension: the monthly learner may
-promote markov2 only if a candidate clears all four bars (gate, noise floor,
-fold consistency, holdout) against the incumbent. Inside the learner's 5y window
-a markov2 candidate uses the 200SMA fallback until the matrix matures (~first
-3y), exactly as live would. Tests: `tests/test_markov2.py`.
+DD — recent-window shine, not evidence. Same day, `regime_filter` joined the
+learner grid: the monthly learner may promote markov2 only if a candidate clears
+all four bars (gate, noise floor, fold consistency, holdout) against the
+incumbent. Inside the learner's 5y window a markov2 candidate uses the 200SMA
+fallback until the matrix matures (~first 3y), exactly as live would. Tests:
+`tests/test_markov2.py`.
+
+**Promoted 2026-08-29** (manual learner run at the user's call, not a hand-edit):
+the seed-202608 sweep's winner — markov2 gate, RSI2 < 5, 3.0×ATR stop, trail
+3.5×ATR, 10-day time stop — cleared all four bars (selection Sharpe 1.26 vs
+noise floor 0.63, 4/4 yearly folds, holdout Sharpe 2.26 vs incumbent 1.31) and
+is now the live config. The 28-day cooldown shields it until 2026-09-26, so the
+Sep 1 scheduled run is evaluate-only. Reflection compares live fills against
+this winner's 559 reference trades (`reports/glider_learn/reference_trades.json`).
 
 ## Sizing note at $5k
 
