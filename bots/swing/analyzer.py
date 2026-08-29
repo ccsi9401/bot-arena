@@ -3,12 +3,21 @@
 Input: scan.json + config + current open positions (symbol, entry, stop, age, order ids)
 passed as context so it can emit exit/management intents. Entry logic itself uses only
 the scan. Deterministic; sizing in validator.
+
+Exit modes (strategy.exit_mode):
+  target — fixed take-profit at target_r_mult × initial risk (original behaviour)
+  trail  — chandelier: stop ratchets up to close − trail_atr_mult × ATR14, never down;
+           the bracket's take-profit leg is parked far away (trail_target_r_mult × R)
+           so winners are cut by the trailing stop, not a fixed cap.
+Both modes keep the +breakeven_at_r breakeven ratchet and the time stop.
 """
 from __future__ import annotations
 
 
 def analyze(scan: dict, cfg: dict, open_positions: list[dict]) -> dict:
     s = cfg["strategy"]
+    exit_mode = s.get("exit_mode", "target")
+    trail_mult = float(s.get("trail_atr_mult", 3.0))
     intents: list[dict] = []
     notes: list[str] = []
     held = {p["symbol"] for p in open_positions}
@@ -30,12 +39,22 @@ def analyze(scan: dict, cfg: dict, open_positions: list[dict]) -> dict:
             intents.append({"action": "close", "symbol": p["symbol"],
                             "reasoning": f"Time stop: held {p['age_days']}d ≥ {s['max_hold_days']}d."})
             continue
+        new_stop = p["stop"]
+        why: list[str] = []
         # breakeven ratchet
-        if r > 0 and f["close"] >= p["entry"] + s["breakeven_at_r"] * r and p["stop"] < p["entry"]:
+        if r > 0 and f["close"] >= p["entry"] + s["breakeven_at_r"] * r and new_stop < p["entry"]:
+            new_stop = p["entry"]
+            why.append(f"+{s['breakeven_at_r']}R reached (close {f['close']:.2f}); stop → breakeven")
+        # chandelier trail
+        if exit_mode == "trail":
+            trail = f["close"] - trail_mult * f["atr14"]
+            if trail > new_stop:
+                new_stop = trail
+                why.append(f"trail {trail_mult}xATR={f['atr14']:.2f} below close {f['close']:.2f}")
+        if new_stop > p["stop"] + 0.005:
             intents.append({"action": "raise_stop", "symbol": p["symbol"],
-                            "new_stop": round(p["entry"], 2),
-                            "reasoning": f"+{s['breakeven_at_r']}R reached "
-                                         f"(close {f['close']:.2f}); stop → breakeven."})
+                            "new_stop": round(new_stop, 2),
+                            "reasoning": "; ".join(why) + "."})
 
     # ---- new entries ----
     candidates = []
@@ -56,6 +75,8 @@ def analyze(scan: dict, cfg: dict, open_positions: list[dict]) -> dict:
                 if stop >= f["close"]:
                     continue
                 rps = f["close"] - stop
+                tgt_mult = (s.get("trail_target_r_mult", 8.0) if exit_mode == "trail"
+                            else s["target_r_mult"])
                 # prefer stronger trends: distance above 200sma, tempered by pullback depth
                 trend_strength = (f["close"] - f["sma200"]) / f["sma200"]
                 candidates.append({
@@ -63,12 +84,13 @@ def analyze(scan: dict, cfg: dict, open_positions: list[dict]) -> dict:
                     "symbol": sym,
                     "entry_limit": round(f["close"] * 1.002, 2),
                     "stop": round(stop, 2),
-                    "target": round(f["close"] + s["target_r_mult"] * rps, 2),
+                    "target": round(f["close"] + tgt_mult * rps, 2),
                     "score": trend_strength,
                     "reasoning": (
                         f"Uptrend (50>200 SMA, {f['pct_below_52wk_high']:.1f}% off 52wk high), "
                         f"pullback trigger RSI2={f['rsi2']:.1f} / EMA20 touch. "
-                        f"Stop {s['stop_atr_mult']}xATR={f['atr14']:.2f} below close {f['close']:.2f}."
+                        f"Stop {s['stop_atr_mult']}xATR={f['atr14']:.2f} below close {f['close']:.2f}; "
+                        f"exit_mode={exit_mode}."
                     ),
                     "checks": checks,
                 })

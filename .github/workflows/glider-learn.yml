@@ -1,0 +1,57 @@
+name: glider-learn
+on:
+  schedule:
+    - cron: "0 12 1 * *"      # 1st of every month, 08:00 ET — market closed or not, it only needs history
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Evaluate only, never write config"
+        type: boolean
+        default: false
+      max_candidates:
+        description: "Cap on candidates (blank = config value)"
+        type: string
+        default: ""
+
+concurrency:
+  group: arena-state
+  cancel-in-progress: false
+
+jobs:
+  learn:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Run learner
+        run: |
+          python backtest/glider_learn.py \
+            ${{ inputs.dry_run && '--dry-run' || '' }} \
+            ${{ inputs.max_candidates != '' && format('--max-candidates {0}', inputs.max_candidates) || '' }}
+      - name: Commit config + report + history
+        if: always()
+        run: |
+          git config user.name "glider-learner"
+          git config user.email "bots@arena.local"
+          git add config/glider.yaml state/glider reports/glider_learn || true
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+            exit 0
+          fi
+          git commit -m "glider learn $(date -u +%Y%m%d)"
+          for i in 1 2 3; do
+            if git pull --rebase -X theirs origin main && git push origin main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 5))
+          done
+          echo "::error::could not push after 3 attempts"
+          exit 1

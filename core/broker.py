@@ -81,6 +81,23 @@ class AlpacaBroker:
                  "order_class": str(o.order_class) if o.order_class else None}
                 for o in orders]
 
+    def filled_orders(self, limit: int = 500) -> list[dict]:
+        """Every FILLED order incl. bracket legs — used by glider_reflect.py."""
+        orders = self.trading.get_orders(
+            GetOrdersRequest(status=QueryOrderStatus.CLOSED, limit=limit, nested=True))
+        flat = []
+        stack = list(orders)
+        while stack:
+            o = stack.pop()
+            stack.extend(getattr(o, "legs", None) or [])
+            if "filled" in str(o.status).lower() and o.filled_avg_price and o.filled_at:
+                flat.append({"id": str(o.id), "symbol": o.symbol,
+                             "side": "buy" if "buy" in str(o.side).lower() else "sell",
+                             "filled_qty": float(o.filled_qty or 0),
+                             "price": float(o.filled_avg_price),
+                             "filled_at": o.filled_at.isoformat()})
+        return flat
+
     def fractionable(self, symbols: list[str]) -> dict[str, bool]:
         """Which symbols Alpaca will accept fractional/notional orders for.
 

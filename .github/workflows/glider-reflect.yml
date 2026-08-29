@@ -1,0 +1,53 @@
+name: glider-reflect
+on:
+  schedule:
+    - cron: "0 11 * * 6"      # Saturdays 07:00 ET
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Evaluate only, never write config"
+        type: boolean
+        default: false
+
+concurrency:
+  group: arena-state
+  cancel-in-progress: false
+
+jobs:
+  reflect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Run reflection
+        env:
+          GLIDER_API_KEY: ${{ secrets.GLIDER_API_KEY }}
+          GLIDER_API_SECRET: ${{ secrets.GLIDER_API_SECRET }}
+        run: python glider_reflect.py ${{ inputs.dry_run && '--dry-run' || '' }}
+      - name: Commit config + state
+        if: always()
+        run: |
+          git config user.name "glider-reflect"
+          git config user.email "bots@arena.local"
+          git add config/glider.yaml state/glider || true
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+            exit 0
+          fi
+          git commit -m "glider reflect $(date -u +%Y%m%d)"
+          for i in 1 2 3; do
+            if git pull --rebase -X theirs origin main && git push origin main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 5))
+          done
+          echo "::error::could not push after 3 attempts"
+          exit 1

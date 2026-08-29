@@ -1,8 +1,8 @@
-# GLIDER — swing trend-pullback bot
+# GLIDER — swing trend-pullback bot (self-learning, gated)
 bot: glider
 execution_broker: alpaca
 account_env_prefix: GLIDER           # GLIDER_API_KEY / GLIDER_API_SECRET
-starting_equity: 50000
+starting_equity: 5000                # run 1: $5k, work up as it earns it
 
 schedule:
   cycles_et: ["15:30"]
@@ -11,22 +11,38 @@ strategy:
   regime_filter: spy_above_200sma    # no new entries in bear regime
   sma_fast: 50
   sma_slow: 200
-  max_pct_below_52wk_high: 15
-  pullback_rsi2_max: 10              # RSI(2) < 10, OR touch of 20EMA
+  max_pct_below_52wk_high: 15        # learnable
+  pullback_rsi2_max: 10              # learnable — RSI(2) < X, OR touch of 20EMA
   ema_touch_period: 20
   atr_period: 14
-  stop_atr_mult: 2.0
-  target_r_mult: 2.0
-  breakeven_at_r: 1.0                # move stop to breakeven at +1R
-  max_hold_days: 15
+  stop_atr_mult: 2.0                 # learnable — initial stop distance
+  exit_mode: target                  # learnable — "target" (fixed R) or "trail" (chandelier)
+  target_r_mult: 2.0                 # learnable — used when exit_mode: target
+  trail_atr_mult: 3.0                # learnable — used when exit_mode: trail
+  trail_target_r_mult: 8.0           # far take-profit leg so the bracket is valid in trail mode
+  breakeven_at_r: 1.0                # move stop to breakeven at +1R (both modes)
+  max_hold_days: 15                  # learnable
   min_price: 10.0
   min_avg_dollar_vol: 50000000
 
 risk:
-  risk_per_trade_pct: 0.9
+  risk_per_trade_pct: 0.9            # reflection may scale this (see learning.base_risk_pct)
   max_positions: 5
   max_gross_exposure_pct: 100
   daily_loss_limit_pct: null         # swing bot has no daily breaker
   kill_switch_drawdown_pct: 15.0
   data_freshness_minutes: 60
   limit_price_tolerance_pct: 1.0
+
+learning:
+  enabled: true                      # set false to freeze both the learner and reflection
+  history_period: 5y                 # daily history the learner fetches
+  holdout_days: 252                  # most recent year is never used for ranking
+  min_days_between_changes: 28
+  max_candidates: 400                # random subset of the grid per run (incumbent always included)
+  min_fold_win_frac: 0.67            # must beat incumbent in ≥ 2/3 of calendar-year folds
+  noise_floor_sigmas: 1.0            # must beat incumbent Sharpe by ≥ this × bootstrap std
+  bootstrap_samples: 300
+  base_risk_pct: 0.9                 # reflection restores to this when live matches backtest
+  min_live_trades: 30                # reflection does nothing before this many closed trades
+  underperform_pctile: 5             # live mean < this pctile of backtest bootstrap → halve risk
