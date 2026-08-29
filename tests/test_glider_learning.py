@@ -76,6 +76,8 @@ def test_engine_runs_and_learner_pieces():
     assert bootstrap_sharpe_std(curve, 50) >= 0
     c = candidates_from_grid(cfg["strategy"], 20, 1)
     assert len(c) == 20 and all("exit_mode" in s for s in c)
+    full_grid = candidates_from_grid(cfg["strategy"], 10_000, 1)
+    assert {s["regime_filter"] for s in full_grid} == {"spy_above_200sma", "markov2"}
     # trail mode also runs end-to-end
     curve2, trades2 = eg.run(data, _cfg(exit_mode="trail"))
     assert len(curve2) == len(curve)

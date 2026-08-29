@@ -48,6 +48,7 @@ REPORT_DIR = ROOT / "reports" / "glider_learn"
 
 # ---- the search space ------------------------------------------------------------
 GRID = {
+    "regime_filter":           ["spy_above_200sma", "markov2"],
     "pullback_rsi2_max":       [5, 10, 15],
     "max_pct_below_52wk_high": [10, 15, 25],
     "stop_atr_mult":           [1.5, 2.0, 2.5, 3.0],
@@ -55,8 +56,9 @@ GRID = {
     "exit":                    [("target", 1.5), ("target", 2.0), ("target", 3.0),
                                 ("trail", 2.5), ("trail", 3.5)],
 }
-LEARNABLE = ["pullback_rsi2_max", "max_pct_below_52wk_high", "stop_atr_mult",
-             "max_hold_days", "exit_mode", "target_r_mult", "trail_atr_mult"]
+LEARNABLE = ["regime_filter", "pullback_rsi2_max", "max_pct_below_52wk_high",
+             "stop_atr_mult", "max_hold_days", "exit_mode", "target_r_mult",
+             "trail_atr_mult"]
 
 
 def candidates_from_grid(base: dict, max_n: int, seed: int) -> list[dict]:

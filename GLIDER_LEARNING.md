@@ -20,10 +20,12 @@ Freeze everything with `learning.enabled: false` (e.g. during a competition roun
 
 ## Learnable knobs and the search grid
 
-`pullback_rsi2_max` {5,10,15} · `max_pct_below_52wk_high` {10,15,25} · `stop_atr_mult`
-{1.5,2,2.5,3} · `max_hold_days` {10,15,25} · exit ∈ {target 1.5R, 2R, 3R, trail 2.5×ATR,
-trail 3.5×ATR} — 540 combos; `learning.max_candidates` random-samples them per run
-(seed = year-month, so a run is reproducible).
+`regime_filter` {spy_above_200sma, markov2} · `pullback_rsi2_max` {5,10,15} ·
+`max_pct_below_52wk_high` {10,15,25} · `stop_atr_mult` {1.5,2,2.5,3} ·
+`max_hold_days` {10,15,25} · exit ∈ {target 1.5R, 2R, 3R, trail 2.5×ATR,
+trail 3.5×ATR} — 1080 combos; `learning.max_candidates` random-samples them per run
+(seed = year-month, so a run is reproducible; 400 of 1080 ≈ 37% coverage per run,
+rotating monthly).
 
 **New: `exit_mode: trail`.** A chandelier stop (`close − trail_atr_mult × ATR14`, ratchets
 up only) replaces the fixed take-profit; the bracket's TP leg is parked at
@@ -89,8 +91,12 @@ immature (< 24 stride samples) both paths **fall back to the 200SMA gate**.
 **Why it ships dark:** 10y walk-forward A/B (2026-08-29, real data, 5 bps slip)
 — 200SMA gate +63.3% / DD −24.7% / Sharpe 0.45 vs markov2 +49.8% / DD −34.2% /
 Sharpe 0.43. Markov2 wins only the recent 5y slice (+19.3% vs +15.9%) with worse
-DD — recent-window shine, not evidence. It stays a config option (and a possible
-future learner dimension), not the default. Tests: `tests/test_markov2.py`.
+DD — recent-window shine, not evidence. It stays off by default, but since
+2026-08-29 `regime_filter` IS a learner grid dimension: the monthly learner may
+promote markov2 only if a candidate clears all four bars (gate, noise floor,
+fold consistency, holdout) against the incumbent. Inside the learner's 5y window
+a markov2 candidate uses the 200SMA fallback until the matrix matures (~first
+3y), exactly as live would. Tests: `tests/test_markov2.py`.
 
 ## Sizing note at $5k
 
