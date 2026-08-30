@@ -10,7 +10,12 @@ on:
         default: false
 
 concurrency:
-  group: arena-state
+  # Own group, per STEWARD's postmortem in steward.yml: GitHub keeps ONE pending
+  # run per group and cancels the rest. glider-cycle fires at 19:30 UTC — the
+  # same minute as scalpel's last cycle AND the cron-job.org bell-ringer — so in
+  # the shared arena-state group the daily GLIDER run could be silently evicted.
+  # Concurrent pushes to main are handled by the commit step's rebase-retry loop.
+  group: arena-state-glider
   cancel-in-progress: false
 
 jobs:
@@ -39,6 +44,21 @@ jobs:
       - name: Refresh dashboard
         if: always()
         run: python dashboard.py || true
+      - name: Publish glider phone page
+        if: always()
+        env:
+          BOARD_TOKEN: ${{ secrets.BOARD_TOKEN }}
+        run: |
+          if [ -z "$BOARD_TOKEN" ]; then echo "no BOARD_TOKEN secret; skipping"; exit 0; fi
+          python glider_board.py
+          git clone --depth 1 "https://x-access-token:${BOARD_TOKEN}@github.com/ccsi9401/bot-arena-board.git" /tmp/boardrepo
+          cp board/glider.html /tmp/boardrepo/glider.html
+          cd /tmp/boardrepo
+          git config user.name "glider-bot"
+          git config user.email "bots@arena.local"
+          git add glider.html
+          git diff --cached --quiet || git commit -m "glider board $(date -u +%Y%m%d-%H%M)"
+          git push
       - name: Commit journal + state
         if: always()
         run: |

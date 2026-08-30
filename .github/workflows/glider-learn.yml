@@ -14,7 +14,9 @@ on:
         default: ""
 
 concurrency:
-  group: arena-state
+  # Shares GLIDER's private group (see glider.yml) — out of arena-state so the
+  # high-frequency workflows there can never evict a queued GLIDER run.
+  group: arena-state-glider
   cancel-in-progress: false
 
 jobs:
