@@ -1,0 +1,4 @@
+{
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/bot-arena/bot-arena/run_cycle.py\", line 85, in main\n    data = MarketData()\n           ^^^^^^^^^^^^\n  File \"/home/runner/work/bot-arena/bot-arena/core/data.py\", line 27, in __init__\n    key = os.environ.get(\"DATA_API_KEY\") or os.environ[\"SCALPEL_API_KEY\"]\n                                            ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^\n  File \"<frozen os>\", line 679, in __getitem__\nKeyError: 'SCALPEL_API_KEY'\n",
+  "_written_et": "2026-08-29T20:18:28.254530-04:00"
+}
