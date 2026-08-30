@@ -30,6 +30,10 @@ jobs:
         env:
           GLIDER_API_KEY: ${{ secrets.GLIDER_API_KEY }}
           GLIDER_API_SECRET: ${{ secrets.GLIDER_API_SECRET }}
+          # core/data.py wants DATA_API_KEY or falls back to SCALPEL_API_KEY;
+          # alias GLIDER's own pair so this workflow depends on no other bot's secrets
+          DATA_API_KEY: ${{ secrets.GLIDER_API_KEY }}
+          DATA_API_SECRET: ${{ secrets.GLIDER_API_SECRET }}
         run: |
           python run_cycle.py --bot glider ${{ inputs.dry_run && '--dry-run' || '' }}
       - name: Refresh dashboard
