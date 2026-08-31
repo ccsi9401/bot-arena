@@ -1,0 +1,47 @@
+{
+  "results": [
+    {
+      "id": "bd0b9d5c-c2a8-44d8-9961-527b8345e4df",
+      "symbol": "XBI",
+      "qty": 3,
+      "status": "OrderStatus.PENDING_NEW",
+      "action": "buy",
+      "ok": true
+    },
+    {
+      "id": "3af69ceb-b3d6-462e-874c-0c2ce49d482f",
+      "symbol": "KO",
+      "qty": 10,
+      "status": "OrderStatus.PENDING_NEW",
+      "action": "buy",
+      "ok": true
+    },
+    {
+      "id": "fffddb76-2dd1-425e-a164-1da1b4e6d04e",
+      "symbol": "AAPL",
+      "qty": 2,
+      "status": "OrderStatus.PENDING_NEW",
+      "action": "buy",
+      "ok": true
+    },
+    {
+      "id": "394af3d0-d227-4394-9af5-62b3da26f1e2",
+      "symbol": "XOM",
+      "qty": 4,
+      "status": "OrderStatus.PENDING_NEW",
+      "action": "buy",
+      "ok": true
+    },
+    {
+      "id": "7f19913c-d630-46f4-a439-f6b66064dcd3",
+      "symbol": "XLV",
+      "qty": 5,
+      "status": "OrderStatus.PENDING_NEW",
+      "action": "buy",
+      "ok": true
+    }
+  ],
+  "placed": 5,
+  "failed": 0,
+  "_written_et": "2026-08-31T15:30:32.122344-04:00"
+}

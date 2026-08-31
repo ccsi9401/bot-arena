@@ -1,0 +1,102 @@
+{
+  "approved": [
+    {
+      "action": "buy",
+      "symbol": "XBI",
+      "entry_limit": 161.73,
+      "stop": 148.7,
+      "target": 263.07,
+      "score": 0.20136682363851666,
+      "reasoning": "Uptrend (50>200 SMA, 4.8% off 52wk high), pullback trigger RSI2=8.6 / EMA20 touch. Stop 3.0xATR=4.24 below close 161.41; exit_mode=trail.",
+      "checks": {
+        "uptrend": true,
+        "near_high": true,
+        "pullback": true
+      },
+      "qty": 3,
+      "notional": 485.19,
+      "risk_dollars": 39.09
+    },
+    {
+      "action": "buy",
+      "symbol": "KO",
+      "entry_limit": 89.01,
+      "stop": 84.55,
+      "target": 123.09,
+      "score": 0.13727001424948232,
+      "reasoning": "Uptrend (50>200 SMA, 3.4% off 52wk high), pullback trigger RSI2=20.9 / EMA20 touch. Stop 3.0xATR=1.43 below close 88.83; exit_mode=trail.",
+      "checks": {
+        "uptrend": true,
+        "near_high": true,
+        "pullback": true
+      },
+      "qty": 10,
+      "notional": 890.1,
+      "risk_dollars": 44.6
+    },
+    {
+      "action": "buy",
+      "symbol": "AAPL",
+      "entry_limit": 316.77,
+      "stop": 294.58,
+      "target": 488.58,
+      "score": 0.11795408408552306,
+      "reasoning": "Uptrend (50>200 SMA, 7.0% off 52wk high), pullback trigger RSI2=48.2 / EMA20 touch. Stop 3.0xATR=7.19 below close 316.13; exit_mode=trail.",
+      "checks": {
+        "uptrend": true,
+        "near_high": true,
+        "pullback": true
+      },
+      "qty": 2,
+      "notional": 633.54,
+      "risk_dollars": 44.38
+    },
+    {
+      "action": "buy",
+      "symbol": "XOM",
+      "entry_limit": 160.47,
+      "stop": 149.96,
+      "target": 241.67,
+      "score": 0.11328906708774461,
+      "reasoning": "Uptrend (50>200 SMA, 6.6% off 52wk high), pullback trigger RSI2=78.1 / EMA20 touch. Stop 3.0xATR=3.40 below close 160.15; exit_mode=trail.",
+      "checks": {
+        "uptrend": true,
+        "near_high": true,
+        "pullback": true
+      },
+      "qty": 4,
+      "notional": 641.88,
+      "risk_dollars": 42.04
+    },
+    {
+      "action": "buy",
+      "symbol": "XLV",
+      "entry_limit": 171.05,
+      "stop": 163.01,
+      "target": 232.28,
+      "score": 0.1015385469125012,
+      "reasoning": "Uptrend (50>200 SMA, 2.8% off 52wk high), pullback trigger RSI2=6.8 / EMA20 touch. Stop 3.0xATR=2.57 below close 170.71; exit_mode=trail.",
+      "checks": {
+        "uptrend": true,
+        "near_high": true,
+        "pullback": true
+      },
+      "qty": 5,
+      "notional": 855.25,
+      "risk_dollars": 40.2
+    }
+  ],
+  "rejected": [],
+  "halts": [],
+  "account_snapshot": {
+    "equity": 5000.0,
+    "cash": 5000.0,
+    "last_equity": 5000.0,
+    "buying_power": 20000.0,
+    "status": "AccountStatus.ACTIVE",
+    "gross_after": 3505.96,
+    "drawdown_pct": 0.0,
+    "day_pl_pct": 0.0
+  },
+  "_written_et": "2026-08-31T15:30:31.971154-04:00"
+}
