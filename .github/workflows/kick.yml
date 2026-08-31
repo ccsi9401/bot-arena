@@ -25,7 +25,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          for wf in $(jq -r '.workflows[]' ops/kick.json); do
-            echo "dispatching $wf"
-            gh workflow run "$wf" -R "$GITHUB_REPOSITORY"
+          # entries may carry dispatch args, e.g. "steward.yml -f mode=pulse" —
+          # $spec is word-split on purpose
+          jq -r '.workflows[]' ops/kick.json | while IFS= read -r spec; do
+            [ -z "$spec" ] && continue
+            echo "dispatching $spec"
+            gh workflow run $spec -R "$GITHUB_REPOSITORY"
           done

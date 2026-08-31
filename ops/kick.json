@@ -1,4 +1,4 @@
 {
-  "workflows": ["steward.yml"],
-  "reason": "2026-08-31: run the weekly rebalance missed in the cron blackout (cycle_status due=true) today, in-hours, mode=auto by default"
+  "workflows": ["bell.yml -f bucket_override=15:30"],
+  "reason": "2026-08-31: dry-verify the bell case table (15:30 weekday bucket should ring scalpel + glider, dispatching nothing)"
 }

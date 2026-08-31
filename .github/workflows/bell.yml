@@ -1,0 +1,67 @@
+name: bell
+# The ONE external heartbeat. GitHub's own cron for this repo died 2026-08-29
+# (re-arm b1ff9dd did not revive it), so cron-job.org rings THIS workflow every
+# 15 minutes (the former glider-only ringer, repointed — same stored PAT), and
+# bell dispatches whatever is due at that ET quarter-hour. The full schedule
+# lives in the case table below, versioned and DST-proof (TZ=America/New_York),
+# instead of spread across eight cron-job.org entries.
+#
+# workflow_dispatch ONLY, on purpose: a schedule: here would double-fire every
+# bucket if GitHub cron ever heals. The bots keep their own (currently dead)
+# schedule: blocks as a freebie if that day comes.
+#
+# Times mirror the bots' original UTC crons (steward catchup 10:50 ET rounds to
+# the 10:45 bucket; mode=catchup reads state, so 5 minutes early is immaterial).
+on:
+  workflow_dispatch:
+    inputs:
+      bucket_override:
+        description: "Test hook: pretend the ET bucket is this (e.g. 15:30); always implies dry run"
+        type: string
+        default: ""
+      dry_run:
+        description: "Echo what would ring, dispatch nothing"
+        type: boolean
+        default: false
+
+permissions:
+  actions: write
+
+concurrency:
+  group: bell
+  cancel-in-progress: false
+
+jobs:
+  ring:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch whatever is due at this ET quarter-hour
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OVERRIDE: ${{ inputs.bucket_override }}
+          DRY: ${{ (inputs.dry_run || inputs.bucket_override != '') && 'y' || 'n' }}
+        run: |
+          set -euo pipefail
+          export TZ=America/New_York
+          DOW=$(date +%u); DOM=$(date +%d)
+          NOW="$(date +%H):$(printf '%02d' $(( (10#$(date +%M) / 15) * 15 )))"
+          if [ -n "$OVERRIDE" ]; then NOW="$OVERRIDE"; fi
+          WD=n; [ "$DOW" -le 5 ] && WD=y
+          echo "bell: ET $(date '+%F %T') dow=$DOW dom=$DOM -> bucket $NOW weekday=$WD dry=$DRY"
+          ring() {
+            echo "  ring: $*"
+            [ "$DRY" = y ] && return 0
+            gh workflow run "$@" -R "$GITHUB_REPOSITORY"
+          }
+          case "$WD:$NOW" in
+            y:10:30|y:11:30|y:12:30|y:13:30|y:14:30|y:15:30) ring scalpel.yml ;;&
+            y:15:30) ring glider.yml ;;&
+            y:10:45) ring steward.yml -f mode=catchup ;;&
+            y:17:15) ring scoreboard.yml ;;&
+            y:17:45) ring steward.yml -f mode=pulse ;;&
+          esac
+          [ "$DOW" = 5 ] && [ "$NOW" = "15:00" ] && ring steward.yml -f mode=auto
+          [ "$DOW" = 6 ] && [ "$NOW" = "07:00" ] && ring glider-reflect.yml
+          [ "$DOM" = "01" ] && [ "$NOW" = "08:00" ] && ring glider-learn.yml
+          echo "bell: done"
