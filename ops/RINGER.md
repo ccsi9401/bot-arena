@@ -16,13 +16,16 @@ no glider session, no scoreboard, no learner.
 
 | Token | Lives in | Expires | Purpose |
 |---|---|---|---|
-| ringer PAT | cron-job.org job header | **2026-11-06** | dispatch bell.yml |
-| BOARD_TOKEN | bot-arena Actions secret | check: same PAT? | push phone boards to bot-arena-board |
+| `arena-2027` (fine-grained: bot-arena + bot-arena-board; Actions RW + Contents RW) | 1) cron-job.org bell job `Authorization` header, 2) bot-arena Actions secret `BOARD_TOKEN` | **2027-08-31** | both duties: dispatch bell.yml + push phone boards |
 
-If your GitHub account has only one PAT, BOARD_TOKEN is the same token and
-BOTH die 2026-11-06 — the boards would stop publishing silently (the
-workflows `|| exit 0` around board pushes... they don't: a bad token fails
-the git push step). Rotate both in the same sitting.
+Consolidated 2026-08-31: the old pair — `bell-ringer` (fine-grained, was to
+die 2026-11-06) and `board publisher` (classic public_repo, was to die
+2026-11-03) — were replaced by this single token and deleted. The calendar
+reminder lives on 2027-08-27. One token, one bell job, one reminder.
+Also deleted the same day: three orphan cron-job.org jobs (`ring scoreboard`,
+`ring steward pulse`, `ring steward friday cycle`) that predated bell — two
+had been failing with HTTP errors since creation and one would have
+double-run the scoreboard daily alongside bell's 17:15 bucket.
 
 ## Rotating the ringer PAT
 

@@ -1,4 +1,4 @@
 {
   "workflows": ["scoreboard.yml"],
-  "reason": "2026-08-31: tonight's 17:15 ET scoreboard bucket passed before the ringer repoint landed (bell never back-fills missed buckets) - run it once manually"
+  "reason": "2026-08-31: verify the rotated BOARD_TOKEN (arena-2027) end-to-end - scoreboard is the on-demand workflow that pushes to bot-arena-board"
 }
