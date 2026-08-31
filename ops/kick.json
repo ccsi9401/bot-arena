@@ -1,0 +1,4 @@
+{
+  "workflows": ["steward.yml"],
+  "reason": "2026-08-31: run the weekly rebalance missed in the cron blackout (cycle_status due=true) today, in-hours, mode=auto by default"
+}

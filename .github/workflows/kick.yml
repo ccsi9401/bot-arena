@@ -1,0 +1,31 @@
+name: kick
+# Manual dispatch relay. GitHub's cron scheduler for this repo went silent on
+# 2026-08-29 (see the re-arm commit b1ff9dd), and workflow_dispatch via API/UI
+# needs a token or a browser the operator's machine may not have handy. Pushing
+# an edit to ops/kick.json fires this workflow, which dispatches each workflow
+# named there using the run's own GITHUB_TOKEN — workflow_dispatch is one of
+# the two event types the stock token is allowed to create (the
+# no-recursive-runs rule explicitly exempts it).
+# The bots' own journal pushes can never fire this: they don't touch
+# ops/kick.json, and GITHUB_TOKEN pushes don't create push runs anyway.
+on:
+  push:
+    paths: ["ops/kick.json"]
+
+permissions:
+  actions: write
+
+jobs:
+  kick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Dispatch listed workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for wf in $(jq -r '.workflows[]' ops/kick.json); do
+            echo "dispatching $wf"
+            gh workflow run "$wf" -R "$GITHUB_REPOSITORY"
+          done
