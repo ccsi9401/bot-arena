@@ -1,6 +1,7 @@
 name: glider-cycle
 on:
   schedule:
+    # re-armed 2026-08-31: repo crons went silent after 8/29 03:09Z (workflows active, dispatch OK, no GH incident) — a workflow-file edit re-registers the schedule
     - cron: "30 19 * * 1-5"   # 15:30 ET during EDT (20:30 UTC after Nov 1 — or use the cron-job.org bell-ringer)
   workflow_dispatch:
     inputs:

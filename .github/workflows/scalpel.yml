@@ -1,6 +1,7 @@
 name: scalpel-cycle
 on:
   schedule:
+    # re-armed 2026-08-31: repo crons went silent after 8/29 03:09Z (workflows active, dispatch OK, no GH incident) — a workflow-file edit re-registers the schedule
     - cron: "30 14-19 * * 1-5"
   workflow_dispatch:
     inputs:

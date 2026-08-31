@@ -1,6 +1,7 @@
 name: steward
 on:
   schedule:
+    # re-armed 2026-08-31: repo crons went silent after 8/29 03:09Z (workflows active, dispatch OK, no GH incident) — a workflow-file edit re-registers the schedule
     # The bot decides cycle-vs-pulse from state, not from the clock — these are
     # just opportunities to run. Two independent faults cost 3 of 5 cycles: the
     # concurrency-group eviction described below (the primary one — it killed runs

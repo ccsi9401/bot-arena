@@ -1,6 +1,7 @@
 name: nightly-scoreboard
 on:
   schedule:
+    # re-armed 2026-08-31: repo crons went silent after 8/29 03:09Z (workflows active, dispatch OK, no GH incident) — a workflow-file edit re-registers the schedule
     - cron: "15 21 * * 1-5"   # 17:15 ET, after settle
   workflow_dispatch:
 

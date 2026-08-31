@@ -1,6 +1,7 @@
 name: glider-learn
 on:
   schedule:
+    # re-armed 2026-08-31: repo crons went silent after 8/29 03:09Z (workflows active, dispatch OK, no GH incident) — a workflow-file edit re-registers the schedule
     - cron: "0 12 1 * *"      # 1st of every month, 08:00 ET — market closed or not, it only needs history
   workflow_dispatch:
     inputs:
