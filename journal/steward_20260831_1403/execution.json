@@ -1,0 +1,52 @@
+{
+  "results": [
+    {
+      "symbol": "GLD",
+      "side": "buy",
+      "qty": 0.8207,
+      "notional": 333.5,
+      "id": "f50f20e5-fcf8-44d8-a0a9-c73a9a50e76a",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "IEF",
+      "side": "buy",
+      "qty": 3.5984,
+      "notional": 333.5,
+      "id": "d7f932d4-4eeb-4dd2-a3ff-6165366cd007",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "QQQ",
+      "side": "buy",
+      "qty": 2.7963,
+      "notional": 2000.0,
+      "id": "8b65a026-edf3-45f0-9efa-7b146bc80f75",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "SHY",
+      "side": "buy",
+      "qty": 4.0718,
+      "notional": 333.5,
+      "id": "3595b9be-a795-4aa3-b03e-a962584bc4e9",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "SPY",
+      "side": "buy",
+      "qty": 1.957,
+      "notional": 1500.0,
+      "id": "53ab270e-102c-4fce-895a-5faab3529256",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    }
+  ],
+  "placed": 5,
+  "failed": 0,
+  "_written_et": "2026-08-31T14:03:02.400619-04:00"
+}

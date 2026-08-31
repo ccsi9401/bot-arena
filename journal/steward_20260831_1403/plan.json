@@ -1,0 +1,73 @@
+{
+  "targets_final": {
+    "GLD": 0.0667,
+    "IEF": 0.0667,
+    "QQQ": 0.4,
+    "SHY": 0.0667,
+    "SPY": 0.3
+  },
+  "current_weights": {},
+  "cash_target": 0.0999,
+  "projected_cash_weight": 0.0999,
+  "sizing_version": 2,
+  "cash_drag_sweep": true,
+  "orders": [
+    {
+      "symbol": "GLD",
+      "side": "buy",
+      "qty": 0.8207,
+      "notional": 333.5,
+      "ref_price": 406.36,
+      "from_w": 0.0,
+      "to_w": 0.0667,
+      "reason": "Add 0.0% \u2192 6.7%"
+    },
+    {
+      "symbol": "IEF",
+      "side": "buy",
+      "qty": 3.5984,
+      "notional": 333.5,
+      "ref_price": 92.68,
+      "from_w": 0.0,
+      "to_w": 0.0667,
+      "reason": "Add 0.0% \u2192 6.7%"
+    },
+    {
+      "symbol": "QQQ",
+      "side": "buy",
+      "qty": 2.7963,
+      "notional": 2000.0,
+      "ref_price": 715.235,
+      "from_w": 0.0,
+      "to_w": 0.4,
+      "reason": "Add 0.0% \u2192 40.0%"
+    },
+    {
+      "symbol": "SHY",
+      "side": "buy",
+      "qty": 4.0718,
+      "notional": 333.5,
+      "ref_price": 81.905,
+      "from_w": 0.0,
+      "to_w": 0.0667,
+      "reason": "Add 0.0% \u2192 6.7%"
+    },
+    {
+      "symbol": "SPY",
+      "side": "buy",
+      "qty": 1.957,
+      "notional": 1500.0,
+      "ref_price": 766.47,
+      "from_w": 0.0,
+      "to_w": 0.3,
+      "reason": "Add 0.0% \u2192 30.0%"
+    }
+  ],
+  "notes": [
+    "Cash drag 90.0pp above target (100.0% vs 10.0%) \u2014 relaxing the 1.5% band on buys to put idle cash back to work."
+  ],
+  "halts": [],
+  "drawdown_pct": 0.0,
+  "peak_drawdown_pct": 0.0,
+  "_written_et": "2026-08-31T14:03:02.014440-04:00"
+}
