@@ -1,6 +1,6 @@
 # Round 1 — Day traders: Claude (SCALPEL) vs ChatGPT
 
-_As of 2026-08-31T18:37 ET · started 2026-08-07_
+_As of 2026-08-31T20:37 ET · started 2026-08-07_
 
 **Leader: GPT-DAY (ChatGPT)**
 
