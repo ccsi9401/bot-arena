@@ -45,5 +45,12 @@
     "winner_sel_sharpe": 1.262103297482043,
     "incumbent_hold_sharpe": 1.3122908700096663,
     "winner_hold_sharpe": 2.260572835767462
+  },
+  {
+    "date": "2026-09-01",
+    "decision": "last change 3d ago < min 28d \u2014 evaluate only",
+    "changed": false,
+    "config_hash_before": "fc730770bfd9",
+    "note": "cooldown"
   }
 ]
