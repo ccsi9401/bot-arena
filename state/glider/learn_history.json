@@ -52,5 +52,12 @@
     "changed": false,
     "config_hash_before": "fc730770bfd9",
     "note": "cooldown"
+  },
+  {
+    "date": "2026-09-01",
+    "decision": "last change 3d ago < min 28d \u2014 evaluate only",
+    "changed": false,
+    "config_hash_before": "fc730770bfd9",
+    "note": "cooldown"
   }
 ]
