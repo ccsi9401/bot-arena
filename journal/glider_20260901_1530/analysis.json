@@ -1,0 +1,22 @@
+{
+  "intents": [
+    {
+      "action": "raise_stop",
+      "symbol": "AAPL",
+      "new_stop": 299.06,
+      "reasoning": "trail 3.5xATR=7.57 below close 325.55."
+    },
+    {
+      "action": "raise_stop",
+      "symbol": "XOM",
+      "new_stop": 152.58,
+      "reasoning": "trail 3.5xATR=3.42 below close 164.53."
+    }
+  ],
+  "notes": [
+    "6 setups; 0 slots free; proposing 0"
+  ],
+  "regime_ok": true,
+  "candidates_considered": 6,
+  "_written_et": "2026-09-01T15:30:43.754743-04:00"
+}

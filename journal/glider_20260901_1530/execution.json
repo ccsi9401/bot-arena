@@ -1,0 +1,19 @@
+{
+  "results": [
+    {
+      "ok": false,
+      "error": "no open stop order found",
+      "action": "raise_stop",
+      "symbol": "AAPL"
+    },
+    {
+      "ok": false,
+      "error": "no open stop order found",
+      "action": "raise_stop",
+      "symbol": "XOM"
+    }
+  ],
+  "placed": 0,
+  "failed": 2,
+  "_written_et": "2026-09-01T15:30:43.782457-04:00"
+}

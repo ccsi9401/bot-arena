@@ -1,0 +1,29 @@
+{
+  "approved": [
+    {
+      "action": "raise_stop",
+      "symbol": "AAPL",
+      "new_stop": 299.06,
+      "reasoning": "trail 3.5xATR=7.57 below close 325.55."
+    },
+    {
+      "action": "raise_stop",
+      "symbol": "XOM",
+      "new_stop": 152.58,
+      "reasoning": "trail 3.5xATR=3.42 below close 164.53."
+    }
+  ],
+  "rejected": [],
+  "halts": [],
+  "account_snapshot": {
+    "equity": 5036.39,
+    "cash": 1501.6,
+    "last_equity": 5006.0,
+    "buying_power": 15903.8,
+    "status": "AccountStatus.ACTIVE",
+    "gross_after": 3534.78,
+    "drawdown_pct": -0.73,
+    "day_pl_pct": 0.61
+  },
+  "_written_et": "2026-09-01T15:30:43.763390-04:00"
+}
