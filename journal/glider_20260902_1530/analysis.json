@@ -1,0 +1,34 @@
+{
+  "intents": [
+    {
+      "action": "raise_stop",
+      "symbol": "XBI",
+      "new_stop": 149.93,
+      "reasoning": "trail 3.5xATR=4.26 below close 164.83."
+    },
+    {
+      "action": "raise_stop",
+      "symbol": "AAPL",
+      "new_stop": 299.85,
+      "reasoning": "trail 3.5xATR=7.37 below close 325.65."
+    },
+    {
+      "action": "raise_stop",
+      "symbol": "XOM",
+      "new_stop": 153.17,
+      "reasoning": "trail 3.5xATR=3.31 below close 164.76."
+    },
+    {
+      "action": "raise_stop",
+      "symbol": "XLV",
+      "new_stop": 163.99,
+      "reasoning": "trail 3.5xATR=2.61 below close 173.11."
+    }
+  ],
+  "notes": [
+    "7 setups; 0 slots free; proposing 0"
+  ],
+  "regime_ok": true,
+  "candidates_considered": 7,
+  "_written_et": "2026-09-02T15:30:50.486957-04:00"
+}

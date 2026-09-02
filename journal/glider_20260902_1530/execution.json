@@ -1,0 +1,31 @@
+{
+  "results": [
+    {
+      "ok": false,
+      "error": "no open stop order found",
+      "action": "raise_stop",
+      "symbol": "XBI"
+    },
+    {
+      "ok": false,
+      "error": "no open stop order found",
+      "action": "raise_stop",
+      "symbol": "AAPL"
+    },
+    {
+      "ok": false,
+      "error": "no open stop order found",
+      "action": "raise_stop",
+      "symbol": "XOM"
+    },
+    {
+      "ok": false,
+      "error": "no open stop order found",
+      "action": "raise_stop",
+      "symbol": "XLV"
+    }
+  ],
+  "placed": 0,
+  "failed": 4,
+  "_written_et": "2026-09-02T15:30:50.843841-04:00"
+}
