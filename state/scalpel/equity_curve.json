@@ -826,5 +826,11 @@
     "equity": 49667.48,
     "cash": 49667.48,
     "note": "cycle scalpel_20260903_1530"
+  },
+  {
+    "ts_et": "2026-09-03T17:15:36.353929-04:00",
+    "equity": 49667.48,
+    "cash": 49667.48,
+    "note": "nightly scoreboard"
   }
 ]
