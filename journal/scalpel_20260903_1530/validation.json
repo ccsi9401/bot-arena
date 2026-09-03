@@ -1,0 +1,21 @@
+{
+  "approved": [
+    {
+      "action": "liquidate_all",
+      "reasoning": "End-of-day cycle: SCALPEL never holds overnight."
+    }
+  ],
+  "rejected": [],
+  "halts": [],
+  "account_snapshot": {
+    "equity": 49667.48,
+    "cash": 49667.48,
+    "last_equity": 49667.48,
+    "buying_power": 198669.92,
+    "status": "AccountStatus.ACTIVE",
+    "gross_after": 0,
+    "drawdown_pct": 0.67,
+    "day_pl_pct": 0.0
+  },
+  "_written_et": "2026-09-03T15:30:52.998356-04:00"
+}

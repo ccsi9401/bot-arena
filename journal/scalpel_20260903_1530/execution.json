@@ -1,0 +1,11 @@
+{
+  "results": [
+    {
+      "action": "liquidate_all",
+      "ok": true
+    }
+  ],
+  "placed": 1,
+  "failed": 0,
+  "_written_et": "2026-09-03T15:30:53.142620-04:00"
+}
