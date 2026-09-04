@@ -1,9 +1,9 @@
-# STEWARD — 2026-09-03 19:31 ET
+# STEWARD — 2026-09-04 15:00 ET
 
-Equity: $5,017
-SPY shadow: $5,020
+Equity: $5,012
+SPY shadow: $5,006
 Regime: RISK-ON
-Last cycle: 2026-08-31
+Last cycle: 2026-09-04
 
 - Regime: RISK-ON — SPY above its 200-day SMA.
 - Index sleeve: QQQ 40.0%, SPY 30.0% (per-position cap 40%).

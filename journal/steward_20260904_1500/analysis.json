@@ -1,0 +1,19 @@
+{
+  "regime_on": true,
+  "targets": {
+    "GLD": 0.0667,
+    "IEF": 0.0667,
+    "QQQ": 0.4,
+    "SHY": 0.0667,
+    "SPY": 0.3
+  },
+  "cash_weight": 0.1,
+  "index_residue_pp": 0.0,
+  "momentum_leaderboard": [],
+  "notes": [
+    "Regime: RISK-ON \u2014 SPY above its 200-day SMA.",
+    "Index sleeve: QQQ 40.0%, SPY 30.0% (per-position cap 40%).",
+    "Defensive ballast: 20% split across GLD, IEF, SHY \u2014 always on."
+  ],
+  "_written_et": "2026-09-04T15:00:39.164079-04:00"
+}

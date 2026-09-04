@@ -58,5 +58,11 @@
     "equity": 5017.47,
     "cash": 499.54,
     "note": "nightly pulse"
+  },
+  {
+    "ts_et": "2026-09-04T15:00:39.612123-04:00",
+    "equity": 5011.98,
+    "cash": 499.54,
+    "note": "cycle steward_20260904_1500"
   }
 ]
