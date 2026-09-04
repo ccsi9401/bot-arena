@@ -1,0 +1,27 @@
+{
+  "cycle_et": "12:30",
+  "style": "dip_reversion",
+  "intents": [
+    {
+      "action": "buy",
+      "symbol": "AAPL",
+      "entry_limit": 320.76,
+      "stop": 309.06,
+      "target": 334.09,
+      "score": 1.3118765133983636,
+      "reasoning": "Dip-buy: daily uptrend (50>200 SMA), down -2.42% since open = 1.02x its daily ATR (2.37%), below VWAP 321.90 on 1.28x volume. Betting on the bounce; stop 1.5xATR below, flat by close.",
+      "checks": {
+        "daily_uptrend": true,
+        "deep_dip": true,
+        "below_vwap": true,
+        "volume_pace": true,
+        "not_etf": true
+      }
+    }
+  ],
+  "notes": [
+    "1 passed filters; proposing top 1"
+  ],
+  "candidates_considered": 1,
+  "_written_et": "2026-09-04T12:30:57.835023-04:00"
+}
