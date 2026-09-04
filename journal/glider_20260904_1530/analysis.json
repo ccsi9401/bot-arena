@@ -1,0 +1,22 @@
+{
+  "intents": [
+    {
+      "action": "raise_stop",
+      "symbol": "XBI",
+      "new_stop": 149.82,
+      "reasoning": "trail 3.5xATR=4.00 below close 163.84."
+    },
+    {
+      "action": "raise_stop",
+      "symbol": "AAPL",
+      "new_stop": 295.26,
+      "reasoning": "trail 3.5xATR=7.58 below close 321.80."
+    }
+  ],
+  "notes": [
+    "6 setups; 0 slots free; proposing 0"
+  ],
+  "regime_ok": true,
+  "candidates_considered": 6,
+  "_written_et": "2026-09-04T15:30:45.799904-04:00"
+}

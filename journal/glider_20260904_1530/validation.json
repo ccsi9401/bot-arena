@@ -1,0 +1,29 @@
+{
+  "approved": [
+    {
+      "action": "raise_stop",
+      "symbol": "XBI",
+      "new_stop": 149.82,
+      "reasoning": "trail 3.5xATR=4.00 below close 163.84."
+    },
+    {
+      "action": "raise_stop",
+      "symbol": "AAPL",
+      "new_stop": 295.26,
+      "reasoning": "trail 3.5xATR=7.58 below close 321.80."
+    }
+  ],
+  "rejected": [],
+  "halts": [],
+  "account_snapshot": {
+    "equity": 5013.24,
+    "cash": 1501.6,
+    "last_equity": 5054.4,
+    "buying_power": 15838.99,
+    "status": "AccountStatus.ACTIVE",
+    "gross_after": 3511.64,
+    "drawdown_pct": -0.26,
+    "day_pl_pct": -0.81
+  },
+  "_written_et": "2026-09-04T15:30:45.861876-04:00"
+}
