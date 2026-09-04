@@ -1,0 +1,36 @@
+{
+  "approved": [
+    {
+      "action": "buy",
+      "symbol": "AAPL",
+      "entry_limit": 321.07,
+      "stop": 309.65,
+      "target": 334.07,
+      "score": 2.0862551218646517,
+      "reasoning": "Dip-buy: daily uptrend (50>200 SMA), down -2.33% since open = 1.01x its daily ATR (2.31%), below VWAP 323.65 on 2.07x volume. Betting on the bounce; stop 1.5xATR below, flat by close.",
+      "checks": {
+        "daily_uptrend": true,
+        "deep_dip": true,
+        "below_vwap": true,
+        "volume_pace": true,
+        "not_etf": true
+      },
+      "qty": 65,
+      "notional": 20869.55,
+      "risk_dollars": 742.3
+    }
+  ],
+  "rejected": [],
+  "halts": [],
+  "account_snapshot": {
+    "equity": 49667.48,
+    "cash": 49667.48,
+    "last_equity": 49667.48,
+    "buying_power": 198669.92,
+    "status": "AccountStatus.ACTIVE",
+    "gross_after": 20869.55,
+    "drawdown_pct": 0.67,
+    "day_pl_pct": 0.0
+  },
+  "_written_et": "2026-09-04T10:30:58.185717-04:00"
+}

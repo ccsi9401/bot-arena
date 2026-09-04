@@ -1,0 +1,15 @@
+{
+  "results": [
+    {
+      "id": "b5dd5d09-9bea-4b09-8360-09316d5a8bb0",
+      "symbol": "AAPL",
+      "qty": 65,
+      "status": "OrderStatus.PENDING_NEW",
+      "action": "buy",
+      "ok": true
+    }
+  ],
+  "placed": 1,
+  "failed": 0,
+  "_written_et": "2026-09-04T10:30:58.229905-04:00"
+}
