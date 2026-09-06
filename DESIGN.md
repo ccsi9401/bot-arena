@@ -103,6 +103,9 @@ broker: every entry is a bracket order (stop + target live on Alpaca's servers b
 3. Concurrency cap: 3 (SCALPEL) / 5 (GLIDER); one position per symbol per bot.
 4. Kill-switch: account equity −15% from starting $50k → bot goes flat and permanently
    halts new entries for the remainder of the competition (reported as its final result).
+   GLIDER (since 2026-09-06, `risk.kill_switch_mode: trailing_peak`) measures the drawdown
+   from its highest recorded equity instead of from the start, because a fully invested
+   core-satellite book should be judged on what it gives back, not on where it began.
 5. Freshness: scan data older than 20 minutes → no new entries this cycle.
 6. Duplicate guard: an intent matching an open order/position is rejected.
 7. Sanity: limit prices within 1% of last trade; qty > 0; market open; symbol tradable.

@@ -104,6 +104,11 @@ class State:
         })
         self.write("equity_curve", curve)
 
+    def peak_equity(self, floor: float = 0.0) -> float:
+        """Highest equity ever recorded in the audit curve (or `floor` if higher)."""
+        pts = self.read("equity_curve", [])
+        return max([floor] + [float(p.get("equity", 0)) for p in pts])
+
     # kill switch --------------------------------------------------------
     def kill_switch_tripped(self) -> bool:
         return bool(self.read("kill_switch", {}).get("tripped", False))

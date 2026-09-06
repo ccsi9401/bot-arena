@@ -140,10 +140,17 @@ keeps DD at −12.5% / −26.5% but trails SPY on total return.
 have a 15% max DD in a window where SPY fell 34%, so GLIDER's gate is ≥30 trades,
 expectancy > 0, max DD ≤ SPY's + `learning.gate_dd_margin_vs_benchmark_pct` (5 pts) AND
 total return ≥ SPY's, graded on the learner's 10y window (`backtest/run_backtest.py`).
-**Known tension:** `risk.kill_switch_drawdown_pct: 15` is measured from *starting* equity
-and would liquidate the whole book (sleeve included) in an ordinary 15% index correction
-early in the account's life; left unchanged on purpose — it is a risk-limit decision, not
-a strategy one.
+**Kill switch is trailing-from-peak** (`risk.kill_switch_mode: trailing_peak`, 2026-09-06):
+the drawdown is measured from the highest equity in `state/glider/equity_curve.json`
+(floored at starting equity), not from the start. When it trips the validator halts new
+entries permanently and the sleeve goes to cash (`core_sleeve.plan(kill=True)` → target 0);
+open overlay positions ride to their stops. Reset = delete `state/glider/kill_switch.json`.
+The *level* (`kill_switch_drawdown_pct`) is the user's risk decision. On the 10y replay the
+fully invested book's peak-to-trough episodes were Dec 2018 −20.5%, Mar 2020 −34.3%,
+Oct 2022 −19.6%, Apr 2025 −17.8% (everything else < 14%), so: 15% or 20% fires first in
+Dec 2018 and freezes the book there; 25% or 30% fires once, in the Mar 2020 crash; 35%
+never fired. Because the halt is permanent, any level below ~35% turns the always-in book
+into cash at some point in a decade until a human resets it.
 
 ## Sizing note at $5k
 

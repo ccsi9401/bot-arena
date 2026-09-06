@@ -166,3 +166,33 @@ def test_active_sharpe_is_zero_against_itself():
     assert s is None or abs(s) < 1e-9
     assert abs(active_returns(bench * 2, bench)).max() < 1e-9
     assert sharpe(bench) is not None and sharpe(bench) != 0
+
+
+# ---------------- kill switch basis ----------------
+def test_kill_switch_trailing_from_peak(tmp_path):
+    st = State("glider")
+    st.dir = tmp_path
+    st.write("equity_curve", [{"equity": 6000.0}, {"equity": 5500.0}])   # peak 6000 on record
+    intent = {"action": "buy", "symbol": "AAA", "entry_limit": 100.0, "stop": 96.0, "target": 108.0}
+    cfg = _cfg()
+    cfg["risk"]["kill_switch_mode"] = "trailing_peak"
+    acct = dict(ACCT, equity=5050.0, cash=5050.0, core_value=0.0)          # +1% from start, -15.8% from peak
+    v = validator.validate([intent], acct, [], [], cfg, st, now_et().isoformat(), True, {"AAA": 100.0})
+    assert any("KILL" in h and "peak 6000" in h for h in v["halts"]) and not v["approved"]
+    assert v["account_snapshot"]["drawdown_basis"] == "peak 6000"
+    # same account under the competition rule (from start) is fine
+    st2 = State("glider")
+    st2.dir = tmp_path / "b"
+    st2.dir.mkdir()
+    st2.write("equity_curve", [{"equity": 6000.0}])
+    cfg2 = _cfg()
+    cfg2["risk"]["kill_switch_mode"] = "from_start"
+    v2 = validator.validate([intent], acct, [], [], cfg2, st2, now_et().isoformat(), True, {"AAA": 100.0})
+    assert not v2["halts"] and len(v2["approved"]) == 1
+    # trailing mode never trips on a fresh account sitting near its start
+    st3 = State("glider")
+    st3.dir = tmp_path / "c"
+    st3.dir.mkdir()
+    v3 = validator.validate([intent], dict(acct, equity=4900.0, cash=4900.0), [], [], cfg, st3,
+                            now_et().isoformat(), True, {"AAA": 100.0})
+    assert not v3["halts"]

@@ -32,12 +32,21 @@ def validate(intents: list[dict], account: dict, positions: list[dict],
     # ---------- account-level gates (evaluated once) ----------
     halts: list[str] = []
 
-    dd_pct = (start_eq - equity) / start_eq * 100
+    # drawdown basis: 'from_start' (competition rule: -X% from starting equity) or
+    # 'trailing_peak' (GLIDER since 2026-09-06: -X% from the highest equity on record,
+    # so a fully invested book is judged on what it gave back, not on where it began)
+    if r.get("kill_switch_mode", "from_start") == "trailing_peak":
+        peak = max(start_eq, state.peak_equity(), equity)
+        dd_pct = (peak - equity) / peak * 100
+        dd_basis = f"peak {peak:.0f}"
+    else:
+        dd_pct = (start_eq - equity) / start_eq * 100
+        dd_basis = f"start {start_eq:.0f}"
     if state.kill_switch_tripped():
         halts.append("kill switch previously tripped")
     elif dd_pct >= r["kill_switch_drawdown_pct"]:
-        state.trip_kill_switch(f"drawdown {dd_pct:.2f}% ≥ {r['kill_switch_drawdown_pct']}%")
-        halts.append(f"KILL SWITCH TRIPPED: drawdown {dd_pct:.2f}%")
+        state.trip_kill_switch(f"drawdown {dd_pct:.2f}% from {dd_basis} ≥ {r['kill_switch_drawdown_pct']}%")
+        halts.append(f"KILL SWITCH TRIPPED: drawdown {dd_pct:.2f}% from {dd_basis}")
 
     daily_pl_pct = (equity - account["last_equity"]) / account["last_equity"] * 100 \
         if account["last_equity"] else 0.0
@@ -148,5 +157,6 @@ def validate(intents: list[dict], account: dict, positions: list[dict],
         "halts": halts,
         "account_snapshot": {**account, "gross_after": round(gross, 2),
                              "drawdown_pct": round(dd_pct, 2),
+                             "drawdown_basis": dd_basis,
                              "day_pl_pct": round(daily_pl_pct, 2)},
     }
