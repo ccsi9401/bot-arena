@@ -60,7 +60,7 @@ def latest_session() -> dict:
         if not rdir.is_dir() or not (rdir / "analysis.json").exists():
             continue
         out = {"run_id": rdir.name}
-        for stage in ("scan", "analysis", "validation", "execution"):
+        for stage in ("scan", "analysis", "validation", "execution", "core"):
             f = rdir / f"{stage}.json"
             if f.exists():
                 try:
@@ -136,8 +136,15 @@ def main() -> int:
                 f' · P(bull)−P(bear) = {sig:+.3f} ({st})</div>')
     elif analysis:
         ok = analysis.get("regime_ok")
+        how = ("200SMA fallback (Markov matrix warming up)" if s.get("regime_filter") == "markov2"
+               else "SPY vs its 200-day SMA")
         gate = (f'<div class="leader">Regime gate: <b>{"OPEN 🟢" if ok else "CLOSED 🟡"}</b>'
-                f' · 200SMA fallback (Markov matrix warming up)</div>')
+                f' · {how}</div>')
+    cp = (run.get("core") or {}).get("plan") or {}
+    if cp:
+        gate += (f'<div class="leader">Core sleeve: <b>${cp.get("current", 0):,.0f}</b> in {html.escape(str(cp.get("symbol")))}'
+                 f' · target ${cp.get("target", 0):,.0f} · {html.escape(str(cp.get("action")))}'
+                 f' — idle cash rides the index instead of sitting out</div>')
 
     # ---- open positions ----
     ledger = state_json("ledger", {})

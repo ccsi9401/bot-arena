@@ -22,6 +22,9 @@ def validate(intents: list[dict], account: dict, positions: list[dict],
     held = {p["symbol"] for p in positions}
     pending_buy = {o["symbol"] for o in open_orders if "buy" in o["side"].lower()}
     gross = sum(abs(p["market_value"]) for p in positions)
+    # cash parked in the core sleeve (run_cycle passes its market value) is spendable:
+    # the sleeve is sold down before entries are placed, so no margin is ever used
+    spendable = account["cash"] + float(account.get("core_value") or 0.0)
 
     def reject(intent, reason):
         rejected.append({**intent, "reject_reason": reason})
@@ -126,11 +129,12 @@ def validate(intents: list[dict], account: dict, positions: list[dict],
         max_gross = equity * r["max_gross_exposure_pct"] / 100
         if gross + notional > max_gross:
             qty = int((max_gross - gross) / intent["entry_limit"])
-        if notional > account["cash"]:
-            qty = min(qty, int(account["cash"] / intent["entry_limit"]))
+        if notional > spendable:
+            qty = min(qty, int(spendable / intent["entry_limit"]))
         if qty < 1:
-            reject(intent, f"exposure/cash cap: gross {gross:.0f}, cash {account['cash']:.0f}")
+            reject(intent, f"exposure/cash cap: gross {gross:.0f}, spendable {spendable:.0f}")
             continue
+        spendable -= qty * intent["entry_limit"]
 
         notional = qty * intent["entry_limit"]
         gross += notional

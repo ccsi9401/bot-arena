@@ -6,8 +6,10 @@ LIVE analyzer over `learning.history_period` of daily data for every candidate, 
 replaces config/glider.yaml ONLY if a candidate clears every one of these bars:
 
   1. passes the DESIGN.md gate on the full window (≥30 trades, expectancy>0, DD<15%)
-  2. selection-window Sharpe beats the incumbent by ≥ noise_floor_sigmas × the
-     incumbent's block-bootstrap Sharpe std  (i.e. the gain is bigger than luck)
+  2. selection-window ACTIVE Sharpe (information ratio of daily returns minus the
+     benchmark's - GLIDER holds SPY as its core, so plain Sharpe would just grade SPY)
+     beats the incumbent by ≥ noise_floor_sigmas × the incumbent's block-bootstrap std
+     (i.e. the gain is bigger than luck)
   3. beats the incumbent in ≥ min_fold_win_frac of calendar-year folds  (consistency)
   4. on the untouched HOLDOUT year (never used for ranking): expectancy>0 and
      Sharpe ≥ incumbent's holdout Sharpe  (out-of-sample check)
@@ -42,13 +44,20 @@ from backtest import data as bd                    # noqa: E402
 from backtest import metrics                       # noqa: E402
 from backtest.engine_glider import run as run_glider, precompute  # noqa: E402
 
+# reports carry arrows/dots; a cp1252 console (Windows) must not crash the run
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(errors="replace")
+
 CFG_PATH = ROOT / "config" / "glider.yaml"
 STATE_DIR = ROOT / "state" / "glider"
 REPORT_DIR = ROOT / "reports" / "glider_learn"
 
 # ---- the search space ------------------------------------------------------------
 GRID = {
-    "regime_filter":           ["spy_above_200sma", "markov2"],
+    # markov2 removed 2026-09-06: with 5y history its matrix is immature for the first
+    # ~2y, so a markov2 candidate silently ran on the 200SMA fallback and got promoted on
+    # the fallback's numbers. On 10y it is +19% vs +105% for the 200SMA gate (same knobs).
+    "regime_filter":           ["spy_above_200sma"],
     "pullback_rsi2_max":       [5, 10, 15],
     "max_pct_below_52wk_high": [10, 15, 25],
     "stop_atr_mult":           [1.5, 2.0, 2.5, 3.0],
@@ -88,15 +97,25 @@ def params_of(strategy: dict) -> dict:
 
 
 # ---- scoring ----------------------------------------------------------------------
-def sharpe(curve: pd.Series) -> float | None:
+def active_returns(curve: pd.Series, bench: pd.Series | None) -> pd.Series:
+    """Daily returns, minus the benchmark's when given (information-ratio basis)."""
     rets = curve.pct_change().dropna()
+    if bench is None:
+        return rets
+    b = bench.reindex(curve.index).ffill().pct_change().reindex(rets.index).fillna(0.0)
+    return rets - b
+
+
+def sharpe(curve: pd.Series, bench: pd.Series | None = None) -> float | None:
+    rets = active_returns(curve, bench)
     if len(rets) < 20 or rets.std() == 0:
         return None
     return float(rets.mean() / rets.std() * math.sqrt(252))
 
 
-def bootstrap_sharpe_std(curve: pd.Series, n: int, block: int = 21, seed: int = 0) -> float:
-    rets = curve.pct_change().dropna().to_numpy()
+def bootstrap_sharpe_std(curve: pd.Series, n: int, block: int = 21, seed: int = 0,
+                         bench: pd.Series | None = None) -> float:
+    rets = active_returns(curve, bench).to_numpy()
     if len(rets) < block * 3:
         return 1.0
     rng = np.random.default_rng(seed)
@@ -112,26 +131,28 @@ def bootstrap_sharpe_std(curve: pd.Series, n: int, block: int = 21, seed: int = 
     return float(np.std(vals)) if vals else 1.0
 
 
-def yearly_sharpes(curve: pd.Series, min_days: int = 120) -> dict[int, float]:
+def yearly_sharpes(curve: pd.Series, min_days: int = 120,
+                   bench: pd.Series | None = None) -> dict[int, float]:
     out = {}
     for yr, sub in curve.groupby(curve.index.year):
         if len(sub) >= min_days:
-            s = sharpe(sub)
+            s = sharpe(sub, bench)
             if s is not None:
                 out[int(yr)] = s
     return out
 
 
-def evaluate(curve: pd.Series, trades: list[dict], holdout_start) -> dict:
+def evaluate(curve: pd.Series, trades: list[dict], holdout_start,
+             bench: pd.Series | None = None, dd_margin_pct: float = 5.0) -> dict:
     sel = curve[curve.index < holdout_start]
     hold = curve[curve.index >= holdout_start]
     hold_trades = [t for t in trades if pd.Timestamp(t["closed"]) >= holdout_start]
-    full = metrics.summarize(curve, trades, "full")
+    full = metrics.summarize(curve, trades, "full", bench_curve=bench, dd_margin_pct=dd_margin_pct)
     return {
         "full": full,
-        "sel_sharpe": sharpe(sel),
-        "sel_years": yearly_sharpes(sel),
-        "hold_sharpe": sharpe(hold),
+        "sel_sharpe": sharpe(sel, bench),
+        "sel_years": yearly_sharpes(sel, bench=bench),
+        "hold_sharpe": sharpe(hold, bench),
         "hold_expectancy": (sum(t["pnl"] for t in hold_trades) / len(hold_trades)
                             if hold_trades else None),
         "hold_trades": len(hold_trades),
@@ -195,17 +216,26 @@ def main() -> int:
                  f"({bench_days[0].date()} → {bench_days[-1].date()})")
     lines.append(f"- holdout (never ranked on): from {holdout_start.date()}")
 
+    # ---- benchmark (scores are information ratios vs it; gate is relative to it) ----
+    bench = data[cfg["universe"]["benchmark"]]["close"]
+    dd_margin = float(L.get("gate_dd_margin_vs_benchmark_pct", 5.0))
+    b0 = bench.reindex(pd.DatetimeIndex(bench_days)).ffill()
+    lines.append(f"- benchmark {cfg['universe']['benchmark']} over the window: "
+                 f"{(b0.iloc[-1] / b0.iloc[0] - 1) * 100:.1f}% · DD {(b0 / b0.cummax() - 1).min() * 100:.1f}% "
+                 f"· scores below are ACTIVE Sharpe (IR) vs it; gate: DD ≤ bench DD + {dd_margin}pp and return ≥ bench")
+
     # ---- incumbent ----
     inc_curve, inc_trades = run_glider(data, cfg, pre=pre)
-    inc = evaluate(inc_curve, inc_trades, holdout_start)
+    inc = evaluate(inc_curve, inc_trades, holdout_start, bench, dd_margin)
     noise = bootstrap_sharpe_std(inc_curve[inc_curve.index < holdout_start],
-                                 L.get("bootstrap_samples", 300))
+                                 L.get("bootstrap_samples", 300), bench=bench)
     floor = L.get("noise_floor_sigmas", 1.0) * noise
     lines.append(f"\n## Incumbent  `{params_of(cfg['strategy'])}`")
-    lines.append(f"- full window: {inc['full']['total_return_pct']}% · DD {inc['full']['max_drawdown_pct']}% · "
+    lines.append(f"- full window: {inc['full']['total_return_pct']}% (excess vs bench {inc['full'].get('excess_return_pct')}) · "
+                 f"DD {inc['full']['max_drawdown_pct']}% · "
                  f"Sharpe {inc['full']['sharpe_daily_ann']} · {inc['full']['n_trades']} trades · "
-                 f"gate {'PASS' if inc['full']['gate']['passed'] else 'FAIL'}")
-    lines.append(f"- selection Sharpe {inc['sel_sharpe']:.2f} ± {noise:.2f} (bootstrap) → "
+                 f"gate {'PASS' if inc['full']['gate']['passed'] else 'FAIL'} {inc['full']['gate']['checks']}")
+    lines.append(f"- selection active Sharpe {inc['sel_sharpe']:.2f} ± {noise:.2f} (bootstrap) → "
                  f"a challenger must reach {inc['sel_sharpe'] + floor:.2f}")
     lines.append(f"- yearly Sharpe: { {k: round(v, 2) for k, v in inc['sel_years'].items()} }")
     lines.append(f"- holdout Sharpe {inc['hold_sharpe']} · holdout expectancy {inc['hold_expectancy']}")
@@ -223,7 +253,7 @@ def main() -> int:
     for i, strat in enumerate(cands):
         c = dict(cfg); c["strategy"] = strat
         curve, trades = run_glider(data, c, pre=pre)
-        ev = evaluate(curve, trades, holdout_start)
+        ev = evaluate(curve, trades, holdout_start, bench, dd_margin)
         wins = sum(1 for y, s in ev["sel_years"].items()
                    if y in inc["sel_years"] and s > inc["sel_years"][y])
         checks = {
@@ -240,7 +270,7 @@ def main() -> int:
             print(f"  {i + 1}/{len(cands)}")
 
     results.sort(key=lambda r: r["eval"]["sel_sharpe"] or -9, reverse=True)
-    lines.append("\n| rank | params | sel Sharpe | holdout Sharpe | full ret % | DD % | trades | yr wins | eligible |")
+    lines.append("\n| rank | params | sel active Sharpe | holdout active Sharpe | full ret % | DD % | trades | yr wins | eligible |")
     lines.append("|---|---|---|---|---|---|---|---|---|")
     for rank, r in enumerate(results[:15], 1):
         e = r["eval"]

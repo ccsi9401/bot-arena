@@ -8,7 +8,7 @@ schedule:
   cycles_et: ["15:30"]
 
 strategy:
-  regime_filter: markov2    # no new entries in bear regime; alt: markov2 (stride-matrix P(bull)-P(bear) gate, core/markov2.py)
+  regime_filter: spy_above_200sma    # no new entries in bear regime. markov2 (core/markov2.py) remains supported but was REMOVED from the learner grid 2026-09-06: its 2026-08-29 promotion was an immature-matrix artifact (10y: +19% vs +105% with the 200SMA gate)
   markov2_min_signal: 0.0            # markov2 gate opens when signal > this (range -1..+1)
   sma_fast: 50
   sma_slow: 200
@@ -26,6 +26,14 @@ strategy:
   min_price: 10.0
   min_avg_dollar_vol: 50000000
 
+core_sleeve:                         # idle cash lives in the benchmark ETF (core-satellite), added 2026-09-06
+  enabled: true
+  symbol: SPY                        # never traded as a pullback setup while the sleeve is on
+  mode: always                       # always = fully invested; gated = SPY only while the regime gate is open
+  cash_buffer_pct: 1.0               # % of equity kept in cash for limit-fill slippage
+  min_order_dollars: 25              # ignore rebalances smaller than this
+  slippage_bps: 1                    # backtest only: per-leg cost on the SPY sweep (penny spread on a $700 ETF)
+
 risk:
   risk_per_trade_pct: 0.9            # reflection may scale this (see learning.base_risk_pct)
   max_positions: 5
@@ -37,9 +45,10 @@ risk:
 
 learning:
   enabled: true                      # set false to freeze both the learner and reflection
-  history_period: 5y                 # daily history the learner fetches
+  history_period: 10y                # daily history the learner fetches (10y since 2026-09-06: 5y was short enough to be fooled by one regime)
   holdout_days: 252                  # most recent year is never used for ranking
   min_days_between_changes: 28
+  gate_dd_margin_vs_benchmark_pct: 5 # gate: backtest max DD may not exceed SPY's over the same window by more than this (replaces the absolute 15% for a fully invested book)
   max_candidates: 400                # random subset of the grid per run (incumbent always included)
   min_fold_win_frac: 0.67            # must beat incumbent in ≥ 2/3 of calendar-year folds
   noise_floor_sigmas: 1.0            # must beat incumbent Sharpe by ≥ this × bootstrap std

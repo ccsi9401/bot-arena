@@ -93,6 +93,8 @@ broker: every entry is a bracket order (stop + target live on Alpaca's servers b
 - Entry at 15:30 ET (near close, using the nearly-complete daily bar). Stop 2×ATR(14) below;
   target 2R; time-stop exit at 15 trading days regardless.
 - Trailing: once a position reaches +1R, stop moves to breakeven.
+- Core sleeve (2026-09-06): idle cash is held in SPY and sold to fund entries, so the book
+  is fully invested (core-satellite). See GLIDER_LEARNING.md.
 
 ## Risk gates (validator — runs every cycle, both bots)
 
@@ -111,7 +113,9 @@ Before either bot trades a dollar of paper money, its strategy must pass a histo
 backtest over the past 2 years of daily data (GLIDER) / 6 months of intraday data (SCALPEL):
 
 - Expectancy > 0 after simulated slippage (5 bps) on at least 30 trades.
-- Max drawdown in backtest < 15%.
+- Max drawdown in backtest < 15% (SCALPEL). GLIDER, fully invested via its core sleeve
+  since 2026-09-06, is graded benchmark-relative instead: max DD ≤ SPY's over the same
+  window + 5 pts, and total return ≥ SPY's, on the learner's 10-year window.
 - Results committed to `reports/backtest/` so launch parameters are justified by evidence.
 
 A strategy that fails is re-parameterized or simplified until it passes, and the change log

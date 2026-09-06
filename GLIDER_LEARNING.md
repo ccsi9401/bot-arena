@@ -9,7 +9,7 @@ Two feedback loops, both **gated**, both **journaled**, both **bounded**:
 
 | loop | cadence | learns from | can change | guardrail |
 |---|---|---|---|---|
-| **Learner** `backtest/glider_learn.py` | monthly (1st) | 5y of daily history, walk-forward | the learnable strategy knobs in `config/glider.yaml` | must beat incumbent beyond a bootstrap noise floor, in ≥2/3 of yearly folds, AND on an untouched holdout year; ≤1 change per 28 days |
+| **Learner** `backtest/glider_learn.py` | monthly (1st) | 10y of daily history, walk-forward | the learnable strategy knobs in `config/glider.yaml` | must beat incumbent beyond a bootstrap noise floor, in ≥2/3 of yearly folds, AND on an untouched holdout year; ≤1 change per 28 days |
 | **Reflection** `glider_reflect.py` | weekly (Sat) | GLIDER's real Alpaca fills | `risk.risk_per_trade_pct` only (base or half) | does nothing before 30 closed live trades; acts only when live mean return is below the 5th percentile of the backtest at that sample size |
 
 It does **not** rewrite the strategy logic, add indicators, or react to the last five
@@ -20,12 +20,13 @@ Freeze everything with `learning.enabled: false` (e.g. during a competition roun
 
 ## Learnable knobs and the search grid
 
-`regime_filter` {spy_above_200sma, markov2} · `pullback_rsi2_max` {5,10,15} ·
+`regime_filter` {spy_above_200sma} (markov2 removed 2026-09-06, see below) · `pullback_rsi2_max` {5,10,15} ·
 `max_pct_below_52wk_high` {10,15,25} · `stop_atr_mult` {1.5,2,2.5,3} ·
 `max_hold_days` {10,15,25} · exit ∈ {target 1.5R, 2R, 3R, trail 2.5×ATR,
-trail 3.5×ATR} — 1080 combos; `learning.max_candidates` random-samples them per run
-(seed = year-month, so a run is reproducible; 400 of 1080 ≈ 37% coverage per run,
-rotating monthly).
+trail 3.5×ATR} — 540 combos; `learning.max_candidates` random-samples them per run
+(seed = year-month, so a run is reproducible; 400 of 540 ≈ 74% coverage per run,
+rotating monthly). Scores are **active Sharpe (information ratio) vs SPY** since
+2026-09-06 — the book holds SPY as its core, so plain Sharpe would just grade the index.
 
 **New: `exit_mode: trail`.** A chandelier stop (`close − trail_atr_mult × ATR14`, ratchets
 up only) replaces the fixed take-profit; the bracket's TP leg is parked at
@@ -105,6 +106,44 @@ noise floor 0.63, 4/4 yearly folds, holdout Sharpe 2.26 vs incumbent 1.31) and
 is now the live config. The 28-day cooldown shields it until 2026-09-26, so the
 Sep 1 scheduled run is evaluate-only. Reflection compares live fills against
 this winner's 559 reference trades (`reports/glider_learn/reference_trades.json`).
+
+**Demoted 2026-09-06.** The promotion was an artifact of the 5y window: the Markov
+matrix needs ~2y of labels before it emits a signal, so the candidate ran on the 200SMA
+fallback from 2022-06 to 2024-08 and its whole "edge" was the 2025 spring V-bottom.
+Replayed on 10y with the same knobs: markov2 +19% / DD −33% / Sharpe 0.26 vs 200SMA
++105% / DD −20% / 0.84 (no gate at all: +122%). As a SPY timing signal it is open only
+10–32% of the 2019–2024 bull years and flips 20–40×/yr; matrices built from 5y vs 10y
+agree 70% of the time, and the live scanner's 1400-day history is a third matrix again.
+`regime_filter` is back to `spy_above_200sma`, markov2 is out of the grid, and the learner
+now fetches 10y so a two-year warm-up can never again hide inside the window.
+
+## Core sleeve — idle cash rides SPY (2026-09-06)
+
+The overlay is ~40–45% invested on average; the rest sat in cash, which was the whole
+gap to SPY. `core_sleeve` (config) holds every idle dollar in SPY, sells SPY to fund each
+overlay entry (before the bracket buys, so no margin is ever used) and sweeps cash back
+after exits (`core/core_sleeve.py`; the engine mirrors it with 1 bp per SPY leg). The
+sleeve position is stripped from reconcile/validate, never proposed as a setup, and
+ignored by reflection. Local replay, 200SMA gate, live knobs:
+
+| window | overlay alone | overlay + sleeve (always) | SPY |
+|---|---|---|---|
+| 5y 2022-06→2026-08 | +50% / DD −8% / Sharpe 1.16 | **+160% / DD −17% / 1.40** | +113% / DD −19% / 1.21 |
+| 10y 2017-06→2026-08 | +105% / DD −20% / 0.84 | **+323% / DD −34% / 0.89** | +264% / DD −34% / 0.85 |
+
+Honest caveats: most of the gain is exposure (42% → 100%); the overlay's alpha is lumpy
+(lags SPY in 5 of 10 years, 2019 by 20 pts); the universe is today's S&P 100 list, so
+survivorship flatters GLIDER but not SPY. `mode: gated` (SPY only while the gate is open)
+keeps DD at −12.5% / −26.5% but trails SPY on total return.
+
+**Gate is benchmark-relative now** (`backtest/metrics.py`): a fully invested book cannot
+have a 15% max DD in a window where SPY fell 34%, so GLIDER's gate is ≥30 trades,
+expectancy > 0, max DD ≤ SPY's + `learning.gate_dd_margin_vs_benchmark_pct` (5 pts) AND
+total return ≥ SPY's, graded on the learner's 10y window (`backtest/run_backtest.py`).
+**Known tension:** `risk.kill_switch_drawdown_pct: 15` is measured from *starting* equity
+and would liquidate the whole book (sleeve included) in an ordinary 15% index correction
+early in the account's life; left unchanged on purpose — it is a risk-limit decision, not
+a strategy one.
 
 ## Sizing note at $5k
 

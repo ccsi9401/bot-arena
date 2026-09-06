@@ -28,12 +28,16 @@ def main() -> int:
     scfg = load_config("scalpel")
     uni = sorted(set(gcfg["universe"]["stocks"] + gcfg["universe"]["etfs"]))
 
-    print("Fetching daily history (3y)...")
-    ddata = bd.daily_history(uni, "3y")
+    period = gcfg.get("learning", {}).get("history_period", "3y")  # same window the learner grades on
+    print(f"Fetching daily history ({period})...")
+    ddata = bd.daily_history(uni, period)
     print(f"  {len(ddata)} symbols")
     print("Running GLIDER backtest...")
     g_curve, g_trades = run_glider(ddata, gcfg)
-    g = metrics.summarize(g_curve, g_trades, "GLIDER 3y daily")
+    bench = ddata[gcfg["universe"]["benchmark"]]["close"]
+    g = metrics.summarize(g_curve, g_trades, f"GLIDER {period} daily vs {gcfg['universe']['benchmark']}",
+                          bench_curve=bench,
+                          dd_margin_pct=gcfg.get("learning", {}).get("gate_dd_margin_vs_benchmark_pct", 5.0))
     (OUT / "glider.json").write_text(json.dumps(
         {"summary": g, "trades": g_trades}, indent=2, default=str), encoding="utf-8")
 

@@ -21,6 +21,8 @@ def analyze(scan: dict, cfg: dict, open_positions: list[dict]) -> dict:
     intents: list[dict] = []
     notes: list[str] = []
     held = {p["symbol"] for p in open_positions}
+    core = cfg.get("core_sleeve") or {}
+    core_sym = core.get("symbol") if core.get("enabled") else None  # sleeve holds it; not a setup
 
     # ---- regime gate ----
     bench = scan["symbols"].get(scan["benchmark"])
@@ -71,7 +73,7 @@ def analyze(scan: dict, cfg: dict, open_positions: list[dict]) -> dict:
     candidates = []
     if regime_ok:
         for sym, f in scan["symbols"].items():
-            if sym in held or f["close"] < s["min_price"]:
+            if sym in held or sym == core_sym or f["close"] < s["min_price"]:
                 continue
             if f["avg_dollar_vol_20d"] < s["min_avg_dollar_vol"]:
                 continue

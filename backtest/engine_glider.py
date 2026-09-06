@@ -7,7 +7,11 @@ identical to production; only broker mechanics are simulated:
   - stop/target checked intrabar on later days, CONSERVATIVE: gap-open, then stop
     before target when both are inside one bar
   - breakeven ratchet, trailing stop & time stop applied at the daily decision point
-Sizing mirrors the validator: risk_per_trade_pct of equity, max positions, cash-bounded.
+  - core sleeve (cfg.core_sleeve, 2026-09-06): idle cash held in the benchmark ETF,
+    sold to fund entries, swept back after exits - slippage_bps per SPY leg. Mirrors
+    core/core_sleeve.py. With the block absent/disabled the engine is unchanged.
+Sizing mirrors the validator: risk_per_trade_pct of equity, max positions, cash-bounded
+(cash + core sleeve value is spendable, exactly as the validator sees it).
 
 Features are precomputed vectorised once per symbol (precompute()). Every indicator is
 either a fixed rolling window or an EWM seeded from the start of the series, so the
@@ -86,6 +90,14 @@ def run(data: dict[str, pd.DataFrame], cfg: dict, start_equity: float | None = N
     days = sorted(feats[bench].keys())
     bars = {s: df for s, df in data.items()}
 
+    cs = cfg.get("core_sleeve") or {}
+    core_on = bool(cs.get("enabled", False))
+    core_sym = cs.get("symbol", bench)
+    core_mode = cs.get("mode", "always")
+    core_slip = float(cs.get("slippage_bps", 1)) / 1e4
+    core_buffer = float(cs.get("cash_buffer_pct", 1.0)) / 100
+    core_qty = 0.0  # fractional shares of the core ETF
+
     cash = start_equity
     positions: dict[str, dict] = {}
     trades: list[dict] = []
@@ -123,8 +135,10 @@ def run(data: dict[str, pd.DataFrame], cfg: dict, start_equity: float | None = N
                     for s, p in positions.items()]
         result = analyze(scan, cfg, open_ctx)
 
-        equity = cash + sum(p["qty"] * snapshot[s]["close"]
-                            for s, p in positions.items() if s in snapshot)
+        core_px = snapshot[core_sym]["close"] if (core_on and core_sym in snapshot) else None
+        core_val = core_qty * core_px if core_px else 0.0
+        equity = cash + core_val + sum(p["qty"] * snapshot[s]["close"]
+                                       for s, p in positions.items() if s in snapshot)
 
         # ---------- 3. apply intents at today's close (mirrors validator arithmetic) ----------
         for intent in result["intents"]:
@@ -147,15 +161,33 @@ def run(data: dict[str, pd.DataFrame], cfg: dict, start_equity: float | None = N
                 if rps <= 0:
                     continue
                 qty = int(equity * cfg["risk"]["risk_per_trade_pct"] / 100 / rps)
-                qty = min(qty, int(cash / entry)) if entry > 0 else 0
+                spendable = cash + (core_qty * core_px * (1 - core_slip) if core_px else 0.0)
+                qty = min(qty, int(spendable / entry)) if entry > 0 else 0
                 if qty < 1:
                     continue
+                shortfall = qty * entry - cash
+                if shortfall > 0 and core_px:  # sell core to fund the entry (before the buy, as live)
+                    sell = min(core_qty, shortfall / (core_px * (1 - core_slip)))
+                    core_qty -= sell
+                    cash += sell * core_px * (1 - core_slip)
                 cash -= qty * entry
                 positions[sym] = {"entry": entry, "stop": intent["stop"],
                                   "target": intent["target"], "qty": qty,
                                   "risk": qty * rps, "opened": str(day.date())}
 
-        curve[day] = cash + sum(p["qty"] * snapshot[s]["close"]
-                                for s, p in positions.items() if s in snapshot)
+        # ---------- 4. core sleeve sweep (after entries, as live) ----------
+        if core_px:
+            want = core_mode == "always" or (core_mode == "gated" and result["regime_ok"])
+            spare = cash - equity * core_buffer
+            if want and spare > 0:
+                core_qty += spare / (core_px * (1 + core_slip))
+                cash -= spare
+            elif not want and core_qty > 0:
+                cash += core_qty * core_px * (1 - core_slip)
+                core_qty = 0.0
+            core_val = core_qty * core_px
+
+        curve[day] = cash + core_val + sum(p["qty"] * snapshot[s]["close"]
+                                           for s, p in positions.items() if s in snapshot)
 
     return pd.Series(curve).sort_index(), trades

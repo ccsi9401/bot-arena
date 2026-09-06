@@ -95,6 +95,9 @@ def main() -> int:
 
     broker = make_broker(cfg)
     fills = broker.filled_orders()
+    core = cfg.get("core_sleeve") or {}
+    if core.get("enabled"):  # SPY sweep fills are cash management, not strategy trades
+        fills = [f for f in fills if f["symbol"] != core.get("symbol", "SPY")]
     trips = round_trips(fills)
     out["live_closed_trades"] = len(trips)
     need = L.get("min_live_trades", 30)

@@ -22,7 +22,7 @@ import os
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import OrderSide, TimeInForce, OrderClass, QueryOrderStatus
 from alpaca.trading.requests import (
-    LimitOrderRequest, StopLossRequest, TakeProfitRequest,
+    LimitOrderRequest, MarketOrderRequest, StopLossRequest, TakeProfitRequest,
     GetOrdersRequest, ReplaceOrderRequest,
 )
 
@@ -132,6 +132,22 @@ class AlpacaBroker:
             take_profit=TakeProfitRequest(limit_price=round(target_price, 2))))
         return {"id": str(order.id), "symbol": symbol, "qty": qty,
                 "status": str(order.status)}
+
+    def submit_notional_market(self, symbol: str, notional: float, side: str) -> dict:
+        """Dollar-sized market order (fractional). Alpaca requires DAY tif for notional
+        orders. Used only by the core sleeve (core/core_sleeve.py)."""
+        order = self.trading.submit_order(MarketOrderRequest(
+            symbol=symbol, notional=round(notional, 2),
+            side=OrderSide.BUY if side == "buy" else OrderSide.SELL,
+            time_in_force=TimeInForce.DAY))
+        return {"id": str(order.id), "symbol": symbol, "side": side,
+                "notional": round(notional, 2), "status": str(order.status)}
+
+    def order_status(self, order_id: str) -> dict:
+        o = self.trading.get_order_by_id(order_id)
+        return {"id": str(o.id), "status": str(o.status),
+                "filled_qty": float(o.filled_qty or 0),
+                "filled_avg_price": float(o.filled_avg_price) if o.filled_avg_price else None}
 
     def replace_stop(self, symbol: str, new_stop: float) -> dict:
         for o in self.open_orders():

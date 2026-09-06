@@ -3,7 +3,7 @@
 Two paper-trading bots, one 30-day competition. See `DESIGN.md` for the full spec.
 
 - **SCALPEL** — intraday session-momentum. Hourly cycles 10:30–15:30 ET, flat every night.
-- **GLIDER** — swing trend-pullback. One cycle daily at 15:30 ET, holds 2–15 days.
+- **GLIDER** — swing trend-pullback. One cycle daily at 15:30 ET, holds 2–15 days. Idle cash rides SPY (core sleeve).
 
 Both: Alpaca paper accounts ($50k), US large caps + ETFs, long-only, 1% risk per trade,
 bracket orders (stops live at the broker), −10% kill switch.

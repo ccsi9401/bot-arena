@@ -17,7 +17,7 @@ from datetime import date, datetime
 from core.common import Journal, State, load_config, now_et
 from core.broker import make_broker
 from core.data import MarketData
-from core import scanner, validator, executor as executor_mod
+from core import scanner, validator, executor as executor_mod, core_sleeve
 
 
 def reconcile_ledger(state: State, positions: list[dict], journal: Journal) -> list[dict]:
@@ -90,7 +90,10 @@ def main() -> int:
             print(json.dumps({"run_id": journal.run_id, "skipped": "market closed"}))
             return 0
         account = broker.account()
-        positions = broker.positions()
+        # the core sleeve (idle cash parked in SPY) is not a strategy position:
+        # strip it before reconcile/validate, expose its value as spendable cash
+        core_pos, positions = core_sleeve.split_positions(broker.positions(), cfg)
+        account["core_value"] = float(core_pos["market_value"]) if core_pos else 0.0
         open_orders = broker.open_orders()
         open_ctx = reconcile_ledger(state, positions, journal)
 
@@ -114,6 +117,24 @@ def main() -> int:
         validation = validator.validate(
             analysis["intents"], account, positions, open_orders, cfg, state,
             scan["asof_et"], market_open, last_trades)
+
+        # ---- 3b. core sleeve: sell SPY BEFORE entries (never margin), buy AFTER ----
+        core_log = None
+        if core_sleeve.enabled(cfg):
+            kill = state.kill_switch_tripped() or any("kill" in h.lower() for h in validation["halts"])
+            core_plan = core_sleeve.plan(account, core_pos, positions, open_orders,
+                                         validation["approved"], cfg,
+                                         regime_ok=bool(analysis.get("regime_ok", True)), kill=kill)
+            core_log = {"plan": core_plan, "orders": [], "dry_run": args.dry_run}
+            if core_plan["action"] == "sell" and not args.dry_run:
+                res = core_sleeve.execute(core_plan, broker)
+                core_log["orders"].append(res)
+                if not res.get("filled"):
+                    dropped = [o for o in validation["approved"] if o["action"] == "buy"]
+                    validation["approved"] = [o for o in validation["approved"] if o["action"] != "buy"]
+                    validation["rejected"] += [{**o, "reject_reason": "core sleeve sell did not fill - entry skipped rather than borrow"}
+                                               for o in dropped]
+                    core_log["note"] = f"sell unfilled - {len(dropped)} entries skipped"
         journal.write("validation", validation)
 
         # ---- 4. execute ----
@@ -123,7 +144,11 @@ def main() -> int:
             tif = "gtc" if args.bot == "glider" else "day"
             execution = executor_mod.execute(validation["approved"], broker, tif=tif)
             update_ledger_after_execution(state, execution, validation)
+            if core_log and core_log["plan"]["action"] == "buy":
+                core_log["orders"].append(core_sleeve.execute(core_log["plan"], broker))
         journal.write("execution", execution)
+        if core_log:
+            journal.write("core", core_log)
 
         state.append_equity_point(account["equity"], account["cash"],
                                   note=f"cycle {journal.run_id}")

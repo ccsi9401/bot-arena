@@ -77,7 +77,8 @@ def test_engine_runs_and_learner_pieces():
     c = candidates_from_grid(cfg["strategy"], 20, 1)
     assert len(c) == 20 and all("exit_mode" in s for s in c)
     full_grid = candidates_from_grid(cfg["strategy"], 10_000, 1)
-    assert {s["regime_filter"] for s in full_grid} == {"spy_above_200sma", "markov2"}
+    # markov2 left the grid 2026-09-06 (immature-matrix artifact); it must not come back silently
+    assert {s["regime_filter"] for s in full_grid} == {"spy_above_200sma"}
     # trail mode also runs end-to-end
     curve2, trades2 = eg.run(data, _cfg(exit_mode="trail"))
     assert len(curve2) == len(curve)
