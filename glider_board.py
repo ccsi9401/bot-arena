@@ -27,6 +27,17 @@ from dashboard import line_chart  # noqa: E402
 OUT = ROOT / "board" / "glider.html"
 FIRST_SESSION = "first session Mon Aug 31, 3:30pm ET"
 
+# Human-readable strategy history for the page (the audit trail itself is git +
+# state/glider/learn_history.json; this is the short version a phone can read).
+CHANGELOG = [
+    ("2026-08-29", "Learner promoted the Markov 2.0 regime gate with a 3.5×ATR trailing exit "
+                   "(later found to be an artifact of the 5-year window)."),
+    ("2026-08-31", "First live session on a $5,000 paper account."),
+    ("2026-09-06", "Regime gate back to the 200-day SMA (on 10 years the Markov gate made +19% "
+                   "vs +105%). Idle cash now rides SPY as a core sleeve. Learner uses 10 years "
+                   "of history and is scored against SPY. Kill switch is 30% trailing from peak."),
+]
+
 
 def equity_curve() -> list[tuple[str, float]]:
     f = ROOT / "state" / "glider" / "equity_curve.json"
@@ -130,21 +141,47 @@ def main() -> int:
     gate = ""
     b = (scan.get("symbols") or {}).get(scan.get("benchmark", ""), {})
     sig, st = b.get("markov2_signal"), b.get("markov2_state", "?")
-    if sig is not None:
+    if s.get("regime_filter") == "markov2" and sig is not None:
         ok = analysis.get("regime_ok")
         gate = (f'<div class="leader">Regime gate: <b>{"OPEN 🟢" if ok else "CLOSED 🟡"}</b>'
                 f' · P(bull)−P(bear) = {sig:+.3f} ({st})</div>')
     elif analysis:
-        ok = analysis.get("regime_ok")
-        how = ("200SMA fallback (Markov matrix warming up)" if s.get("regime_filter") == "markov2"
-               else "SPY vs its 200-day SMA")
+        if s.get("regime_filter") == "markov2":
+            ok, how = analysis.get("regime_ok"), "200SMA fallback (Markov matrix warming up)"
+        elif b.get("close") and b.get("sma200"):
+            # judge from the scan itself: the last session may predate a config change
+            ok = b["close"] > b["sma200"]
+            how = (f'SPY {b["close"]:,.2f} vs 200-day SMA {b["sma200"]:,.2f} '
+                   f'({(b["close"] / b["sma200"] - 1) * 100:+.1f}%)')
+        else:
+            ok, how = analysis.get("regime_ok"), "SPY vs its 200-day SMA"
         gate = (f'<div class="leader">Regime gate: <b>{"OPEN 🟢" if ok else "CLOSED 🟡"}</b>'
                 f' · {how}</div>')
+    core_cfg = cfg.get("core_sleeve") or {}
+    core_sym = html.escape(str(core_cfg.get("symbol", "SPY")))
     cp = (run.get("core") or {}).get("plan") or {}
     if cp:
-        gate += (f'<div class="leader">Core sleeve: <b>${cp.get("current", 0):,.0f}</b> in {html.escape(str(cp.get("symbol")))}'
+        gate += (f'<div class="leader">Core sleeve: <b>${cp.get("current", 0):,.0f}</b> in {core_sym}'
                  f' · target ${cp.get("target", 0):,.0f} · {html.escape(str(cp.get("action")))}'
                  f' — idle cash rides the index instead of sitting out</div>')
+    elif core_cfg.get("enabled"):
+        gate += (f'<div class="leader">Core sleeve: <b>ON</b> · idle cash is swept into {core_sym} '
+                 f'at the next 3:30pm cycle — it rides the index instead of sitting out</div>')
+
+    # ---- kill switch standing ----
+    kill_mode = risk.get("kill_switch_mode", "from_start")
+    kill_level = float(risk.get("kill_switch_drawdown_pct", 15))
+    kill_desc = (f"−{kill_level:.0f}% trailing from peak" if kill_mode == "trailing_peak"
+                 else f"−{kill_level:.0f}% from start")
+    if eq:
+        peak = max([start] + [v for _, v in port])
+        ref = peak if kill_mode == "trailing_peak" else start
+        dd = (ref - eq) / ref * 100
+        tripped = state_json("kill_switch", {}).get("tripped", False)
+        standing = ("<b>TRIPPED</b> — flat until reset" if tripped else
+                    f'book is {dd:.1f}% below {"peak" if kill_mode == "trailing_peak" else "start"} '
+                    f'${ref:,.0f} · line at −{kill_level:.0f}%')
+        gate += f'<div class="leader">Kill switch: {kill_desc} · {standing}</div>'
 
     # ---- open positions ----
     ledger = state_json("ledger", {})
@@ -204,7 +241,14 @@ def main() -> int:
         need = int(learn.get("min_live_trades", 30))
         learn_rows.append(f"<p class='why'>Reflection (Sat): {n}/{need} closed live trades — "
                           f"{html.escape(str(refl.get('summary', '')))}</p>")
+    learn_rows.append("<p class='why'><b>Strategy changes</b></p>")
+    for d, what in sorted(CHANGELOG, reverse=True):
+        learn_rows.append(f"<p class='why'>{d} — {html.escape(what)}</p>")
     learning = "".join(learn_rows)
+
+    gate_desc = ("SPY above its 200-day SMA" if s.get("regime_filter") == "spy_above_200sma"
+                 else "Markov 2.0 (stride matrix)")
+    core_desc = f" on a {core_sym} core" if core_cfg.get("enabled") else ""
 
     page = f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
@@ -266,7 +310,7 @@ footer{{color:var(--muted);font-size:12px;margin-top:22px}}
 <div class="nav"><a href="index.html">← Arena scoreboard</a> · <a href="steward.html">STEWARD →</a></div>
 <h1>GLIDER — Claude's swing bot</h1>
 <div class="sub">Updated {now_et():%b %d, %I:%M %p} ET · trades daily at 3:30pm ET ·
-self-learning (monthly, gated)</div>
+{"idle cash rides " + core_sym + " · " if core_cfg.get("enabled") else ""}self-learning (monthly, gated)</div>
 {gate}
 <div class="tiles">{tiles}</div>
 <div class="panel">{chart}</div>
@@ -276,9 +320,9 @@ self-learning (monthly, gated)</div>
 <div class="panel">{session}</div>
 <h2>Self-learning</h2>
 <div class="panel">{learning}</div>
-<footer>trend-pullback entries · Markov 2.0 regime gate (stride matrix) ·
+<footer>trend-pullback overlay{core_desc} · regime gate: {gate_desc} ·
 {risk["risk_per_trade_pct"]}% risk/trade · max {risk["max_positions"]} positions ·
-kill switch −{risk["kill_switch_drawdown_pct"]:.0f}% ·
+kill switch {kill_desc} ·
 ${start:,.0f} paper account</footer>
 </div>
 <script>
