@@ -39,7 +39,7 @@ risk:
   max_positions: 5
   max_gross_exposure_pct: 100
   daily_loss_limit_pct: null         # swing bot has no daily breaker
-  kill_switch_drawdown_pct: 15.0
+  kill_switch_drawdown_pct: 30.0        # catastrophe line (2026-09-06): fully invested book; 10y replay fires once (Mar 2020), 15-20% would have died Dec 2018
   kill_switch_mode: trailing_peak    # trailing_peak = from the highest equity on record (2026-09-06); from_start = competition rule
   data_freshness_minutes: 60
   limit_price_tolerance_pct: 1.0
