@@ -60,6 +60,10 @@ jobs:
             y:10:45) ring steward.yml -f mode=catchup ;;&
             y:17:15) ring scoreboard.yml ;;&
             y:17:45) ring steward.yml -f mode=pulse ;;&
+            # TALON (crypto, 24/7): its own cron is "5 0,4,8,12,16,20 * * *" UTC, which GitHub
+            # fires 2-3 hours late or not at all. These are the same six slots in ET, every day
+            # of the week. The gate step inside talon.yml skips green until the backtest passes.
+            [yn]:00:00|[yn]:04:00|[yn]:08:00|[yn]:12:00|[yn]:16:00|[yn]:20:00) ring talon.yml ;;&
           esac
           [ "$DOW" = 5 ] && [ "$NOW" = "15:00" ] && ring steward.yml -f mode=auto
           [ "$DOW" = 6 ] && [ "$NOW" = "07:00" ] && ring glider-reflect.yml
