@@ -1060,7 +1060,9 @@ def test_board_with_state_and_journal(cfg):
     ]
     btc = {"last": 60000.0, "sma": 62000.0, "asof": "2026-09-05",
            "closes": {"2026-09-05": 58000.0, "2026-09-06": 60000.0}}
-    page = TB.render(cfg, _gate(True), state, journal, btc, _dt(2026, 9, 6, 10, 0))
+    c = copy.deepcopy(cfg)
+    c["risk"]["starting_equity"] = 10_000   # the fixture's snapshots are on a $10k base
+    page = TB.render(c, _gate(True), state, journal, btc, _dt(2026, 9, 6, 10, 0))
     assert "PASSED 🟢" in page
     assert "Regime: <b>OFF 🟡" in page
     assert "ETH/USD" in page and "locked_2R" in page and "+3.3R" in page
