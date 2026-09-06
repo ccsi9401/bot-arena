@@ -38,17 +38,33 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -r requirements.txt
+      - name: Check the backtest gate
+        id: gate
+        # run_talon.py exits 2 when the gate is not passed, which is the right answer for a
+        # human at a terminal but turns every scheduled run red until the gate is earned:
+        # six failure emails a day that teach you to ignore the one that matters. STEWARD's
+        # convention is to skip green and say why; this step does the same for TALON.
+        # pulse and flatten are not gated and always run.
+        run: |
+          MODE="${{ inputs.mode }}"
+          if [ -z "$MODE" ]; then MODE=cycle; fi   # scheduled runs trade
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "requested mode=$MODE (event=${{ github.event_name }})"
+          if [ "$MODE" != "cycle" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if python -c "import json,sys,yaml; c=yaml.safe_load(open('config/talon.yaml')); p=c['paths']['gate']; g=json.load(open(p)); print(p, '->', 'passed' if g.get('passed') else 'NOT passed', '-', g.get('reason','')); sys.exit(0 if g.get('passed') else 1)"; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice title=TALON gated::backtest gate not passed; cycle skipped. Run backtest/backtest.py on real bars and commit state/talon/gate.json to enable trading."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Run TALON
+        if: steps.gate.outputs.skip != 'true'
         env:
           TALON_API_KEY: ${{ secrets.TALON_API_KEY }}
           TALON_API_SECRET: ${{ secrets.TALON_API_SECRET }}
           # TALON_FORCE_LIVE is deliberately NOT set here. Even if config ever said
           # mode: live, the broker would refuse without it (two independent switches).
-        run: |
-          MODE="${{ inputs.mode }}"
-          if [ -z "$MODE" ]; then MODE=cycle; fi   # scheduled runs trade
-          echo "requested mode=$MODE (event=${{ github.event_name }})"
-          python run_talon.py --mode "$MODE"
+        run: python run_talon.py --mode "${{ steps.gate.outputs.mode }}"
       - name: Commit state + journal
         # always(): a failed cycle still records what happened (journal/talon/*.jsonl
         # gets the error row, state keeps the last good snapshot).
