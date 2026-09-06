@@ -103,7 +103,7 @@ rising_floor:
     step_pct: 0.05            # sweep in whole 5% steps of basis so it does not nibble every tick
 
 risk:
-  starting_equity: 10000
+  starting_equity: 100000     # paper account PA3WNFN5XKSS opened with Alpaca default $100k (2026-09-06)
   risk_per_trade_pct: 0.010   # 1R = 1% of tradeable equity
   max_position_weight: 0.25   # per-position notional cap, fraction of tradeable equity
   max_gross_exposure: 0.75    # open + new notional cap, fraction of tradeable equity (pro-rata haircut)
