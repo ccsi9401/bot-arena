@@ -991,3 +991,91 @@ def test_live_exit_uses_completed_bar_not_live_mark(live):
                                                      "current_price": 100.0, "unrealized_pl": -380.0}}))
     assert RT.run("cycle", c) == RT.EXIT_OK
     assert "BTC/USD" in br2.closed
+
+
+# ---------------------------------------------------------------------------
+# Phone page — talon_board.render() is pure; exercise it offline
+# ---------------------------------------------------------------------------
+
+import talon_board as TB  # noqa: E402
+from datetime import datetime as _dt  # noqa: E402
+
+
+def _gate(passed: bool) -> dict:
+    return {
+        "passed": passed,
+        "reason": "all checks passed" if passed else "FAILED: sub-window 1/2 beat equal_weight on sharpe",
+        "generated_utc": "2026-09-06T06:56:53+00:00",
+        "universe": ["BTC/USD", "ETH/USD"],
+        "window": {"start": "2023-04-05 00:00:00+00:00", "end": "2026-09-06 00:00:00+00:00", "bars": 1251},
+        "checks": [
+            {"check": "sharpe >= min_sharpe", "value": 0.911, "threshold": 0.8, "ok": True},
+            {"check": "sub-window 1/2 beat equal_weight on sharpe", "window": "2023-04-05..2024-12-20",
+             "value": 1.307, "threshold": 1.345, "ok": passed},
+        ],
+        "metrics": {"strategy": {"total_return_pct": 0.71, "sharpe": 0.911, "max_drawdown_pct": 0.258, "trades": 80},
+                    "btc_hold": {"total_return_pct": 1.82, "sharpe": 0.887, "max_drawdown_pct": 0.531},
+                    "equal_weight": {"total_return_pct": 0.83, "sharpe": 0.583, "max_drawdown_pct": 0.723}},
+    }
+
+
+def test_board_renders_with_nothing_but_config(cfg):
+    page = TB.render(cfg, {}, {}, [], {}, _dt(2026, 9, 6, 18, 35))
+    assert "Gate: <b>NOT RUN</b>" in page
+    assert "No cycle has got past the gate" in page
+    assert "No open positions" in page
+    assert "Next ring <b>Sun 08:00 PM ET</b>" in page
+    assert "<script>" in page and page.count("<table") == 0
+
+
+def test_board_failing_gate_is_the_headline(cfg):
+    page = TB.render(cfg, _gate(False), {}, [], {"last": 60000.0, "sma": 55000.0, "asof": "2026-09-05", "closes": {}},
+                     _dt(2026, 9, 6, 23, 30))
+    assert "FAILING 🔴" in page and "1/2 checks" in page
+    assert "❌ sub-window 1/2 beat equal_weight on sharpe" in page and "2023-04-05..2024-12-20" in page
+    assert "Regime: <b>ON 🟢</b>" in page and "+9.1%" in page
+    assert "Next ring <b>Mon 12:00 AM ET</b>" in page
+    assert "80 trades" in page
+
+
+def test_board_with_state_and_journal(cfg):
+    fl = PositionFloor.open("ETH/USD", 3000.0, 60.0, cfg)
+    fl.update(3400.0, cfg)  # +3.3R -> locked_2R
+    state = {
+        "last_run_utc": "2026-09-06T20:00:40+00:00",
+        "equity_high_water": 10_800.0,
+        "halted": False, "halt_reason": "",
+        "account_floor": {"basis": 10_600.0, "locked": 400.0, "high_water": 11_000.0, "history": []},
+        "positions": {"ETH/USD": fl.to_dict()},
+        "last_snapshot": {"equity": 10_500.0, "locked": 400.0, "regime_on": True, "open_count": 1},
+    }
+    journal = [
+        {"ts": "2026-09-05T00:05:00+00:00", "run_id": "r1", "event": "snapshot", "equity": 10_000.0},
+        {"ts": "2026-09-06T00:05:00+00:00", "run_id": "r2", "event": "plan", "regime_on": True, "tradeable": 10_100.0,
+         "targets": {"ETH/USD": 2500.0}, "notes": ["Regime ON."],
+         "candidates": [{"symbol": "ETH/USD", "score": 0.8, "momentum": 0.12, "reasons": ["ema_trend", "donchian_breakout"]},
+                        {"symbol": "LTC/USD", "score": 0.4, "momentum": -0.02, "reasons": ["ema_trend"]}]},
+        {"ts": "2026-09-06T00:05:03+00:00", "run_id": "r2", "event": "entry", "symbol": "ETH/USD", "notional": 2500.0},
+        {"ts": "2026-09-06T00:05:04+00:00", "run_id": "r2", "event": "snapshot", "equity": 10_500.0},
+    ]
+    btc = {"last": 60000.0, "sma": 62000.0, "asof": "2026-09-05",
+           "closes": {"2026-09-05": 58000.0, "2026-09-06": 60000.0}}
+    page = TB.render(cfg, _gate(True), state, journal, btc, _dt(2026, 9, 6, 10, 0))
+    assert "PASSED 🟢" in page
+    assert "Regime: <b>OFF 🟡" in page
+    assert "ETH/USD" in page and "locked_2R" in page and "+3.3R" in page
+    assert "$400" in page and "basis $10,600" in page
+    assert "2.8% below high-water $10,800" in page
+    assert "planned entries: ETH/USD $2,500" in page
+    assert "ema_trend, donchian_breakout" in page
+    assert "entry ETH/USD" in page
+    assert "linechart" in page          # two snapshots -> a real chart
+    assert "$10,500" in page and "$10,345" in page   # BTC hold: 10,000 * 60000/58000
+    assert "Next ring <b>Sun 12:00 PM ET</b>" in page
+
+
+def test_board_cli_offline_writes_file(tmp_path):
+    out = tmp_path / "talon.html"
+    assert TB.main(["--offline", "--out", str(out)]) == 0
+    s = out.read_text(encoding="utf-8")
+    assert "<title>TALON" in s and "Gate:" in s

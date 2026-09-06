@@ -65,6 +65,24 @@ jobs:
           # TALON_FORCE_LIVE is deliberately NOT set here. Even if config ever said
           # mode: live, the broker would refuse without it (two independent switches).
         run: python run_talon.py --mode "${{ steps.gate.outputs.mode }}"
+      - name: Publish talon phone page
+        # Same pattern as glider/steward: render from committed files, push to the public
+        # bot-arena-board Pages repo. always(): the page must update even on a gated skip,
+        # because "gated" is exactly what it needs to say.
+        if: always()
+        env:
+          BOARD_TOKEN: ${{ secrets.BOARD_TOKEN }}
+        run: |
+          if [ -z "$BOARD_TOKEN" ]; then echo "no BOARD_TOKEN secret; skipping"; exit 0; fi
+          python talon_board.py
+          git clone --depth 1 "https://x-access-token:${BOARD_TOKEN}@github.com/ccsi9401/bot-arena-board.git" /tmp/boardrepo
+          cp board/talon.html /tmp/boardrepo/talon.html
+          cd /tmp/boardrepo
+          git config user.name "talon-bot"
+          git config user.email "bots@arena.local"
+          git add talon.html
+          git diff --cached --quiet || git commit -m "talon board $(date -u +%Y%m%d-%H%M)"
+          git push
       - name: Commit state + journal
         # always(): a failed cycle still records what happened (journal/talon/*.jsonl
         # gets the error row, state keeps the last good snapshot).
