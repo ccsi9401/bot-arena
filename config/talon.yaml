@@ -1,0 +1,159 @@
+# TALON — long-only crypto trend/dip ensemble with a rising floor (Alpaca paper).
+#
+# EVERY tunable lives here. No number a human might want to change is allowed in a
+# .py file; if you find one, move it here and reference it. The backtest and the live
+# cycle read this same file, so a knob changed here is changed in both.
+meta:
+  name: TALON
+  version: "1.0.0"
+  mode: paper                 # "paper" or "live". "live" ALSO needs TALON_FORCE_LIVE=I_UNDERSTAND
+                              # in the environment — two independent switches, see talon/broker.py.
+  account_env_prefix: TALON   # TALON_API_KEY / TALON_API_SECRET
+
+universe:
+  # Ten pairs. Three have partial history on Alpaca (SOL delisted 2023-07-07 to 2024-08-25 under
+  # the SEC security designation, XRP listed 2024-01-01, DOT 2023-08-18). With
+  # data.alignment: point_in_time each name becomes eligible once it has min_bars of its own
+  # valid bars, so partial history no longer shortens the tested window for everyone else.
+  symbols: [BTC/USD, ETH/USD, SOL/USD, LINK/USD, AVAX/USD, LTC/USD, DOT/USD, UNI/USD, AAVE/USD, XRP/USD]
+  benchmark: BTC/USD          # the regime gate reads this one; must have gap-free history
+
+data:
+  timeframe: 1D
+  lookback_bars: 900          # what the LIVE cycle fetches. The backtest fetches backtest.lookback_bars.
+  min_bars: 250               # a symbol with fewer VALID bars than this is not scored, and the
+                              # backtest starts walking forward here (must exceed regime.sma_days)
+  alignment: point_in_time    # point_in_time: panel on the union calendar, NaN where a name has no
+                              # bar, each name eligible after its own min_bars (standard PIT universe).
+                              # intersection: trim every frame to the common timestamps (the old
+                              # behaviour; one late listing shortens the whole tested window).
+  periods_per_year: 365       # crypto trades every day: vol and Sharpe annualise on 365
+  use_incomplete_bar: false   # Alpaca returns the in-progress daily bar. Signals are computed on
+                              # COMPLETED bars only (mirrors the backtest's fill-at-next-open);
+                              # the in-progress bar's close is still used as "current price" for exits.
+  base_url: https://data.alpaca.markets/v1beta3/crypto/us/bars
+  page_limit: 10000           # bars per page; Alpaca paginates with next_page_token
+  retries: 5
+  backoff_base_s: 1.0         # sleep = base * 2**attempt between retries
+  timeout_s: 30
+
+# One block per strategy. weight 0 disables a strategy without deleting it.
+# The three 0/1 strategies vote; the ensemble score is the weighted vote share (0..1).
+# momentum_score is NOT a vote — it is a cross-sectional ranking key applied in the planner:
+# the top_k names by momentum (positive only) get its weight added, then re-normalised.
+strategies:
+  donchian_breakout:
+    weight: 1.0
+    entry_lookback: 40        # close above the max of the PREVIOUS 40 highs (shifted by 1)
+    trend_sma: 100            # ...and above the 100-day SMA
+  ema_trend:
+    weight: 1.0
+    fast: 21
+    slow: 55
+    slope_bars: 10            # slow EMA must be higher than it was 10 bars ago
+  dip_reversion:
+    weight: 0.0               # OFF since 2026-09-06. Ablation on 2023-04..2026-09: Sharpe 0.88 -> 1.03
+                              # with it removed. Mechanism: it fires when RSI < 35, exactly when the
+                              # trend voters are weakest, so the ensemble agrees at the worst moments.
+                              # Kept in the book at weight 0 so the experiment is one edit to reverse.
+    trend_sma: 100            # MANDATORY uptrend filter — without it this buys falling knives
+    rsi_period: 14
+    rsi_max: 35               # RSI below this counts as a dip...
+    z_window: 20
+    z_max: -1.5               # ...or a 20-day z-score below this
+  momentum_score:
+    weight: 0.5               # added to the top_k names' score, then re-normalised
+    short: 30                 # short_weight * pct_change(short) + long_weight * pct_change(long)
+    long: 90
+    short_weight: 0.5
+    long_weight: 0.5
+    top_k: 5
+
+ensemble:
+  min_score: 0.30             # a name needs at least this share of the weighted vote to be a candidate
+  max_positions: 5
+
+regime:
+  enabled: true
+  sma_days: 200               # benchmark above its 200-day SMA = risk-on. KEEP FIXED. Do not sweep.
+  block_new_entries_when_off: true   # exits still run when the regime is off; only entries stop
+
+rising_floor:
+  position:
+    atr_period: 14
+    initial_atr_mult: 2.0     # initial stop = entry - 2*ATR; that distance is 1R
+    min_r_pct: 0.005          # ...but never less than 0.5% of entry (hair-trigger guard for tiny ATR)
+    breakeven_at_r: 1.0       # at +1R the floor moves to entry + cost_pad: the trade can no longer lose
+    ratchet_steps:            # at +at_r, lock in lock_r of profit
+      - {at_r: 2.0, lock_r: 1.0}
+      - {at_r: 3.0, lock_r: 2.0}
+      - {at_r: 5.0, lock_r: 3.5}
+    trail_pct: 0.18           # once past basement, floor is at least high_water * (1 - 0.18)
+    evaluate_on: completed_bar  # completed_bar: floors ratchet and breach on the CLOSE of the last
+                                # completed daily bar, live and in the backtest alike (a close-based
+                                # stop; standard for daily-bar trend following). The 4-hourly cycles
+                                # still run the equity kill switch and breaker every time.
+                                # current_price: live checks the live mark six times a day and the
+                                # backtest checks the daily LOW (fill at the floor). Measured 2026-09-06:
+                                # current_price cut Sharpe 0.88 -> 0.44 because a 2-ATR floor is
+                                # touched by intraday wicks far more often than by closes.
+  account:
+    activation_gain_pct: 0.10 # sweep only once equity is >= 10% above basis
+    sweep_fraction: 0.40      # lock 40% of the eligible gain
+    step_pct: 0.05            # sweep in whole 5% steps of basis so it does not nibble every tick
+
+risk:
+  starting_equity: 10000
+  risk_per_trade_pct: 0.010   # 1R = 1% of tradeable equity
+  max_position_weight: 0.25   # per-position notional cap, fraction of tradeable equity
+  max_gross_exposure: 0.75    # open + new notional cap, fraction of tradeable equity (pro-rata haircut)
+  min_order_notional: 25      # below this an order is dropped
+  daily_loss_breaker_pct: 0.04   # equity down 4% from the UTC-day start -> halt for the day
+  daily_breaker_action: block_entries   # block_entries: no new risk, the position floors handle exits
+                                        # (circuit-breaker convention). flatten: close everything too.
+                                        # The kill switch always flattens.
+  kill_switch_dd_pct: 0.18       # equity down 18% from high-water -> halt + flatten (human resets)
+  inverse_vol_sizing: true
+  inverse_vol_clip: [0.5, 2.0]   # 1/vol scale, normalised to mean 1 across the selected set, clipped
+  vol_window: 30                 # realised-vol window (bars) for the inverse-vol scale
+
+broker:
+  fill_wait_s: 1.0            # after a market buy, poll the order this often...
+  fill_polls: 5               # ...this many times for filled_avg_price (else use the planned price)
+
+costs:                        # pessimistic on purpose: Alpaca crypto taker fee is ~25 bps
+  fee_bps: 25
+  slippage_bps: 15
+
+backtest:
+  lookback_bars: 1500         # ~4.1 years of daily bars; after min_bars warm-up ~3.4 years are TESTED
+  kill_switch_restart_bars: 30   # backtest-only modelling of the human reset: after the kill switch
+                                 # fires, stay flat this many bars, then reset high-water and resume
+  synthetic:                  # --synthetic: geometric random walk, three trend regimes, NO edge
+    bars: 900
+    seed: 7
+    start_price: 100.0
+    daily_vol: 0.03
+    common_factor: 0.6        # share of each symbol move that comes from a shared market factor
+    intrabar_range: 0.5       # high/low wick size as a fraction of daily_vol
+    regimes:                  # equal thirds, in this order: chop absorbs the min_bars warm-up,
+      - {name: chop, drift: 0.0}         # then the bot trades a bull leg (floors ratchet,
+      - {name: bull, drift: 0.0030}      # account floor sweeps), then a bear leg (exits,
+      - {name: bear, drift: -0.0030}     # regime gate, kill switch). Log-drift per bar.
+
+backtest_gate:
+  min_sharpe: 0.80
+  max_drawdown_pct: 0.35
+  min_total_return_pct: 0.0
+  must_beat_control_on: sharpe
+  controls_to_beat: [equal_weight]   # add btc_hold to also require beating BTC buy-and-hold
+  min_trades: 30
+  years_required: 3.0         # measured on the TESTED window (after min_bars warm-up)
+  sub_windows: 2              # split the tested window into this many equal parts; EACH part must
+                              # clear max_drawdown_pct and beat the controls on must_beat_control_on.
+                              # A single-regime pass (one long bull leg) fails here. 1 disables.
+
+paths:
+  state: state/talon/talon_state.json
+  gate: state/talon/gate.json
+  journal_dir: journal/talon  # one JSONL file per UTC day: journal/talon/YYYY-MM-DD.jsonl

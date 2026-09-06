@@ -1,0 +1,134 @@
+{
+  "passed": false,
+  "reason": "FAILED: sub-window 1/2 beat equal_weight on sharpe",
+  "generated_utc": "2026-09-06T07:16:32+00:00",
+  "config_version": "1.0.0",
+  "universe": [
+    "BTC/USD",
+    "ETH/USD",
+    "SOL/USD",
+    "LINK/USD",
+    "AVAX/USD",
+    "LTC/USD",
+    "DOT/USD",
+    "UNI/USD",
+    "AAVE/USD",
+    "XRP/USD"
+  ],
+  "alignment": "point_in_time",
+  "window": {
+    "start": "2023-04-05 00:00:00+00:00",
+    "end": "2026-09-06 00:00:00+00:00",
+    "bars": 1251
+  },
+  "checks": [
+    {
+      "check": "sharpe >= min_sharpe",
+      "value": 0.911,
+      "threshold": 0.8,
+      "ok": true
+    },
+    {
+      "check": "max_drawdown <= max_drawdown_pct",
+      "value": 0.2581,
+      "threshold": 0.35,
+      "ok": true
+    },
+    {
+      "check": "total_return >= min_total_return_pct",
+      "value": 0.7091,
+      "threshold": 0.0,
+      "ok": true
+    },
+    {
+      "check": "trades >= min_trades",
+      "value": 80,
+      "threshold": 30,
+      "ok": true
+    },
+    {
+      "check": "years_tested >= years_required",
+      "value": 3.425,
+      "threshold": 3.0,
+      "ok": true
+    },
+    {
+      "check": "beat equal_weight on sharpe",
+      "value": 0.911,
+      "threshold": 0.583,
+      "ok": true
+    },
+    {
+      "check": "sub-window 1/2 max_drawdown <= max_drawdown_pct",
+      "window": "2023-04-05..2024-12-20",
+      "value": 0.2581,
+      "threshold": 0.35,
+      "ok": true
+    },
+    {
+      "check": "sub-window 1/2 beat equal_weight on sharpe",
+      "window": "2023-04-05..2024-12-20",
+      "value": 1.307,
+      "threshold": 1.345,
+      "ok": false
+    },
+    {
+      "check": "sub-window 2/2 max_drawdown <= max_drawdown_pct",
+      "window": "2024-12-20..2026-09-06",
+      "value": 0.1345,
+      "threshold": 0.35,
+      "ok": true
+    },
+    {
+      "check": "sub-window 2/2 beat equal_weight on sharpe",
+      "window": "2024-12-20..2026-09-06",
+      "value": 0.328,
+      "threshold": -0.214,
+      "ok": true
+    }
+  ],
+  "metrics": {
+    "strategy": {
+      "total_return_pct": 0.7091,
+      "cagr_pct": 0.1694,
+      "sharpe": 0.911,
+      "max_drawdown_pct": 0.2581,
+      "years": 3.425,
+      "final_equity": 17091.26,
+      "trades": 80,
+      "win_rate": 0.3625,
+      "avg_r": 0.68,
+      "avg_bars_held": 43.9,
+      "locked_reserve": 3479.3,
+      "swept_total": 3479.3,
+      "kill_switch_events": 1,
+      "breaker_events": 4,
+      "regime_on_share": 0.632,
+      "open_at_end": 5,
+      "exit_reasons": {
+        "floor": 76,
+        "gap": 0,
+        "halt": 4,
+        "delisted": 0
+      }
+    },
+    "btc_hold": {
+      "total_return_pct": 1.8194,
+      "cagr_pct": 0.3535,
+      "sharpe": 0.887,
+      "max_drawdown_pct": 0.5307,
+      "years": 3.425,
+      "final_equity": 28193.56,
+      "names": 1
+    },
+    "equal_weight": {
+      "total_return_pct": 0.8257,
+      "cagr_pct": 0.1922,
+      "sharpe": 0.583,
+      "max_drawdown_pct": 0.7226,
+      "years": 3.425,
+      "final_equity": 18257.14,
+      "names": 8
+    }
+  }
+}
