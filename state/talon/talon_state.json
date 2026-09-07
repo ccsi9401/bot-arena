@@ -1,7 +1,7 @@
 {
   "account_floor": {
     "basis": 100000.0,
-    "high_water": 100000.0,
+    "high_water": 100171.77,
     "history": [],
     "locked": 0.0
   },
@@ -10,14 +10,14 @@
     "date": "2026-09-07",
     "start_equity": 100000.0
   },
-  "equity_high_water": 100000.0,
+  "equity_high_water": 100171.77,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-09-07T16:00:42+00:00",
+  "last_run_utc": "2026-09-07T19:49:42+00:00",
   "last_snapshot": {
-    "equity": 100000.0,
+    "equity": 100171.77,
     "halted": false,
-    "high_water": 100000.0,
+    "high_water": 100171.77,
     "locked": 0.0,
     "open": [
       "AAVE/USD",
@@ -27,17 +27,17 @@
       "UNI/USD"
     ],
     "open_count": 5,
-    "pnl_day": 0.0,
-    "pnl_total": 0.0,
+    "pnl_day": 171.77,
+    "pnl_total": 171.77,
     "regime_on": true,
-    "tradeable": 100000.0
+    "tradeable": 100171.77
   },
   "positions": {
     "AAVE/USD": {
       "cost_pad": 0.524917867488,
       "entry": 131.229466872,
       "floor": 115.07176945120578,
-      "high_water": 131.229466872,
+      "high_water": 136.8285,
       "r_unit": 16.157697420794207,
       "stage": "basement",
       "symbol": "AAVE/USD"
@@ -46,7 +46,7 @@
       "cost_pad": 9.898109902624,
       "entry": 2474.527475656,
       "floor": 2288.1619967698434,
-      "high_water": 2474.527475656,
+      "high_water": 2515.445,
       "r_unit": 186.36547888615684,
       "stage": "basement",
       "symbol": "ETH/USD"
@@ -55,7 +55,7 @@
       "cost_pad": 0.051732449087999996,
       "entry": 12.933112272,
       "floor": 11.643441535313091,
-      "high_water": 12.933112272,
+      "high_water": 13.2346,
       "r_unit": 1.289670736686909,
       "stage": "basement",
       "symbol": "LINK/USD"
@@ -64,7 +64,7 @@
       "cost_pad": 0.413798475476,
       "entry": 103.449618869,
       "floor": 92.91192180569116,
-      "high_water": 103.449618869,
+      "high_water": 106.529,
       "r_unit": 10.537697063308844,
       "stage": "basement",
       "symbol": "SOL/USD"
@@ -73,7 +73,7 @@
       "cost_pad": 0.027221635188,
       "entry": 6.805408797,
       "floor": 5.809333319655863,
-      "high_water": 6.805408797,
+      "high_water": 7.294845,
       "r_unit": 0.9960754773441372,
       "stage": "basement",
       "symbol": "UNI/USD"
