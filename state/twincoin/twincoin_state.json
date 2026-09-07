@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "armed_at": "2026-09-07T05:13:19.544884+00:00",
+  "acct_equity_at_arm": 500.0,
+  "basis_equity": 500.0,
+  "hwm": 500.0,
+  "halt_until": null,
+  "kill_mode_left": 0,
+  "no_entry_until": null,
+  "week_block_until": null,
+  "streak": 0,
+  "streak_until": null,
+  "day_key": null,
+  "day_start_eq": 500.0,
+  "week_key": null,
+  "week_start_eq": 500.0,
+  "last_bar": null,
+  "positions": {},
+  "last_entry": {},
+  "cooldown_until": {},
+  "last_vote": {},
+  "stats": {
+    "n": 0,
+    "wins": 0,
+    "pnl": 0.0
+  },
+  "reconcile_halt": false,
+  "kills": 0
+}
