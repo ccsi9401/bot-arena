@@ -322,3 +322,25 @@ def test_order_sanity_rejects_oversize(cfg):
         e._submit(symbol=SYMS[0], side="buy", qty=1.0, order_type="market", ref_price=50000.0)
     with pytest.raises(RuntimeError):
         e._submit(symbol="DOGE/USD", side="buy", qty=1.0, order_type="market", ref_price=1.0)
+
+
+# ----------------------------------------------------------------- phone page (pure render)
+def test_board_renders_offline(cfg):
+    from datetime import datetime, timezone
+    import twincoin_board as tb
+    now = datetime(2026, 9, 7, 5, 0, tzinfo=timezone.utc)
+    page = tb.render(cfg, {}, {}, [], [], {}, now)
+    assert "NOT ARMED" in page and "No open positions" in page
+    armed = {"armed": True, "armed_at": "2026-09-07T05:13:19+00:00", "account_equity_at_arm": 500.0}
+    st = new_state(cfg, 500.0, now)
+    st["positions"]["ETH/USD"] = {"qty": 0.05, "qty0": 0.05, "entry": 2500.0, "risk_px": 190.0, "risk_usd": 9.5, "floor": 2310.0, "hi": 2500.0,
+                                  "partial_px": 2880.0, "partial_done": False, "proceeds": 0.0, "cost": 125.0, "t_in": now.isoformat()}
+    st["last_vote"]["ETH/USD"] = {"day": "2026-09-06", "bull": 5, "bear": 1, "detail": {"trend": 1, "rsi": 1, "macd": -1, "ema50": 1, "ema200": 1, "volume": 1},
+                                  "close": 2515.0, "atr": 93.0, "ema20": 2374.0, "ema50": 2179.0, "ema200": 2179.0, "rsi": 65.8}
+    journal = [{"event": "snapshot", "ts": "2026-09-07T04:15:00", "bar": "2026-09-07T00:00:00+00:00", "ledger_equity": 500.0, "account_equity": 500.0, "cash": 375.0},
+               {"event": "snapshot", "ts": "2026-09-08T00:15:00", "bar": "2026-09-07T20:00:00+00:00", "ledger_equity": 503.2, "account_equity": 503.2, "cash": 375.0},
+               {"event": "entry_filled", "ts": "2026-09-08T00:15:00", "symbol": "ETH/USD", "price": 2500.0}]
+    trades = [{"symbol": "BTC/USD", "t_out": "2026-09-05T00:00:00", "pnl": "-9.10", "R": "-0.95", "reason": "floor"}]
+    page = tb.render(cfg, armed, st, journal, trades, {"last": {"ETH/USD": 2600.0}}, now)
+    assert "ARMED" in page and "ETH/USD" in page and "5 bull" in page and "BUY" in page
+    assert "<svg" in page and "1 closed" in page and "entry_filled" in page

@@ -62,6 +62,24 @@ jobs:
           TWINCOIN_API_KEY: ${{ secrets.TWINCOIN_API_KEY }}
           TWINCOIN_API_SECRET: ${{ secrets.TWINCOIN_API_SECRET }}
         run: python run_twincoin.py --mode "${{ steps.guard.outputs.mode }}"
+      - name: Publish twincoin phone page
+        # Same pattern as talon/glider/steward: render from committed files plus a keyless bars
+        # fetch, push to the public bot-arena-board Pages repo. always(): the page must update
+        # even on a guarded skip, because "not armed" is exactly what it needs to say.
+        if: always()
+        env:
+          BOARD_TOKEN: ${{ secrets.BOARD_TOKEN }}
+        run: |
+          if [ -z "$BOARD_TOKEN" ]; then echo "no BOARD_TOKEN secret; skipping"; exit 0; fi
+          python twincoin_board.py
+          git clone --depth 1 "https://x-access-token:${BOARD_TOKEN}@github.com/ccsi9401/bot-arena-board.git" /tmp/boardrepo
+          cp board/twincoin.html /tmp/boardrepo/twincoin.html
+          cd /tmp/boardrepo
+          git config user.name "twincoin-bot"
+          git config user.email "bots@arena.local"
+          git add twincoin.html
+          git diff --cached --quiet || git commit -m "twincoin board $(date -u +%Y%m%d-%H%M)"
+          git push
       - name: Commit state + journal
         if: always()
         run: |

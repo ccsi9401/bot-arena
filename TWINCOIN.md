@@ -10,6 +10,15 @@ indicators agree, sizes each position so a stop-out costs 2% of a $500 ledger, e
 Paper only. `twincoin/broker.py` has no live switch and refuses any config that is not
 `mode: paper`.
 
+## Phone page
+
+https://ccsi9401.github.io/bot-arena-board/twincoin.html — rebuilt and pushed by the workflow
+after every ring (`twincoin_board.py` → `board/twincoin.html` → the public bot-arena-board Pages
+repo, same as the other bots). Shows standing, the $500 ledger against BTC buy-and-hold, the
+live six-vote per coin, open positions with floors, closed trades with R multiples, the latest
+cycle's actions, and the next ring. Auto-refreshes every 15 minutes; add it to the home screen.
+Any workflow_dispatch (even mode `signal`, which needs no keys) republishes it immediately.
+
 ## Layout
 
 | Path | What |
