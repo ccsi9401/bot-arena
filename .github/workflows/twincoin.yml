@@ -1,0 +1,79 @@
+name: twincoin
+# TWINCOIN — Twin-Coin Trend Bot: BTC/ETH long-only daily trend follower on a $500 ledger,
+# Alpaca PAPER only (the broker has no live switch). Crypto trades 24/7; the cycle is keyed to
+# UTC 4-hour bar closes (00/04/08/12/16/20 UTC) and is idempotent per closed bar, so extra
+# rings are no-ops. bell.yml rings it at :15 past every UTC hour divisible by four.
+#
+# Two guards before any order: TWINCOIN_API_KEY/SECRET must exist as repo secrets, and
+# state/twincoin/armed.json must say armed=true (written by `run_twincoin.py --mode arm`,
+# which records the account equity the $500 ledger is measured from). Missing either ->
+# the run skips green with a notice rather than failing six times a day.
+on:
+  schedule:
+    - cron: "15 0,4,8,12,16,20 * * *"   # GitHub's own cron is unreliable here; bell.yml is the real trigger
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "cycle (trade) · pulse (dry run) · preflight · arm · flatten · signal (no keys)"
+        type: choice
+        options: [cycle, pulse, preflight, arm, flatten, signal]
+        default: cycle
+
+concurrency:
+  group: twincoin
+  cancel-in-progress: false
+
+jobs:
+  twincoin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Guards
+        id: guard
+        env:
+          HAVE_KEY: ${{ secrets.TWINCOIN_API_KEY != '' && secrets.TWINCOIN_API_SECRET != '' }}
+        run: |
+          MODE="${{ inputs.mode }}"; if [ -z "$MODE" ]; then MODE=cycle; fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "requested mode=$MODE (event=${{ github.event_name }})"
+          if [ "$MODE" = "signal" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ "$HAVE_KEY" != "true" ]; then
+            echo "::notice title=TWINCOIN not configured::TWINCOIN_API_KEY / TWINCOIN_API_SECRET secrets are missing; run skipped."
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ "$MODE" = "cycle" ] && ! python -c "import json,sys; sys.exit(0 if json.load(open('state/twincoin/armed.json')).get('armed') else 1)" 2>/dev/null; then
+            echo "::notice title=TWINCOIN not armed::state/twincoin/armed.json missing or armed=false; run 'arm' via workflow_dispatch after preflight passes."
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+      - name: Run TWINCOIN
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          TWINCOIN_API_KEY: ${{ secrets.TWINCOIN_API_KEY }}
+          TWINCOIN_API_SECRET: ${{ secrets.TWINCOIN_API_SECRET }}
+        run: python run_twincoin.py --mode "${{ steps.guard.outputs.mode }}"
+      - name: Commit state + journal
+        if: always()
+        run: |
+          git config user.name "twincoin-bot"
+          git config user.email "bots@arena.local"
+          git add state/twincoin journal/twincoin || true
+          if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
+          git commit -m "twincoin ${{ steps.guard.outputs.mode || 'cycle' }} $(date -u +%Y%m%d-%H%M)"
+          for i in 1 2 3 4 5; do
+            git fetch origin main
+            if git rebase -X theirs origin/main && git push origin HEAD:main; then echo "pushed on attempt $i"; exit 0; fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 5))
+          done
+          echo "::error::could not push after 5 attempts"; exit 1

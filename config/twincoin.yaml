@@ -1,0 +1,68 @@
+# TWINCOIN — Twin-Coin Trend Bot. BTC/ETH long-only daily trend follower, Alpaca PAPER.
+# Every number here is the adopted spec of 2026-09-07 (backtest: Alpaca 2021-2026 +21.9%,
+# max DD -21.7%; 2018-2026 spliced +98%). The backtest that produced them lives in
+# Documents/Alpaca Trading EJ/Twin-Coin-Trend-Bot/backtest/backtest.py and its P dict
+# must match this file. Change one, change both.
+meta:
+  name: twincoin
+  mode: paper                      # the broker refuses anything else (see twincoin/broker.py)
+  account_env_prefix: TWINCOIN     # TWINCOIN_API_KEY / TWINCOIN_API_SECRET
+
+universe:
+  symbols: ["BTC/USD", "ETH/USD"]
+  sleeve: {"BTC/USD": 0.42, "ETH/USD": 0.28}   # max notional as a fraction of ledger equity
+  vol_gate: {"BTC/USD": 0.06, "ETH/USD": 0.08} # no entry if daily ATR / price exceeds this
+  qty_decimals: {"BTC/USD": 6, "ETH/USD": 5}
+
+ledger:
+  # The paper account is bigger than $500. The bot keeps its own $500 ledger:
+  # ledger_equity = basis_equity + (account_equity_now - account_equity_at_arm).
+  # Sizing, caps, loss limits and the kill switch all use ledger equity.
+  basis_equity: 500.0
+  cash_floor: 0.30
+  min_notional: 25.0
+
+signal:
+  vote_min: 5                      # of 6 bullish to enter (raised from 4 after backtest)
+  sell_vote_min: 4                 # of 6 bearish: blocks new entries only; never exits
+  rsi_bull: [55, 75]
+  rsi_bear: 45
+  ema50_slope_bars: 5
+  obv_lookback: 20
+
+risk:
+  risk_pct: 0.02
+  stop_atr: 2.0                    # initial hard stop = entry - 2 ATR14 (this distance is 1R)
+  trail_atr: 3.0                   # chandelier: highest daily close since entry - 3 ATR14
+  partial_frac: 0.3333
+  partial_R: 2.0
+  backstop_stop: 0.97              # exchange stop-limit: stop at floor * 0.97 ...
+  backstop_limit: 0.95             # ... limit at floor * 0.95 (never stop-market on Alpaca: phantom wicks)
+  breakeven_pad: 0.006             # +1R ratchet lifts the floor to entry * (1 + pad) = fees round trip
+  kill_dd: 0.25                    # from ledger high-water mark; flatten + halt
+  kill_pause_days: 30
+  kill_risk: 0.005                 # risk per trade for the first trades after a restart
+  kill_trades: 10
+  daily_loss: 0.03
+  weekly_loss: 0.05
+  streak_n: 3
+  streak_pause_days: 5
+  reentry_days: 7
+  cooldown_days: 3
+  weekend_filter: true             # no new entries when the daily close falls on Sat/Sun UTC
+  max_order_notional: 250.0        # order sanity: anything bigger is a bug, not a trade
+
+data:
+  daily_start: "2021-01-01"        # Alpaca crypto history begins here; EMA200 warm-up is ample
+  h4_lookback_days: 120
+  coinbase_sanitize: true          # clip Alpaca daily highs/lows to what Coinbase also traded
+  timeout_s: 30
+  retries: 4
+  backoff_base_s: 1.0
+  fill_wait_s: 25
+
+paths:
+  state: state/twincoin/twincoin_state.json
+  armed: state/twincoin/armed.json
+  journal_dir: journal/twincoin
+  trades_csv: journal/twincoin/trades.csv
