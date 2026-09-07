@@ -1,7 +1,7 @@
 {
-  "passed": false,
-  "reason": "FAILED: sub-window 1/2 beat equal_weight on sharpe",
-  "generated_utc": "2026-09-06T23:18:27+00:00",
+  "passed": true,
+  "reason": "all checks passed",
+  "generated_utc": "2026-09-07T15:51:25+00:00",
   "config_version": "1.0.0",
   "universe": [
     "BTC/USD",
@@ -17,26 +17,26 @@
   ],
   "alignment": "point_in_time",
   "window": {
-    "start": "2023-04-05 00:00:00+00:00",
-    "end": "2026-09-06 00:00:00+00:00",
+    "start": "2023-04-06 00:00:00+00:00",
+    "end": "2026-09-07 00:00:00+00:00",
     "bars": 1251
   },
   "checks": [
     {
       "check": "sharpe >= min_sharpe",
-      "value": 0.929,
+      "value": 0.95,
       "threshold": 0.8,
       "ok": true
     },
     {
       "check": "max_drawdown <= max_drawdown_pct",
-      "value": 0.2581,
+      "value": 0.2604,
       "threshold": 0.35,
       "ok": true
     },
     {
       "check": "total_return >= min_total_return_pct",
-      "value": 0.7295,
+      "value": 0.7321,
       "threshold": 0.0,
       "ok": true
     },
@@ -54,53 +54,53 @@
     },
     {
       "check": "beat equal_weight on sharpe",
-      "value": 0.929,
-      "threshold": 0.591,
+      "value": 0.95,
+      "threshold": 0.585,
       "ok": true
     },
     {
       "check": "sub-window 1/2 max_drawdown <= max_drawdown_pct",
-      "window": "2023-04-05..2024-12-20",
-      "value": 0.2581,
+      "window": "2023-04-06..2024-12-21",
+      "value": 0.2604,
       "threshold": 0.35,
       "ok": true
     },
     {
       "check": "sub-window 1/2 beat equal_weight on sharpe",
-      "window": "2023-04-05..2024-12-20",
-      "value": 1.307,
-      "threshold": 1.345,
-      "ok": false
+      "window": "2023-04-06..2024-12-21",
+      "value": 1.361,
+      "threshold": 1.302,
+      "ok": true
     },
     {
       "check": "sub-window 2/2 max_drawdown <= max_drawdown_pct",
-      "window": "2024-12-20..2026-09-06",
-      "value": 0.1345,
+      "window": "2024-12-21..2026-09-07",
+      "value": 0.1301,
       "threshold": 0.35,
       "ok": true
     },
     {
       "check": "sub-window 2/2 beat equal_weight on sharpe",
-      "window": "2024-12-20..2026-09-06",
-      "value": 0.377,
-      "threshold": -0.199,
+      "window": "2024-12-21..2026-09-07",
+      "value": 0.345,
+      "threshold": -0.17,
       "ok": true
     }
   ],
   "metrics": {
     "strategy": {
-      "total_return_pct": 0.7295,
-      "cagr_pct": 0.1735,
-      "sharpe": 0.929,
-      "max_drawdown_pct": 0.2581,
+      "total_return_pct": 0.7321,
+      "cagr_pct": 0.174,
+      "sharpe": 0.95,
+      "max_drawdown_pct": 0.2604,
       "years": 3.425,
-      "final_equity": 172954.99,
+      "final_equity": 173206.45,
       "trades": 80,
       "win_rate": 0.3625,
-      "avg_r": 0.68,
-      "avg_bars_held": 43.9,
-      "locked_reserve": 34793.02,
-      "swept_total": 34793.02,
+      "avg_r": 0.707,
+      "avg_bars_held": 44.0,
+      "locked_reserve": 43867.73,
+      "swept_total": 43867.73,
       "kill_switch_events": 1,
       "breaker_events": 4,
       "regime_on_share": 0.632,
@@ -113,21 +113,21 @@
       }
     },
     "btc_hold": {
-      "total_return_pct": 1.8344,
-      "cagr_pct": 0.3556,
-      "sharpe": 0.89,
+      "total_return_pct": 1.7997,
+      "cagr_pct": 0.3507,
+      "sharpe": 0.882,
       "max_drawdown_pct": 0.5307,
       "years": 3.425,
-      "final_equity": 283443.89,
+      "final_equity": 279967.02,
       "names": 1
     },
     "equal_weight": {
-      "total_return_pct": 0.8577,
-      "cagr_pct": 0.1982,
-      "sharpe": 0.591,
-      "max_drawdown_pct": 0.7226,
+      "total_return_pct": 0.8356,
+      "cagr_pct": 0.194,
+      "sharpe": 0.585,
+      "max_drawdown_pct": 0.7221,
       "years": 3.425,
-      "final_equity": 185767.34,
+      "final_equity": 183558.01,
       "names": 8
     }
   }
