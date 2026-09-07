@@ -65,6 +65,13 @@ jobs:
             # of the week. The gate step inside talon.yml skips green until the backtest passes.
             [yn]:00:00|[yn]:04:00|[yn]:08:00|[yn]:12:00|[yn]:16:00|[yn]:20:00) ring talon.yml ;;&
           esac
+          # TWINCOIN (crypto, 24/7): keyed to UTC 4-hour bar closes, not ET, so it is computed
+          # from the UTC clock instead of the ET case table and stays right through DST. Rings
+          # at :15 past every UTC hour divisible by four (00/04/08/12/16/20 UTC). The cycle is
+          # idempotent per closed bar, so a stray ring is a no-op. Guards inside twincoin.yml
+          # skip green until its secrets exist and state/twincoin/armed.json says armed=true.
+          UTCH=$(TZ=UTC date +%H); UTCMIN=$(( (10#$(TZ=UTC date +%M) / 15) * 15 ))
+          if [ $((10#$UTCH % 4)) -eq 0 ] && [ "$UTCMIN" = 15 ] && [ -z "$OVERRIDE" ]; then ring twincoin.yml; fi
           [ "$DOW" = 5 ] && [ "$NOW" = "15:00" ] && ring steward.yml -f mode=auto
           [ "$DOW" = 6 ] && [ "$NOW" = "07:00" ] && ring glider-reflect.yml
           [ "$DOM" = "01" ] && [ "$NOW" = "08:00" ] && ring glider-learn.yml
