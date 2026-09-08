@@ -14,10 +14,10 @@
   "day_start_eq": 500.0,
   "week_key": "2026-09-07",
   "week_start_eq": 500.0,
-  "last_bar": "2026-09-07T16:00:00+00:00",
+  "last_bar": "2026-09-08T12:00:00+00:00",
   "positions": {
     "ETH/USD": {
-      "qty": 0.0547,
+      "qty": 0.05456325,
       "qty0": 0.0547,
       "entry": 2487.7,
       "risk_px": 182.78470133704502,
@@ -30,8 +30,9 @@
       "cost": 136.07718999999997,
       "t_in": "2026-09-08T00:15:49.166550649+00:00",
       "partial_order_id": "20d0573b-d077-41f4-921b-ed71e735cb53",
-      "backstop_order_id": null,
-      "partial_qty": 0.01823
+      "backstop_order_id": "1b21f1b4-ebc4-4986-a623-905c73f45976",
+      "partial_qty": 0.01823,
+      "backstop_floor": 2304.9152986629547
     }
   },
   "last_entry": {
