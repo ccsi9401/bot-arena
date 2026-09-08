@@ -10,15 +10,74 @@
   "week_block_until": null,
   "streak": 0,
   "streak_until": null,
-  "day_key": "2026-09-07",
+  "day_key": "2026-09-08",
   "day_start_eq": 500.0,
   "week_key": "2026-09-07",
   "week_start_eq": 500.0,
   "last_bar": "2026-09-07T16:00:00+00:00",
-  "positions": {},
-  "last_entry": {},
+  "positions": {
+    "ETH/USD": {
+      "qty": 0.0547,
+      "qty0": 0.0547,
+      "entry": 2487.7,
+      "risk_px": 182.78470133704502,
+      "risk_usd": 9.998323163136362,
+      "floor": 2304.9152986629547,
+      "hi": 2487.7,
+      "partial_px": 2853.26940267409,
+      "partial_done": false,
+      "proceeds": 0.0,
+      "cost": 136.07718999999997,
+      "t_in": "2026-09-08T00:15:49.166550649+00:00",
+      "partial_order_id": "20d0573b-d077-41f4-921b-ed71e735cb53",
+      "backstop_order_id": null,
+      "partial_qty": 0.01823
+    }
+  },
+  "last_entry": {
+    "ETH/USD": "2026-09-08T00:15:37.969287+00:00"
+  },
   "cooldown_until": {},
-  "last_vote": {},
+  "last_vote": {
+    "BTC/USD": {
+      "day": "2026-09-07T00:00:00+00:00",
+      "bull": 4,
+      "bear": 1,
+      "detail": {
+        "trend": 1,
+        "rsi": 1,
+        "macd": -1,
+        "ema50": 1,
+        "ema200": 0,
+        "volume": 1
+      },
+      "close": 79096.805,
+      "atr": 2275.3094137752587,
+      "ema20": 76734.33536247532,
+      "ema50": 72032.02854228129,
+      "ema200": 72707.3225938115,
+      "rsi": 62.678994782919894
+    },
+    "ETH/USD": {
+      "day": "2026-09-07T00:00:00+00:00",
+      "bull": 5,
+      "bear": 1,
+      "detail": {
+        "trend": 1,
+        "rsi": 1,
+        "macd": -1,
+        "ema50": 1,
+        "ema200": 1,
+        "volume": 1
+      },
+      "close": 2490.4615,
+      "atr": 91.39235066852251,
+      "ema20": 2384.694045154716,
+      "ema50": 2191.4219396906783,
+      "ema200": 2181.9934300979507,
+      "rsi": 63.33334258966056
+    }
+  },
   "stats": {
     "n": 0,
     "wins": 0,
