@@ -55,7 +55,6 @@ jobs:
             gh workflow run "$@" -R "$GITHUB_REPOSITORY"
           }
           case "$WD:$NOW" in
-            y:10:30|y:11:30|y:12:30|y:13:30|y:14:30|y:15:30) ring scalpel.yml ;;&
             y:15:30) ring glider.yml ;;&
             y:10:45) ring steward.yml -f mode=catchup ;;&
             y:17:15) ring scoreboard.yml ;;&
