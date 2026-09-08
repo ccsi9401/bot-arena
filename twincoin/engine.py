@@ -8,16 +8,25 @@ Order of operations, every run (idempotent per closed 4H bar):
   5. risk rules on the mark: kill switch, daily / weekly loss, losing streak
   6. floor exits: 4H close below the floor -> market sell now (= "next open" in the backtest)
   7. if t closes a UTC day: vote; ratchet floors for open positions; decide entries
-  8. entries: market buy, then rest the partial limit and the backstop stop-limit
+  8. entries: market buy, then rest the backstop stop-limit and the partial limit
   9. record last_bar, snapshot
 
 Fills and P&L in the trade log come from broker fill prices (fees are already inside the
 account equity the ledger tracks). Dry-run mode (pulse) performs no broker mutation and
 saves no state; it prints what a cycle would do.
+
+Quantity discipline (2026-09-08): Alpaca charges crypto buy fees IN THE BASE ASSET, so a
+filled buy of 0.0547 ETH leaves ~0.05456 ETH actually in the account. Sizing sell legs off
+the order's filled_qty therefore overshoots the balance by the fee and Alpaca rejects the
+order with HTTP 403 / code 40310000. Every sell leg is now sized from what the broker says
+is HELD and AVAILABLE, never from the recorded fill quantity, and the protective backstop is
+placed BEFORE the partial take-profit so that if anything has to be squeezed out by rounding
+it is the profit leg and never the protection.
 """
 from __future__ import annotations
 
 import math
+import time
 import uuid
 from datetime import timedelta
 
@@ -60,6 +69,36 @@ class Engine:
     # ------------------------------------------------------------------ helpers
     def ledger_equity(self, acct_equity: float) -> float:
         return float(self.st["basis_equity"]) + (float(acct_equity) - float(self.st["acct_equity_at_arm"]))
+
+    def _broker_qty(self, sym: str) -> tuple[float, float] | None:
+        """(qty, qty_available) as the broker reports it, or None in dry-run / no position."""
+        if self.dry:
+            return None
+        bp = self.b.positions().get(sym)
+        if not bp:
+            return None
+        q = float(bp["qty"])
+        return q, float(bp.get("qty_available", q))
+
+    def _sellable(self, sym: str, want: float, dec: int) -> float:
+        """How much of `want` we can actually sell right now.
+
+        Returns `want` when the broker has at least that much free. Otherwise returns the
+        available quantity, rounded down. Polls briefly because a just-canceled order can
+        take a moment to release its reservation at Alpaca -- without the poll a floor
+        ratchet would replace a full backstop with a partial one.
+        """
+        if self.dry:
+            return want
+        avail = 0.0
+        for attempt in range(4):
+            bq = self._broker_qty(sym)
+            avail = bq[1] if bq else 0.0
+            if round_down(avail, dec) >= want:
+                return want
+            if attempt < 3:
+                time.sleep(0.5)
+        return round_down(avail, dec)
 
     def _submit(self, **kw) -> dict | None:
         notional = kw.get("qty", 0) * (kw.get("limit_price") or kw.get("ref_price") or 0)
@@ -105,18 +144,21 @@ class Engine:
 
     # ------------------------------------------------------------- resting orders
     def _place_resting(self, sym: str, p: dict) -> None:
-        """Partial limit for 1/3 (if not done) and backstop stop-limit for the rest."""
+        """Backstop stop-limit for the bulk, then the partial limit for 1/3 (if not done).
+
+        Protection goes on FIRST. Both legs are sized against the broker's available
+        balance, so a fee-shaved position can never leave the stop unplaced.
+        """
         dec = int(self.cfg["universe"]["qty_decimals"][sym])
-        qty = p["qty"]
-        q_partial = 0.0
-        if not p["partial_done"]:
-            q_partial = round_down(qty * float(self.R["partial_frac"]), dec)
-            if q_partial > 0:
-                o = self._submit(symbol=sym, side="sell", qty=q_partial, order_type="limit", limit_price=p["partial_px"],
-                                 client_order_id=f"tc-partial-{uuid.uuid4().hex[:10]}")
-                p["partial_order_id"] = o["id"] if o else "dry"
-                p["partial_qty"] = q_partial
-        q_back = round_down(qty - q_partial, dec)
+        bq = self._broker_qty(sym)
+        held = round_down(min(p["qty"], bq[0]), dec) if bq else round_down(p["qty"], dec)
+        if bq and held < round_down(p["qty"], dec):
+            self.j.write("qty_clamped", symbol=sym, state_qty=p["qty"], broker_qty=bq[0], used=held)
+            p["qty"] = held
+        q_partial = round_down(held * float(self.R["partial_frac"]), dec) if not p["partial_done"] else 0.0
+        q_back = round_down(held - q_partial, dec)
+        if q_back > 0:
+            q_back = self._sellable(sym, q_back, dec)
         if q_back > 0:
             o = self._submit(symbol=sym, side="sell", qty=q_back, order_type="stop_limit",
                              stop_price=p["floor"] * float(self.R["backstop_stop"]),
@@ -124,19 +166,37 @@ class Engine:
                              client_order_id=f"tc-back-{uuid.uuid4().hex[:10]}")
             p["backstop_order_id"] = o["id"] if o else "dry"
             p["backstop_floor"] = p["floor"]
+        else:
+            self.j.write("backstop_skipped", symbol=sym, why="no sellable quantity", want=round_down(held - q_partial, dec))
+        if q_partial > 0:
+            q_partial = self._sellable(sym, q_partial, dec)
+        if q_partial > 0:
+            o = self._submit(symbol=sym, side="sell", qty=q_partial, order_type="limit", limit_price=p["partial_px"],
+                             client_order_id=f"tc-partial-{uuid.uuid4().hex[:10]}")
+            p["partial_order_id"] = o["id"] if o else "dry"
+            p["partial_qty"] = q_partial
+        elif not p["partial_done"]:
+            self.j.write("partial_skipped", symbol=sym, why="no sellable quantity after backstop")
 
     def _replace_backstop(self, sym: str, p: dict, why: str) -> None:
         self._cancel(p.get("backstop_order_id") if p.get("backstop_order_id") != "dry" else None, why)
         p["backstop_order_id"] = None
         dec = int(self.cfg["universe"]["qty_decimals"][sym])
-        q_back = round_down(p["qty"] - (0.0 if p["partial_done"] else p.get("partial_qty", 0.0)), dec)
-        if q_back > 0:
-            o = self._submit(symbol=sym, side="sell", qty=q_back, order_type="stop_limit",
-                             stop_price=p["floor"] * float(self.R["backstop_stop"]),
-                             limit_price=p["floor"] * float(self.R["backstop_limit"]),
-                             client_order_id=f"tc-back-{uuid.uuid4().hex[:10]}")
-            p["backstop_order_id"] = o["id"] if o else "dry"
-            p["backstop_floor"] = p["floor"]
+        want = round_down(p["qty"] - (0.0 if p["partial_done"] else p.get("partial_qty", 0.0)), dec)
+        if want <= 0:
+            return
+        q_back = self._sellable(sym, want, dec)
+        if q_back <= 0:
+            self.j.write("backstop_skipped", symbol=sym, why="no sellable quantity", want=want)
+            return
+        if q_back < want:
+            self.j.write("backstop_clamped", symbol=sym, want=want, used=q_back)
+        o = self._submit(symbol=sym, side="sell", qty=q_back, order_type="stop_limit",
+                         stop_price=p["floor"] * float(self.R["backstop_stop"]),
+                         limit_price=p["floor"] * float(self.R["backstop_limit"]),
+                         client_order_id=f"tc-back-{uuid.uuid4().hex[:10]}")
+        p["backstop_order_id"] = o["id"] if o else "dry"
+        p["backstop_floor"] = p["floor"]
 
     def sync_orders(self, now) -> None:
         for sym in list(self.st["positions"]):
@@ -182,6 +242,9 @@ class Engine:
                 self.st["reconcile_halt"] = True
                 continue
             bq = bpos[sym]["qty"]
+            if bq < self.st["positions"][sym]["qty"]:
+                # state can never claim more than the broker holds, or sell legs get rejected
+                self.st["positions"][sym]["qty"] = bq
             if abs(bq - self.st["positions"][sym]["qty"]) / max(bq, 1e-9) > 0.02:
                 self.j.write("qty_mismatch", symbol=sym, state_qty=self.st["positions"][sym]["qty"], broker_qty=bq)
                 self.st["positions"][sym]["qty"] = bq
@@ -210,6 +273,8 @@ class Engine:
         qty = bpos.get(sym, {}).get("qty_available", p["qty"]) if not self.dry else p["qty"]
         dec = int(self.cfg["universe"]["qty_decimals"][sym])
         qty = round_down(min(qty, bpos.get(sym, {}).get("qty", qty)) if not self.dry else qty, dec)
+        if not self.dry:
+            qty = self._sellable(sym, qty, dec)
         if qty <= 0:
             self.j.write("exit_skipped", symbol=sym, why="no qty available", reason=reason)
             del self.st["positions"][sym]
@@ -259,14 +324,21 @@ class Engine:
             self._cancel(o.get("id"), "entry not filled in time")
             return
         fill, fq = float(o["filled_avg_price"]), float(o["filled_qty"])
-        p = {"qty": fq, "qty0": fq, "entry": fill, "risk_px": risk_px, "risk_usd": fq * risk_px, "floor": fill - risk_px, "hi": fill,
-             "partial_px": fill + float(self.R["partial_R"]) * risk_px, "partial_done": False, "proceeds": 0.0, "cost": fq * fill,
+        cost = fq * fill  # what was actually paid; the base-asset fee stays in cost, not in qty
+        held = fq
+        bq = self._broker_qty(sym)
+        if bq and 0 < bq[0] < fq:
+            held = round_down(bq[0], dec)
+            self.j.write("entry_qty_adjusted", symbol=sym, filled_qty=fq, held_qty=bq[0], used=held,
+                         note="broker holds less than filled qty (crypto fee taken in base asset)")
+        p = {"qty": held, "qty0": held, "entry": fill, "risk_px": risk_px, "risk_usd": held * risk_px, "floor": fill - risk_px, "hi": fill,
+             "partial_px": fill + float(self.R["partial_R"]) * risk_px, "partial_done": False, "proceeds": 0.0, "cost": cost,
              "t_in": iso(o.get("filled_at") or now), "partial_order_id": None, "backstop_order_id": None}
         self.st["positions"][sym] = p
         self.st["last_entry"][sym] = iso(now)
         if self.st["kill_mode_left"] > 0:
             self.st["kill_mode_left"] -= 1
-        self.j.write("entry_filled", symbol=sym, price=fill, qty=fq, notional=round(fq * fill, 2), risk_usd=round(p["risk_usd"], 2),
+        self.j.write("entry_filled", symbol=sym, price=fill, qty=held, notional=round(cost, 2), risk_usd=round(p["risk_usd"], 2),
                      floor=round(p["floor"], 2), partial_at=round(p["partial_px"], 2))
         self._place_resting(sym, p)
 
