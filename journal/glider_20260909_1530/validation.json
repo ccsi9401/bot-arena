@@ -1,0 +1,25 @@
+{
+  "approved": [
+    {
+      "action": "raise_stop",
+      "symbol": "XOM",
+      "new_stop": 152.42,
+      "reasoning": "trail 3.5xATR=3.46 below close 164.54."
+    }
+  ],
+  "rejected": [],
+  "halts": [],
+  "account_snapshot": {
+    "equity": 4975.58,
+    "cash": 49.89,
+    "last_equity": 4980.22562816364,
+    "buying_power": 13991.49,
+    "status": "AccountStatus.ACTIVE",
+    "core_value": 1444.942702,
+    "gross_after": 3480.74,
+    "drawdown_pct": 1.62,
+    "drawdown_basis": "peak 5058",
+    "day_pl_pct": -0.09
+  },
+  "_written_et": "2026-09-09T15:30:39.139343-04:00"
+}

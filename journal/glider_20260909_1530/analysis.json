@@ -1,0 +1,16 @@
+{
+  "intents": [
+    {
+      "action": "raise_stop",
+      "symbol": "XOM",
+      "new_stop": 152.42,
+      "reasoning": "trail 3.5xATR=3.46 below close 164.54."
+    }
+  ],
+  "notes": [
+    "5 setups; 0 slots free; proposing 0"
+  ],
+  "regime_ok": true,
+  "candidates_considered": 5,
+  "_written_et": "2026-09-09T15:30:39.089737-04:00"
+}

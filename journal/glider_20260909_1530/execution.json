@@ -1,0 +1,13 @@
+{
+  "results": [
+    {
+      "ok": false,
+      "error": "no open stop order found",
+      "action": "raise_stop",
+      "symbol": "XOM"
+    }
+  ],
+  "placed": 0,
+  "failed": 1,
+  "_written_et": "2026-09-09T15:30:39.166505-04:00"
+}
