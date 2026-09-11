@@ -1,11 +1,11 @@
 {
-  "due": true,
+  "due": false,
   "overdue": false,
   "week_anchor_et": "2026-09-11",
   "days_since_anchor": 0,
-  "last_cycle_date_et": "2026-09-04",
-  "last_cycle_run_id": "steward_20260904_1500",
-  "checked_et": "2026-09-11T13:56:23.630830-04:00",
-  "requested_mode": "catchup",
-  "resolved_mode": "noop"
+  "last_cycle_date_et": "2026-09-11",
+  "last_cycle_run_id": "steward_20260911_1500",
+  "checked_et": "2026-09-11T15:00:47.692062-04:00",
+  "requested_mode": "auto",
+  "resolved_mode": "cycle"
 }
