@@ -148,5 +148,11 @@
     "equity": 4979.68,
     "cash": 499.54,
     "note": "nightly pulse"
+  },
+  {
+    "ts_et": "2026-09-11T19:31:18.658885-04:00",
+    "equity": 4980.89,
+    "cash": 499.54,
+    "note": "nightly pulse"
   }
 ]
