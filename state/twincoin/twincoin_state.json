@@ -3,7 +3,7 @@
   "armed_at": "2026-09-07T05:13:19.544884+00:00",
   "acct_equity_at_arm": 500.0,
   "basis_equity": 500.0,
-  "hwm": 501.28,
+  "hwm": 503.66,
   "halt_until": null,
   "kill_mode_left": 0,
   "no_entry_until": null,
@@ -14,7 +14,7 @@
   "day_start_eq": 497.49,
   "week_key": "2026-09-07",
   "week_start_eq": 500.0,
-  "last_bar": "2026-09-11T08:00:00+00:00",
+  "last_bar": "2026-09-11T12:00:00+00:00",
   "positions": {
     "ETH/USD": {
       "qty": 0.05456325,
