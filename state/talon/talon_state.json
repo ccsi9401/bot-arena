@@ -7,15 +7,15 @@
   },
   "created_utc": "2026-09-07T16:00:41+00:00",
   "day": {
-    "date": "2026-09-12",
-    "start_equity": 97236.24
+    "date": "2026-09-13",
+    "start_equity": 97464.9
   },
   "equity_high_water": 100171.77,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-09-12T22:09:55+00:00",
+  "last_run_utc": "2026-09-13T00:00:39+00:00",
   "last_snapshot": {
-    "equity": 97427.79,
+    "equity": 97464.9,
     "halted": false,
     "high_water": 100171.77,
     "locked": 0.0,
@@ -27,10 +27,10 @@
       "UNI/USD"
     ],
     "open_count": 5,
-    "pnl_day": 191.55,
-    "pnl_total": -2572.21,
+    "pnl_day": 0.0,
+    "pnl_total": -2535.1,
     "regime_on": true,
-    "tradeable": 97427.79
+    "tradeable": 97464.9
   },
   "positions": {
     "AAVE/USD": {
@@ -55,7 +55,7 @@
       "cost_pad": 9.898109902624,
       "entry": 2474.527475656,
       "floor": 2288.1619967698434,
-      "high_water": 2516.066,
+      "high_water": 2525.045,
       "r_unit": 186.36547888615684,
       "stage": "basement",
       "symbol": "ETH/USD"
