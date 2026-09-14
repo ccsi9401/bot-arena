@@ -13,9 +13,9 @@
   "equity_high_water": 100171.77,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-09-14T00:00:41+00:00",
+  "last_run_utc": "2026-09-14T04:00:47+00:00",
   "last_snapshot": {
-    "equity": 96548.17,
+    "equity": 97158.86,
     "halted": false,
     "high_water": 100171.77,
     "locked": 0.0,
@@ -27,10 +27,10 @@
       "UNI/USD"
     ],
     "open_count": 5,
-    "pnl_day": 0.0,
-    "pnl_total": -3451.83,
+    "pnl_day": 610.69,
+    "pnl_total": -2841.14,
     "regime_on": true,
-    "tradeable": 96548.17
+    "tradeable": 97158.86
   },
   "positions": {
     "AAVE/USD": {
