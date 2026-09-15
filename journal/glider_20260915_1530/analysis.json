@@ -1,0 +1,35 @@
+{
+  "intents": [
+    {
+      "action": "close",
+      "symbol": "XBI",
+      "reasoning": "Time stop: held 15d \u2265 10d."
+    },
+    {
+      "action": "close",
+      "symbol": "KO",
+      "reasoning": "Time stop: held 15d \u2265 10d."
+    },
+    {
+      "action": "close",
+      "symbol": "AAPL",
+      "reasoning": "Time stop: held 15d \u2265 10d."
+    },
+    {
+      "action": "close",
+      "symbol": "XOM",
+      "reasoning": "Time stop: held 15d \u2265 10d."
+    },
+    {
+      "action": "close",
+      "symbol": "XLV",
+      "reasoning": "Time stop: held 15d \u2265 10d."
+    }
+  ],
+  "notes": [
+    "1 setups; 0 slots free; proposing 0"
+  ],
+  "regime_ok": true,
+  "candidates_considered": 1,
+  "_written_et": "2026-09-15T15:30:41.049817-04:00"
+}
