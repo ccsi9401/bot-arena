@@ -7,30 +7,30 @@
   },
   "created_utc": "2026-09-07T16:00:41+00:00",
   "day": {
-    "date": "2026-09-15",
-    "start_equity": 97678.54
+    "date": "2026-09-16",
+    "start_equity": 95498.92
   },
   "equity_high_water": 100171.77,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-09-15T22:50:07+00:00",
+  "last_run_utc": "2026-09-16T00:00:41+00:00",
   "last_snapshot": {
-    "equity": 95409.89,
+    "equity": 95498.92,
     "halted": false,
     "high_water": 100171.77,
     "locked": 0.0,
     "open": [
       "AAVE/USD",
-      "DOT/USD",
       "ETH/USD",
+      "LINK/USD",
       "SOL/USD",
       "UNI/USD"
     ],
     "open_count": 5,
-    "pnl_day": -2268.65,
-    "pnl_total": -4590.11,
+    "pnl_day": 0.0,
+    "pnl_total": -4501.08,
     "regime_on": true,
-    "tradeable": 95409.89
+    "tradeable": 95498.92
   },
   "positions": {
     "AAVE/USD": {
@@ -42,15 +42,6 @@
       "stage": "basement",
       "symbol": "AAVE/USD"
     },
-    "DOT/USD": {
-      "cost_pad": 0.0044110763079999995,
-      "entry": 1.102769077,
-      "floor": 0.9437238226188502,
-      "high_water": 1.102769077,
-      "r_unit": 0.15904525438114975,
-      "stage": "basement",
-      "symbol": "DOT/USD"
-    },
     "ETH/USD": {
       "cost_pad": 9.898109902624,
       "entry": 2474.527475656,
@@ -59,6 +50,15 @@
       "r_unit": 186.36547888615684,
       "stage": "basement",
       "symbol": "ETH/USD"
+    },
+    "LINK/USD": {
+      "cost_pad": 0.043648821476,
+      "entry": 10.912205369,
+      "floor": 9.589654650523352,
+      "high_water": 10.912205369,
+      "r_unit": 1.322550718476649,
+      "stage": "basement",
+      "symbol": "LINK/USD"
     },
     "SOL/USD": {
       "cost_pad": 0.413798475476,
