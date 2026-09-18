@@ -7,15 +7,15 @@
   },
   "created_utc": "2026-09-07T16:00:41+00:00",
   "day": {
-    "date": "2026-09-17",
-    "start_equity": 95829.79
+    "date": "2026-09-18",
+    "start_equity": 98041.95
   },
   "equity_high_water": 100171.77,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-09-17T22:48:03+00:00",
+  "last_run_utc": "2026-09-18T00:00:42+00:00",
   "last_snapshot": {
-    "equity": 97856.72,
+    "equity": 98041.95,
     "halted": false,
     "high_water": 100171.77,
     "locked": 0.0,
@@ -27,10 +27,10 @@
       "UNI/USD"
     ],
     "open_count": 5,
-    "pnl_day": 2026.93,
-    "pnl_total": -2143.28,
+    "pnl_day": 0.0,
+    "pnl_total": -1958.05,
     "regime_on": true,
-    "tradeable": 97856.72
+    "tradeable": 98041.95
   },
   "positions": {
     "AAVE/USD": {
@@ -55,7 +55,7 @@
       "cost_pad": 0.043648821476,
       "entry": 10.912205369,
       "floor": 9.589654650523352,
-      "high_water": 11.04895,
+      "high_water": 11.369,
       "r_unit": 1.322550718476649,
       "stage": "basement",
       "symbol": "LINK/USD"
@@ -73,7 +73,7 @@
       "cost_pad": 0.027221635188,
       "entry": 6.805408797,
       "floor": 5.809333319655863,
-      "high_water": 7.294845,
+      "high_water": 7.78943,
       "r_unit": 0.9960754773441372,
       "stage": "basement",
       "symbol": "UNI/USD"
