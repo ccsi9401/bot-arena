@@ -1,7 +1,7 @@
 {
   "account_floor": {
     "basis": 100000.0,
-    "high_water": 102296.44,
+    "high_water": 102862.94,
     "history": [],
     "locked": 0.0
   },
@@ -10,14 +10,14 @@
     "date": "2026-09-18",
     "start_equity": 98041.95
   },
-  "equity_high_water": 102296.44,
+  "equity_high_water": 102862.94,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-09-18T18:59:08+00:00",
+  "last_run_utc": "2026-09-18T20:00:42+00:00",
   "last_snapshot": {
-    "equity": 102296.44,
+    "equity": 102862.94,
     "halted": false,
-    "high_water": 102296.44,
+    "high_water": 102862.94,
     "locked": 0.0,
     "open": [
       "AAVE/USD",
@@ -27,10 +27,10 @@
       "UNI/USD"
     ],
     "open_count": 5,
-    "pnl_day": 4254.49,
-    "pnl_total": 2296.44,
+    "pnl_day": 4820.99,
+    "pnl_total": 2862.94,
     "regime_on": true,
-    "tradeable": 102296.44
+    "tradeable": 102862.94
   },
   "positions": {
     "AAVE/USD": {
