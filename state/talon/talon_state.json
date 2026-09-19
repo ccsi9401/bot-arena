@@ -7,15 +7,15 @@
   },
   "created_utc": "2026-09-07T16:00:41+00:00",
   "day": {
-    "date": "2026-09-18",
-    "start_equity": 98041.95
+    "date": "2026-09-19",
+    "start_equity": 102346.88
   },
   "equity_high_water": 102862.94,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-09-18T22:27:30+00:00",
+  "last_run_utc": "2026-09-19T00:00:43+00:00",
   "last_snapshot": {
-    "equity": 102608.7,
+    "equity": 102346.88,
     "halted": false,
     "high_water": 102862.94,
     "locked": 0.0,
@@ -27,17 +27,17 @@
       "UNI/USD"
     ],
     "open_count": 5,
-    "pnl_day": 4566.75,
-    "pnl_total": 2608.7,
+    "pnl_day": 0.0,
+    "pnl_total": 2346.88,
     "regime_on": true,
-    "tradeable": 102608.7
+    "tradeable": 102346.88
   },
   "positions": {
     "AAVE/USD": {
       "cost_pad": 0.524917867488,
       "entry": 131.229466872,
       "floor": 115.07176945120578,
-      "high_water": 136.8285,
+      "high_water": 139.441,
       "r_unit": 16.157697420794207,
       "stage": "basement",
       "symbol": "AAVE/USD"
@@ -46,7 +46,7 @@
       "cost_pad": 9.898109902624,
       "entry": 2474.527475656,
       "floor": 2288.1619967698434,
-      "high_water": 2525.045,
+      "high_water": 2612.4025,
       "r_unit": 186.36547888615684,
       "stage": "basement",
       "symbol": "ETH/USD"
@@ -55,7 +55,7 @@
       "cost_pad": 0.043648821476,
       "entry": 10.912205369,
       "floor": 9.589654650523352,
-      "high_water": 11.369,
+      "high_water": 12.2265,
       "r_unit": 1.322550718476649,
       "stage": "basement",
       "symbol": "LINK/USD"
@@ -64,7 +64,7 @@
       "cost_pad": 0.413798475476,
       "entry": 103.449618869,
       "floor": 92.91192180569116,
-      "high_water": 106.529,
+      "high_water": 112.665,
       "r_unit": 10.537697063308844,
       "stage": "basement",
       "symbol": "SOL/USD"
@@ -72,10 +72,10 @@
     "UNI/USD": {
       "cost_pad": 0.027221635188,
       "entry": 6.805408797,
-      "floor": 5.809333319655863,
-      "high_water": 7.78943,
+      "floor": 7.801484274344137,
+      "high_water": 8.86545,
       "r_unit": 0.9960754773441372,
-      "stage": "basement",
+      "stage": "locked_1R",
       "symbol": "UNI/USD"
     }
   },
