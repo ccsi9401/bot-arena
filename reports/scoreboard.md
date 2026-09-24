@@ -1,16 +1,17 @@
-# Round 1 — Day traders: Claude (SCALPEL) vs ChatGPT
+# Bot Arena — live fleet
 
-_As of 2026-09-04T19:02 ET · started 2026-08-07_
+_As of 2026-09-24T17:15 ET · started 2026-09-24_
 
-**Leader: GPT-DAY (ChatGPT)**
+**Leader: TALON**
 
-| | SCALPEL (Claude) | GPT-DAY (ChatGPT) |
-|---|---|---|
-| Equity | 49701.93 | 49978.28 |
-| Total return % | -0.6 | -0.04 |
-| Today % | 0.07 | 0.0 |
-| Max DD % | -0.67 | -0.14 |
-| Sharpe (ann.) | -3.66 | -0.84 |
-| Days scored | 23 | 23 |
-| Open | [] | [] |
-| Kill switch | False | None |
+| | TALON | PAWL | TWIN-COIN | GLIDER | STEWARD |
+|---|---|---|---|---|---|
+| Equity | 104629.11 | 1000.0 | None | 5022.09 | 5042.73 |
+| Total return % | 4.63 | 0.0 | None | 0.44 | 0.85 |
+| Today % | 1.15 | 0.0 | None | 0.18 | -0.18 |
+| Max DD % | 0.0 | 0.0 | None | 0.0 | 0.0 |
+| Sharpe (ann.) | None | None | None | None | None |
+| Days scored | 1 | 1 | None | 1 | 1 |
+| Open | ['AAVEUSD', 'ETHUSD', 'LINKUSD', 'SOLUSD', 'UNIUSD'] | [] | [] | ['AAPL', 'KO', 'SPY', 'XBI', 'XLV', 'XOM'] | ['GLD', 'IEF', 'QQQ', 'SHY', 'SPY'] |
+| Kill switch | None | None | None | None | None |
+| Error |  |  | APIError |  |  |

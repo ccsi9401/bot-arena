@@ -1,35 +1,94 @@
 {
-  "round": 1,
-  "title": "Round 1 \u2014 Day traders: Claude (SCALPEL) vs ChatGPT",
-  "start_date": "2026-08-07",
-  "asof_et": "2026-09-04T19:02:56.644290-04:00",
+  "round": 2,
+  "title": "Bot Arena \u2014 live fleet",
+  "start_date": "2026-09-24",
+  "asof_et": "2026-09-24T17:15:38.673147-04:00",
   "competitors": [
     {
-      "slug": "scalpel",
-      "label": "SCALPEL (Claude)",
-      "equity": 49701.93,
-      "cash": 49701.93,
-      "total_return_pct": -0.6,
-      "day_pl_pct": 0.07,
-      "max_drawdown_pct": -0.67,
-      "sharpe_daily_ann": -3.66,
-      "trading_days": 23,
-      "open_positions": [],
-      "kill_switch": false
+      "slug": "talon",
+      "label": "TALON",
+      "equity": 104629.11,
+      "cash": 50364.37,
+      "total_return_pct": 4.63,
+      "day_pl_pct": 1.15,
+      "max_drawdown_pct": 0.0,
+      "sharpe_daily_ann": null,
+      "trading_days": 1,
+      "open_positions": [
+        "AAVEUSD",
+        "ETHUSD",
+        "LINKUSD",
+        "SOLUSD",
+        "UNIUSD"
+      ],
+      "kill_switch": null
     },
     {
-      "slug": "gpt_day",
-      "label": "GPT-DAY (ChatGPT)",
-      "equity": 49978.28,
-      "cash": 49978.28,
-      "total_return_pct": -0.04,
+      "slug": "pawl",
+      "label": "PAWL",
+      "equity": 1000.0,
+      "cash": 1000.0,
+      "total_return_pct": 0.0,
       "day_pl_pct": 0.0,
-      "max_drawdown_pct": -0.14,
-      "sharpe_daily_ann": -0.84,
-      "trading_days": 23,
+      "max_drawdown_pct": 0.0,
+      "sharpe_daily_ann": null,
+      "trading_days": 1,
       "open_positions": [],
+      "kill_switch": null
+    },
+    {
+      "slug": "twincoin",
+      "label": "TWIN-COIN",
+      "error": "APIError",
+      "equity": null,
+      "cash": null,
+      "total_return_pct": null,
+      "day_pl_pct": null,
+      "max_drawdown_pct": null,
+      "sharpe_daily_ann": null,
+      "trading_days": null,
+      "open_positions": [],
+      "kill_switch": null
+    },
+    {
+      "slug": "glider",
+      "label": "GLIDER",
+      "equity": 5022.09,
+      "cash": 49.89,
+      "total_return_pct": 0.44,
+      "day_pl_pct": 0.18,
+      "max_drawdown_pct": 0.0,
+      "sharpe_daily_ann": null,
+      "trading_days": 1,
+      "open_positions": [
+        "AAPL",
+        "KO",
+        "SPY",
+        "XBI",
+        "XLV",
+        "XOM"
+      ],
+      "kill_switch": null
+    },
+    {
+      "slug": "steward",
+      "label": "STEWARD",
+      "equity": 5042.73,
+      "cash": 499.54,
+      "total_return_pct": 0.85,
+      "day_pl_pct": -0.18,
+      "max_drawdown_pct": 0.0,
+      "sharpe_daily_ann": null,
+      "trading_days": 1,
+      "open_positions": [
+        "GLD",
+        "IEF",
+        "QQQ",
+        "SHY",
+        "SPY"
+      ],
       "kill_switch": null
     }
   ],
-  "leader": "GPT-DAY (ChatGPT)"
+  "leader": "TALON"
 }
