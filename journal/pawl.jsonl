@@ -6,3 +6,5 @@
 {"ts": "2026-09-24T09:15:14.579509+00:00", "event": "ratchet_idle", "note": "no open positions"}
 {"ts": "2026-09-24T17:03:55.567461+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-09-24T17:03:55.906392+00:00", "event": "ratchet_idle", "note": "no open positions"}
+{"ts": "2026-09-24T23:10:52.047967+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-09-24T23:10:52.244710+00:00", "event": "ratchet_idle", "note": "no open positions"}
