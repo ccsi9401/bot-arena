@@ -1,0 +1,168 @@
+{
+  "passed": true,
+  "live_arm": "pawl_core",
+  "rotation_enabled": false,
+  "floor_mode": "none",
+  "checks": [
+    {
+      "check": "history",
+      "pass": true,
+      "detail": "1886 days tested, 1460 required"
+    },
+    {
+      "check": "rotation_sleeve",
+      "pass": true,
+      "detail": "rotation Sharpe edge +0.000 vs required +0.150 -> DISABLED, running core-only"
+    },
+    {
+      "check": "floor_mode",
+      "pass": true,
+      "detail": "tight 0.09 / catastrophe 0.62 / none 0.80 Sharpe -> NONE"
+    },
+    {
+      "check": "sharpe_vs_buy_hold",
+      "pass": true,
+      "detail": "pawl_core Sharpe 0.8 vs buy-hold BTC 0.607"
+    },
+    {
+      "check": "drawdown_vs_buy_hold",
+      "pass": true,
+      "detail": "pawl_core max DD -0.1908 vs buy-hold BTC -0.7668"
+    },
+    {
+      "check": "sharpe_vs_blend",
+      "pass": true,
+      "detail": "pawl_core Sharpe 0.8 vs rebalanced blend 0.662 (BTC/USD 70%, ETH/USD 30%)"
+    },
+    {
+      "check": "drawdown_limit",
+      "pass": true,
+      "detail": "pawl_core max DD -0.1908 vs limit -0.4"
+    },
+    {
+      "check": "fee_drag_annual",
+      "pass": true,
+      "detail": "fees run 1.9%/yr of average equity (limit 12%/yr; Alpaca base tier is 25bps taker a side)"
+    }
+  ],
+  "arms": {
+    "pawl_full": {
+      "total_return": 0.7461,
+      "cagr": 0.1139,
+      "max_drawdown": -0.2442,
+      "vol_annual": 0.2119,
+      "sharpe": 0.617,
+      "sortino": 0.469,
+      "calmar": 0.466,
+      "trades": 97,
+      "fees_paid": 1151.87,
+      "days": 1886
+    },
+    "pawl_core": {
+      "total_return": 1.0494,
+      "cagr": 0.149,
+      "max_drawdown": -0.1908,
+      "vol_annual": 0.198,
+      "sharpe": 0.8,
+      "sortino": 0.728,
+      "calmar": 0.781,
+      "trades": 94,
+      "fees_paid": 1304.49,
+      "days": 1886
+    },
+    "floor_tight": {
+      "total_return": -0.0044,
+      "cagr": -0.0008,
+      "max_drawdown": -0.2445,
+      "vol_annual": 0.1813,
+      "sharpe": 0.087,
+      "sortino": 0.063,
+      "calmar": -0.003,
+      "trades": 111,
+      "fees_paid": 1188.53,
+      "days": 1886
+    },
+    "floor_catastrophe": {
+      "total_return": 0.7461,
+      "cagr": 0.1139,
+      "max_drawdown": -0.2442,
+      "vol_annual": 0.2119,
+      "sharpe": 0.617,
+      "sortino": 0.469,
+      "calmar": 0.466,
+      "trades": 97,
+      "fees_paid": 1151.87,
+      "days": 1886
+    },
+    "floor_none": {
+      "total_return": 1.0494,
+      "cagr": 0.149,
+      "max_drawdown": -0.1908,
+      "vol_annual": 0.198,
+      "sharpe": 0.8,
+      "sortino": 0.728,
+      "calmar": 0.781,
+      "trades": 94,
+      "fees_paid": 1304.49,
+      "days": 1886
+    },
+    "bh_btc": {
+      "total_return": 1.8683,
+      "cagr": 0.2018,
+      "max_drawdown": -0.7668,
+      "vol_annual": 0.5741,
+      "sharpe": 0.607,
+      "sortino": 0.87,
+      "calmar": 0.263,
+      "trades": 1,
+      "fees_paid": 35.0,
+      "days": 2092
+    },
+    "bh_5050": {
+      "total_return": 2.2718,
+      "cagr": 0.2297,
+      "max_drawdown": -0.7741,
+      "vol_annual": 0.6747,
+      "sharpe": 0.645,
+      "sortino": 0.904,
+      "calmar": 0.297,
+      "trades": 2,
+      "fees_paid": 35.0,
+      "days": 2092
+    },
+    "btc_regime": {
+      "total_return": 1.1288,
+      "cagr": 0.1409,
+      "max_drawdown": -0.3699,
+      "vol_annual": 0.3422,
+      "sharpe": 0.556,
+      "sortino": 0.586,
+      "calmar": 0.381,
+      "trades": 49,
+      "fees_paid": 1715.0,
+      "days": 2092
+    },
+    "blend": {
+      "total_return": 2.4695,
+      "cagr": 0.2424,
+      "max_drawdown": -0.7632,
+      "vol_annual": 0.6065,
+      "sharpe": 0.662,
+      "sortino": 0.93,
+      "calmar": 0.318,
+      "trades": 156,
+      "fees_paid": 312.7,
+      "days": 2092
+    }
+  },
+  "cost_model": {
+    "taker": 0.0025,
+    "slippage": 0.001
+  },
+  "caveats": [
+    "Universe is today's Alpaca crypto list replayed historically -- survivorship-biased. pawl_core (BTC+ETH) is the bias-free control and is the arm to trust.",
+    "Fills are modelled at next-bar open with taker fees; real slippage on thin alt pairs will be worse.",
+    "Crypto history is short and dominated by two bull cycles. A 4-year window is not a lot of regimes."
+  ],
+  "generated_at": "2026-09-24T00:57:54.218206+00:00"
+}
