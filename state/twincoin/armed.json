@@ -1,7 +1,9 @@
 {
-  "armed": true,
+  "armed": false,
   "armed_at": "2026-09-07T05:13:19+00:00",
   "account_equity_at_arm": 500.0,
   "basis_equity": 500.0,
-  "note": "written by run_twincoin.py --mode arm"
+  "note": "written by run_twincoin.py --mode arm",
+  "paused_at": "2026-09-24T01:20:00+00:00",
+  "pause_note": "Paused at user request 2026-09-24. To resume, set armed back to true by hand -- do NOT run --mode arm, which would reset the $500 ledger zero point."
 }
