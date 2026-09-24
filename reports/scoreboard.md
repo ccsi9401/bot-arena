@@ -1,14 +1,14 @@
 # Bot Arena — live fleet
 
-_As of 2026-09-24T17:15 ET · started 2026-09-24_
+_As of 2026-09-24T19:53 ET · started 2026-09-24_
 
 **Leader: TALON**
 
 | | TALON | PAWL | TWIN-COIN | GLIDER | STEWARD |
 |---|---|---|---|---|---|
-| Equity | 104629.11 | 1000.0 | None | 5022.09 | 5042.73 |
-| Total return % | 4.63 | 0.0 | None | 0.44 | 0.85 |
-| Today % | 1.15 | 0.0 | None | 0.18 | -0.18 |
+| Equity | 104620.36 | 1000.0 | None | 5019.52 | 5040.83 |
+| Total return % | 4.62 | 0.0 | None | 0.39 | 0.82 |
+| Today % | 1.14 | 0.0 | None | 0.13 | -0.21 |
 | Max DD % | 0.0 | 0.0 | None | 0.0 | 0.0 |
 | Sharpe (ann.) | None | None | None | None | None |
 | Days scored | 1 | 1 | None | 1 | 1 |
