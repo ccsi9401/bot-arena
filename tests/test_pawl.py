@@ -277,3 +277,23 @@ def test_sim_resting_stop_fills_when_the_bar_trades_through_it():
     assert "BTC/USD" not in sim.positions()
     import os
     os.remove("/tmp/pawl_test_ledger2.json")
+
+
+def test_live_runs_the_floor_mode_the_gate_chose(tmp_path, monkeypatch):
+    import copy, json
+    import run_pawl
+    gate = tmp_path / "gate.json"
+    gate.write_text(json.dumps({"floor_mode": "none"}))
+    monkeypatch.setattr(run_pawl, "GATE_PATH", str(gate))
+    cfg = copy.deepcopy(CFG); cfg["floor"]["mode"] = "catastrophe"
+    run_pawl._apply_gate_floor_mode(cfg)
+    assert cfg["floor"]["mode"] == "none"
+
+    class FakeApi:
+        cancelled = []
+        def positions(self): return {"BTC/USD": {"qty": "0.01"}}
+        def cancel_floor_for(self, s): self.cancelled.append(s)
+        def protective_stop(self, *a): raise AssertionError("no floor may be placed in mode none")
+    state = {"floors": {"BTC/USD": {"symbol": "BTC/USD", "floor_price": 1.0}}}
+    run_pawl._place_floors(FakeApi(), state, {}, cfg)
+    assert state["floors"] == {} and FakeApi.cancelled == ["BTC/USD"]

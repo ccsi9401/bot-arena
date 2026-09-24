@@ -411,3 +411,12 @@ should be a separate market-neutral bot on its own venue, not a PAWL sleeve.
 **Account.** PAWL needs its **own** Alpaca paper account. Twin-Coin already holds BTC/ETH
 on PA3W63AXACS1, and PAWL's reconcile rule halts when the broker shows a position it
 doesn't know about.
+
+**Live now follows the gate's floor choice (2026-09-23, user chose this).** Before this, the gate
+recorded `floor_mode` but live always used the config's `catastrophe` floor. On Alpaca bars
+the catastrophe floor fires on phantom wicks (Sharpe 0.62 / -24.4% DD with it vs 0.80 /
+-19.1% without, 2021-2026), so the gate picks `none`. The Alpaca row above was already
+the no-floor arm; live now runs that same arm. `cycle`/`ratchet`/`pulse` read `floor_mode`
+from `state/pawl_gate.json`. In mode `none`, any resting stop_limit is cancelled, and exits
+come from the daily regime and momentum rules plus the 25% drawdown kill. The trade-off:
+nothing protects the account between daily cycles.

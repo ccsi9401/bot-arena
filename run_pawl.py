@@ -28,6 +28,7 @@ from pawl import strategy as st
 from pawl.broker import ALL_VENUES, BrokerError, capabilities, get_broker
 from pawl.data import load_csvs
 from pawl.floor import FloorState, limit_for, open_floor, ratchet as ratchet_floor, breached
+from pawl.floor import enabled as floor_enabled
 
 GATE_PATH = "state/pawl_gate.json"
 
@@ -237,6 +238,11 @@ def cmd_ratchet(cfg, args):
     if not positions:
         J.log("ratchet_idle", note="no open positions")
         return 0
+    if not floor_enabled(cfg):
+        _place_floors(api, state, {}, cfg)       # clears any stale resting floors
+        J.save_state(state)
+        J.log("ratchet_idle", note="floor mode none (chosen by gate); exits come from the daily cycle")
+        return 0
 
     bars = _bars(api, list(positions.keys()), 90)
     fresh, stale = R.bars_are_fresh(bars, cfg)
@@ -286,6 +292,16 @@ def cmd_ratchet(cfg, args):
 def _place_floors(api: Alpaca, state: dict, bars: dict, cfg: dict) -> None:
     """Make the broker's resting orders match our intended floors."""
     positions = api.positions()
+    if not floor_enabled(cfg):
+        # Gate chose no floor: make sure nothing is left resting from an
+        # earlier mode, or it would keep holding quantity and could still fire.
+        for s in positions:
+            try:
+                api.cancel_floor_for(s)
+            except BrokerError as e:
+                J.log("floor_cancel_failed", symbol=s, error=str(e)[:300])
+        state["floors"] = {}
+        return
     for s, raw in list(state.get("floors", {}).items()):
         pos = positions.get(s)
         if not pos:
@@ -393,6 +409,19 @@ def cmd_venues(cfg, args):
     return 0
 
 
+def _apply_gate_floor_mode(cfg) -> None:
+    """Live runs the floor mode the gate measured, not the config default.
+    Otherwise the gate can report the no-floor arm while live places a floor
+    (on Alpaca bars the catastrophe floor fires on phantom wicks: Sharpe 0.62
+    with it vs 0.80 without, 2021-2026)."""
+    if not os.path.exists(GATE_PATH):
+        return
+    with open(GATE_PATH, encoding="utf-8") as fh:
+        mode = json.load(fh).get("floor_mode")
+    if mode in ("tight", "catastrophe", "none"):
+        cfg["floor"]["mode"] = mode
+
+
 def main():
     ap = argparse.ArgumentParser(prog="run_pawl.py")
     ap.add_argument("command", choices=["gate", "cycle", "ratchet", "pulse", "flatten", "venues"])
@@ -402,6 +431,8 @@ def main():
     args = ap.parse_args()
 
     cfg = kcfg.load(args.config)
+    if args.command in ("cycle", "ratchet", "pulse"):
+        _apply_gate_floor_mode(cfg)
     fn = {"gate": cmd_gate, "cycle": cmd_cycle, "ratchet": cmd_ratchet,
           "pulse": cmd_pulse, "flatten": cmd_flatten, "venues": cmd_venues}[args.command]
     try:
