@@ -297,3 +297,21 @@ def test_live_runs_the_floor_mode_the_gate_chose(tmp_path, monkeypatch):
     state = {"floors": {"BTC/USD": {"symbol": "BTC/USD", "floor_price": 1.0}}}
     run_pawl._place_floors(FakeApi(), state, {}, cfg)
     assert state["floors"] == {} and FakeApi.cancelled == ["BTC/USD"]
+
+
+def test_alpaca_adapter_is_concrete_and_fetches_bars():
+    # Regression: daily_bars was indented under a module-level helper, so the
+    # class stayed abstract and every live command crashed on connect.
+    from pawl.broker.alpaca import AlpacaBroker
+    api = AlpacaBroker(paper=True, key="PKTEST", secret="x")
+    assert callable(getattr(api, "daily_bars"))
+
+
+def test_cycle_bars_drop_the_forming_day():
+    import run_pawl
+    class FakeApi:
+        def daily_bars(self, symbols, days):
+            return {"BTC/USD": series(n=10)}      # series() ends on today's date
+    full = run_pawl._bars(FakeApi(), ["BTC/USD"], 10)["BTC/USD"]
+    done = run_pawl._bars(FakeApi(), ["BTC/USD"], 10, completed_only=True)["BTC/USD"]
+    assert len(done) == len(full) - 1 and done.index[-1] < full.index[-1]

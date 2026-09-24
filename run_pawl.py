@@ -76,8 +76,14 @@ def _connect(cfg):
     return api
 
 
-def _bars(api, symbols, days):
-    return api.daily_bars(symbols, days)
+def _bars(api, symbols, days, completed_only=False):
+    """completed_only drops today's still-forming bar so the daily cycle sees
+    exactly what the backtest saw: signals on completed days only."""
+    bars = api.daily_bars(symbols, days)
+    if completed_only:
+        today = datetime.now(timezone.utc).date()
+        bars = {s: df[[t.date() < today for t in df.index]] for s, df in bars.items()}
+    return bars
 
 
 # ---------------------------------------------------------------- gate
@@ -100,7 +106,8 @@ def cmd_gate(cfg, args):
         src = f"CSV folder {args.csv_dir}"
     else:
         api = _connect(cfg)
-        bars = _bars(api, list(cfg["universe"]["core"]) + list(cfg["universe"]["rotation"]), args.days)
+        bars = _bars(api, list(cfg["universe"]["core"]) + list(cfg["universe"]["rotation"]), args.days,
+                     completed_only=True)
         src = f"Alpaca daily bars, {args.days}d"
     if not bars:
         J.log("gate_failed", reason="no bars returned", source=src)
@@ -158,7 +165,8 @@ def cmd_cycle(cfg, args):
             J.log("halted", reason="untracked position at broker; refusing to trade around a bug")
             return 1
 
-    bars = _bars(api, _universe(cfg, state), max(400, cfg["regime"]["sma_days"] + 120))
+    bars = _bars(api, _universe(cfg, state), max(400, cfg["regime"]["sma_days"] + 120),
+                 completed_only=True)
     verdict = R.evaluate(state, equity, bars, cfg)
     for r in verdict.reasons:
         J.log("risk", note=r)

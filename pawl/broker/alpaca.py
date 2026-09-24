@@ -133,14 +133,8 @@ class AlpacaBroker(Broker):
                 break
         return out
 
-
-def _q(qty: float) -> str:
-    """Alpaca crypto decimals vary by asset; 8dp is safe for all of them and
-    truncating (not rounding) avoids ordering a fraction more than we hold."""
-    import math
-    return f"{math.floor(qty * 1e8) / 1e8:.8f}"
-
     def daily_bars(self, symbols: List[str], days: int = 1200) -> Dict[str, pd.DataFrame]:
+        """Daily bars, including today's still-forming bar."""
         start = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
         raw = self._raw_bars(symbols, timeframe="1D", start=start)
         out: Dict[str, pd.DataFrame] = {}
@@ -153,3 +147,10 @@ def _q(qty: float) -> str:
                 columns={"o": "open", "h": "high", "l": "low", "c": "close", "v": "volume"})
             out[sym] = df[["open", "high", "low", "close", "volume"]].astype(float)
         return out
+
+
+def _q(qty: float) -> str:
+    """Alpaca crypto decimals vary by asset; 8dp is safe for all of them and
+    truncating (not rounding) avoids ordering a fraction more than we hold."""
+    import math
+    return f"{math.floor(qty * 1e8) / 1e8:.8f}"
