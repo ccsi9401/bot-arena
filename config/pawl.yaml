@@ -1,0 +1,133 @@
+# PAWL — long-only crypto trend bot (Alpaca paper)
+# Every number here is a decision, not a default. See PAWL.md for why each one is what it is.
+
+broker:
+  # The venue is a config line, not a rewrite. `python run_pawl.py venues`
+  # prints the capability sheet and the reasoning behind each entry.
+  #   alpaca          -- long-only spot, 50bps RT, but free paper AND a resting
+  #                      stop_limit+GTC. Prove the strategy here.
+  #   sim             -- local ledger filled at real prices using another venue's
+  #                      fee schedule. Use it to rehearse a venue with no sandbox.
+  #   kraken_us_perps -- CFTC-regulated US perps, 10bps RT, shorting and 8h
+  #                      funding. The real upgrade; adapter needs wiring first.
+  #   kraken          -- spot; 160bps RT at entry tier. Worse than Alpaca.
+  #   ibkr            -- cheapest fees, but market/limit only with IOC or 5-min
+  #                      TIF, so no resting floor is possible. Rejected.
+  venue: alpaca
+  simulate: kraken_us_perps    # only used when venue: sim
+  sim_start_equity: 5000
+  # Perps make leverage available. PAWL does not take it.
+  max_notional_x_equity: 1.0
+
+meta:
+  name: PAWL
+  mode: paper            # paper | live   -- live is gated on human edit + passing gate
+  base_currency: USD
+
+universe:
+  # Core holdings. Never dropped from consideration, no survivorship question:
+  # BTC and ETH were the two largest assets for the entire backtest window.
+  core: ["BTC/USD", "ETH/USD"]
+  # Rotation candidates. Auto-disabled by the gate if they don't beat core-only.
+  # Empty by decision (2026-09-23): this is a BTC/ETH bot. Small caps crash
+  # together and fill badly, so a wider list adds correlated risk, not
+  # diversification. The rotation machinery is kept; the gate re-tests it if
+  # names are ever added back.
+  rotation: []
+  # Liquidity screen — an asset failing this is untradable regardless of signal.
+  min_median_dollar_vol_30d: 3_000_000
+
+regime:
+  # The market-wide switch. Nothing enters while this is false; everything exits.
+  anchor: "BTC/USD"
+  sma_days: 200
+  # Asset must also be above its own trend before it is eligible.
+  asset_sma_days: 100
+
+momentum:
+  lookback_days: 28
+  # Buffer band, not a zero-line cross. The hold zone between these is what
+  # prevents whipsaw, and whipsaw is what kills trend systems at 50bps a turn.
+  entry_threshold: 0.05     # enter above +5% trailing 28d return
+  exit_threshold: -0.02     # exit below -2%
+  max_positions: 3
+  # Rank by return / realized vol, not raw return.
+  rank_by: risk_adjusted
+  # After ANY exit, an asset is ineligible for this many days. Without this the
+  # bot stops out on a wick and buys straight back in the next morning, paying
+  # 50bps for the privilege. Found by running the gate, not by reasoning.
+  reentry_cooldown_days: 7
+
+sizing:
+  target_vol_annual: 0.35   # per-position vol target
+  vol_lookback_days: 28
+  max_weight_per_position: 0.35
+  max_total_invested: 0.85  # 15% cash buffer, always
+  min_notional_usd: 250     # below this, fees dominate the trade
+  # Only trade when the gap is worth the round trip.
+  drift_band_pct_of_equity: 0.05
+  drift_band_pct_of_target: 0.25
+
+floor:
+  # Synthetic trailing stop: Alpaca crypto has no trailing_stop order type,
+  # so the floor is a resting stop_limit that we ratchet upward, never down.
+  #
+  # mode decides HOW FAR OUT it sits, and this is the most important setting
+  # in the file. Measured on 6.5 years of real BTC/ETH bars, a TIGHT 3x-ATR
+  # trailing floor cost ~20 points of CAGR and bought ZERO drawdown protection
+  # -- in the COVID crash it made drawdown WORSE (-17.8% vs -9.9%), because it
+  # stopped out near the low and the cooldown locked the bot out of the rebound.
+  # The regime gate is doing all the defensive work; a tight floor just sells
+  # normal crypto volatility at the worst moment.
+  #
+  #   tight        -- atr_multiple. Measured as harmful. Kept so you can re-test it.
+  #   catastrophe  -- far out: whichever of catastrophe_atr_multiple / catastrophe_pct
+  #                   is FURTHER from price. Never fires on noise; still there if a
+  #                   gap or an exchange event happens while the daily loop sleeps.
+  #   none         -- no resting order at all. Exits come only from the daily
+  #                   momentum and regime rules. Nothing protects you between cycles.
+  mode: catastrophe
+  atr_days: 14
+  atr_multiple: 3.0
+  catastrophe_atr_multiple: 10.0
+  catastrophe_pct: 0.35
+  # Limit price sits below the stop so the order converts to marketable
+  # rather than sitting unfilled while price runs through it.
+  limit_offset_pct: 0.010
+  ratchet_hours: 4
+
+risk:
+  daily_loss_halt_pct: 0.06       # halt new entries for 24h
+  drawdown_kill_pct: 0.25         # flat everything, require manual re-arm
+  max_bar_age_minutes: 120        # stale data => no trading this cycle
+  max_consecutive_order_failures: 2
+  # Hard turnover cap. Derived, not guessed: one round trip on an average 28%
+  # position costs 0.28 x 50bps = 14bps of equity. Five a month is ~0.7%/mo,
+  # ~8.5%/yr of fee drag -- already a large bite out of any realistic edge.
+  # Twelve a month would be ~20%/yr, which no long-only crypto trend system
+  # earns back. Exits are always exempt from this cap.
+  monthly_roundtrip_budget: 5
+
+costs:
+  # Alpaca crypto base tier. Used by the backtest. Do not optimise against
+  # a lower tier you do not actually qualify for.
+  taker_fee: 0.0025
+  maker_fee: 0.0015
+  assumed_slippage: 0.0010
+
+gate:
+  # The bot refuses to arm unless a gate artifact exists and passed.
+  min_history_days: 1460          # 4 years
+  max_drawdown_limit: 0.40   # long-only crypto; buy-and-hold routinely sees -70%
+  must_beat_buy_hold_sharpe: true
+  must_beat_buy_hold_drawdown: true
+  # If the rotation sleeve does not beat core-only by more than the noise
+  # floor, the gate disables rotation and PAWL runs core-only. This is not
+  # a failure — it is the gate doing its job.
+  rotation_sharpe_edge_required: 0.15
+  gate_max_age_days: 45
+  # The benchmark every arm must beat: a fixed 70/30 blend, rebalanced monthly
+  # or on a 5-point drift. If PAWL cannot beat this on Sharpe, it is not
+  # earning its complexity and the gate fails.
+  benchmark_blend: {"BTC/USD": 0.70, "ETH/USD": 0.30}
+  must_beat_blend_sharpe: true

@@ -1,0 +1,97 @@
+name: PAWL
+
+on:
+  schedule:
+    # Daily signal clock -- 00:10 UTC, ten minutes after the daily bar closes.
+    - cron: "10 0 * * *"
+    # Ratchet clock -- every 4h. The floor itself rests AT THE BROKER between
+    # these runs, so a missed ratchet leaves you protected at a slightly lower
+    # price. It never leaves you unprotected.
+    - cron: "5 4,8,12,16,20 * * *"
+    # Gate clock -- 1st of each month. The cycle refuses to trade on a gate
+    # older than 45 days, so this keeps it fresh on Alpaca's own bars.
+    - cron: "40 23 1 * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "gate | cycle | ratchet | pulse | flatten"
+        required: true
+        default: pulse
+        type: choice
+        options: [gate, cycle, ratchet, pulse, flatten]
+
+concurrency:
+  group: pawl
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Pick mode
+        id: pick
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "10 0 * * *" ]; then
+            echo "mode=cycle" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "40 23 1 * *" ]; then
+            echo "mode=gate" >> $GITHUB_OUTPUT
+          else
+            echo "mode=ratchet" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Secrets guard
+        id: guard
+        env:
+          HAVE_KEY: ${{ secrets.PAWL_API_KEY != '' && secrets.PAWL_API_SECRET != '' }}
+        run: |
+          if [ "$HAVE_KEY" != "true" ]; then
+            echo "::notice title=PAWL not configured::PAWL_API_KEY / PAWL_API_SECRET secrets are missing; run skipped."
+            echo "go=false" >> $GITHUB_OUTPUT
+          else
+            echo "go=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run PAWL (${{ steps.pick.outputs.mode }})
+        if: steps.guard.outputs.go == 'true'
+        env:
+          PAWL_API_KEY: ${{ secrets.PAWL_API_KEY }}
+          PAWL_API_SECRET: ${{ secrets.PAWL_API_SECRET }}
+        run: python run_pawl.py ${{ steps.pick.outputs.mode }}
+
+      # Hardened commit: retry with rebase so a concurrent run can never leave
+      # the branch wedged. Same pattern as the other bots in this repo.
+      - name: Commit state and journal
+        if: always() && steps.guard.outputs.go == 'true'
+        run: |
+          git config user.name "pawl-bot"
+          git config user.email "pawl-bot@users.noreply.github.com"
+          git add -A state journal || true
+          if git diff --cached --quiet; then
+            echo "nothing to commit"; exit 0
+          fi
+          git commit -m "PAWL ${{ steps.pick.outputs.mode }} $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3 4 5; do
+            if git push; then echo "pushed on attempt $i"; exit 0; fi
+            echo "push $i failed; rebasing"
+            git fetch origin "${GITHUB_REF_NAME}"
+            git pull --rebase -X theirs origin "${GITHUB_REF_NAME}" || true
+            sleep $((i * 4))
+          done
+          echo "::error::could not push PAWL state after 5 attempts"
+          exit 1
