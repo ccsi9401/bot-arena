@@ -1,21 +1,16 @@
-# The current matchup. The scoreboard reads this — swap it for round 2.
-round: 1
-title: "Round 1 — Day traders: Claude (SCALPEL) vs ChatGPT"
-duration_days: 30
-start_date: "2026-08-07"
+# What the public scoreboard tracks. Round 1 (SCALPEL vs GPT-DAY, 2026-08-07, 30 days)
+# is over; its record stays in git history and state/scalpel, state/gpt_day.
+#
+# Every entry is scored READ-ONLY: the scoreboard calls account() and positions()
+# with the bot's own keys and never places an order. Accounts are different sizes,
+# so bots are compared on % return from their own starting equity.
+# `curve` keeps the scoreboard's audit copy apart from each bot's own equity file.
+round: 2
+title: "Bot Arena — live fleet"
+start_date: "2026-09-24"
 competitors:
-  - slug: scalpel
-    label: "SCALPEL (Claude)"
-    kind: managed            # we run this bot's full pipeline
-    bot: scalpel
-  - slug: gpt_day
-    label: "GPT-DAY (ChatGPT)"
-    kind: external           # scored only: account is READ, never traded
-    env_prefix: GPTDAY       # GPTDAY_API_KEY / GPTDAY_API_SECRET
-    starting_equity: 50000
-
-# Round 2 (later): GLIDER (Claude) vs the GPT swing challenger
-# competitors:
-#   - {slug: glider, label: "GLIDER (Claude)", kind: managed, bot: glider}
-#   - {slug: gpt_swing, label: "GPT-SWING (ChatGPT)", kind: external,
-#      env_prefix: GPTSWING, starting_equity: 50000}
+  - {slug: talon,    label: "TALON",     kind: external, env_prefix: TALON,    starting_equity: 100000, curve: scoreboard/talon,    note: "crypto trend, 10 coins"}
+  - {slug: pawl,     label: "PAWL",      kind: external, env_prefix: PAWL,     starting_equity: 1000,   curve: scoreboard/pawl,     note: "BTC/ETH trend"}
+  - {slug: twincoin, label: "TWIN-COIN", kind: external, env_prefix: TWINCOIN, starting_equity: 500,    curve: scoreboard/twincoin, note: "BTC/ETH, paused"}
+  - {slug: glider,   label: "GLIDER",    kind: external, env_prefix: GLIDER,   starting_equity: 5000,   curve: scoreboard/glider,   note: "stock swing"}
+  - {slug: steward,  label: "STEWARD",   kind: external, env_prefix: STEWARD,  starting_equity: 5000,   curve: scoreboard/steward,  note: "ETF core"}

@@ -2,7 +2,7 @@ name: nightly-scoreboard
 on:
   schedule:
     # re-armed 2026-08-31: repo crons went silent after 8/29 03:09Z (workflows active, dispatch OK, no GH incident) — a workflow-file edit re-registers the schedule
-    - cron: "15 21 * * 1-5"   # 17:15 ET, after settle
+    - cron: "15 21 * * *"     # 17:15 ET daily -- the crypto bots trade weekends too
   workflow_dispatch:
 
 concurrency:
@@ -24,15 +24,17 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Update scoreboard
         env:
-          SCALPEL_API_KEY: ${{ secrets.SCALPEL_API_KEY }}
-          SCALPEL_API_SECRET: ${{ secrets.SCALPEL_API_SECRET }}
+          # READ-ONLY scoring: account() and positions() only, never an order.
+          TALON_API_KEY: ${{ secrets.TALON_API_KEY }}
+          TALON_API_SECRET: ${{ secrets.TALON_API_SECRET }}
+          PAWL_API_KEY: ${{ secrets.PAWL_API_KEY }}
+          PAWL_API_SECRET: ${{ secrets.PAWL_API_SECRET }}
+          TWINCOIN_API_KEY: ${{ secrets.TWINCOIN_API_KEY }}
+          TWINCOIN_API_SECRET: ${{ secrets.TWINCOIN_API_SECRET }}
           GLIDER_API_KEY: ${{ secrets.GLIDER_API_KEY }}
           GLIDER_API_SECRET: ${{ secrets.GLIDER_API_SECRET }}
-          # external competitors (READ-ONLY scoring)
-          GPTDAY_API_KEY: ${{ secrets.GPTDAY_API_KEY }}
-          GPTDAY_API_SECRET: ${{ secrets.GPTDAY_API_SECRET }}
-          GPTSWING_API_KEY: ${{ secrets.GPTSWING_API_KEY }}
-          GPTSWING_API_SECRET: ${{ secrets.GPTSWING_API_SECRET }}
+          STEWARD_API_KEY: ${{ secrets.STEWARD_API_KEY }}
+          STEWARD_API_SECRET: ${{ secrets.STEWARD_API_SECRET }}
         run: |
           python scoreboard.py
           python dashboard.py

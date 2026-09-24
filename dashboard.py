@@ -39,6 +39,7 @@ def latest_run(bot: str) -> dict | None:
 
 
 def equity_series(slug: str) -> list[tuple[str, float]]:
+    """slug is a folder under state/ (may be nested, e.g. scoreboard/talon)."""
     f = ROOT / "state" / slug / "equity_curve.json"
     if not f.exists():
         return []
@@ -49,8 +50,9 @@ def equity_series(slug: str) -> list[tuple[str, float]]:
 
 
 # ---------------------------------------------------------------- svg helpers
-def line_chart(series: list[dict], w=860, h=280, pad=58) -> str:
-    """series: [{label, color, points:[(date, value)]}] -> svg + hover layer."""
+def line_chart(series: list[dict], w=860, h=280, pad=58, unit: str = "$") -> str:
+    """series: [{label, color, points:[(date, value)]}] -> svg + hover layer.
+    unit "$" labels the axis in dollars; "%" in signed percent."""
     pts_all = [v for s in series for _, v in s["points"]]
     dates = sorted({d for s in series for d, _ in s["points"]})
     if not pts_all or len(dates) < 2:
@@ -70,8 +72,9 @@ def line_chart(series: list[dict], w=860, h=280, pad=58) -> str:
         v = lo + (hi - lo) * k / 4
         y = Y(v)
         grid.append(f'<line x1="{pad}" y1="{y:.1f}" x2="{w-84}" y2="{y:.1f}" class="grid"/>')
+        tick = f"${v:,.0f}" if unit == "$" else f"{v:+.1f}%"
         labels.append(f'<text x="{pad-6}" y="{y+4:.1f}" class="tick" text-anchor="end">'
-                      f'${v:,.0f}</text>')
+                      f'{tick}</text>')
     step = max(1, len(dates) // 6)
     for d in dates[::step]:
         labels.append(f'<text x="{X(d):.1f}" y="{h-10}" class="tick" text-anchor="middle">'
@@ -91,7 +94,7 @@ def line_chart(series: list[dict], w=860, h=280, pad=58) -> str:
                                    for d, v in s["points"]]})
 
     return f'''
-<div class="chartwrap" data-series='{html.escape(json.dumps(dots_js))}'>
+<div class="chartwrap" data-unit="{unit}" data-series='{html.escape(json.dumps(dots_js))}'>
 <svg viewBox="0 0 {w} {h}" class="linechart" role="img"
      aria-label="Equity curves">
   {"".join(grid)}

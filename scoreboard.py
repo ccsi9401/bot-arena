@@ -33,7 +33,7 @@ def competitor_stats(c: dict) -> dict:
     else:  # external — read-only scoring
         broker = AlpacaBroker(c["env_prefix"])
         start = c.get("starting_equity", 50000)
-        state = State(c["slug"])          # equity-curve audit copy only
+        state = State(c.get("curve", c["slug"]))   # equity-curve audit copy only
         kill = None
 
     acct = broker.account()
@@ -65,8 +65,23 @@ def competitor_stats(c: dict) -> dict:
 
 def main() -> int:
     comp = yaml.safe_load((ROOT / "config" / "competition.yaml").read_text(encoding="utf-8"))
-    rows = [competitor_stats(c) for c in comp["competitors"]]
-    leader = max(rows, key=lambda r: r["total_return_pct"])
+    rows = []
+    for c in comp["competitors"]:
+        # One dead key or unreachable account must not take the whole board
+        # down -- that is exactly how Round 1's board went dark on 2026-09-04.
+        try:
+            rows.append(competitor_stats(c))
+        except Exception as e:  # noqa: BLE001 -- report it on the board, keep going
+            print(f"::warning title=scoreboard::{c['slug']} unavailable: {type(e).__name__}: {str(e)[:200]}")
+            rows.append({"slug": c["slug"], "label": c["label"], "error": f"{type(e).__name__}",
+                         "equity": None, "cash": None, "total_return_pct": None, "day_pl_pct": None,
+                         "max_drawdown_pct": None, "sharpe_daily_ann": None, "trading_days": None,
+                         "open_positions": [], "kill_switch": None})
+    ok = [r for r in rows if r.get("total_return_pct") is not None]
+    if not ok:
+        print("::error::no competitor could be scored")
+        return 1
+    leader = max(ok, key=lambda r: r["total_return_pct"])
     board = {"round": comp["round"], "title": comp["title"],
              "start_date": comp.get("start_date"),
              "asof_et": now_et().isoformat(), "competitors": rows,
@@ -83,8 +98,8 @@ def main() -> int:
                        ("day_pl_pct", "Today %"), ("max_drawdown_pct", "Max DD %"),
                        ("sharpe_daily_ann", "Sharpe (ann.)"),
                        ("trading_days", "Days scored"), ("open_positions", "Open"),
-                       ("kill_switch", "Kill switch")]:
-        md.append(f"| {label} | " + " | ".join(str(r[key]) for r in rows) + " |")
+                       ("kill_switch", "Kill switch"), ("error", "Error")]:
+        md.append(f"| {label} | " + " | ".join(str(r.get(key, "")) for r in rows) + " |")
     (REPORTS / "scoreboard.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print("\n".join(md))
     return 0

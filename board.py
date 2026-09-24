@@ -27,12 +27,18 @@ def build() -> str:
     sb_file = ROOT / "reports" / "scoreboard.json"
     sb = json.loads(sb_file.read_text(encoding="utf-8")) if sb_file.exists() else {}
     rows = sb.get("competitors", [])
-    curves = {c["slug"]: equity_series(c["slug"]) for c in comp["competitors"]}
-    colors = ["var(--series-1)", "var(--series-2)"]
+    # Accounts range from $500 to $100k, so the race is drawn in % return from
+    # each bot's own starting equity; dollars would flatten the small ones.
+    curves = {}
+    for c in comp["competitors"]:
+        start = float(c.get("starting_equity", 50000))
+        curves[c["slug"]] = [(d, round((v / start - 1) * 100, 2))
+                             for d, v in equity_series(c.get("curve", c["slug"]))]
+    colors = [f"var(--series-{k})" for k in range(1, 6)]
     chart = line_chart([
         {"label": c["label"], "short": c["label"].split()[0],
-         "color": colors[i % 2], "points": curves[c["slug"]]}
-        for i, c in enumerate(comp["competitors"]) if curves[c["slug"]]])
+         "color": colors[i % len(colors)], "points": curves[c["slug"]]}
+        for i, c in enumerate(comp["competitors"]) if curves[c["slug"]]], unit="%")
 
     # tiles
     tiles = []
@@ -46,9 +52,12 @@ def build() -> str:
             up = ret >= 0
             delta = (f'<div class="delta {"up" if up else "down"}">'
                      f'{"▲" if up else "▼"} {ret:+.2f}%</div>')
-        tiles.append(f'''<div class="tile" style="border-top:4px solid {colors[i%2]}">
+        if r.get("error"):
+            delta = '<div class="delta down">unavailable</div>'
+        note = f'<div class="tnote">{html.escape(c["note"])}</div>' if c.get("note") else ""
+        tiles.append(f'''<div class="tile" style="border-top:4px solid {colors[i % len(colors)]}">
   <div class="tlabel">{html.escape(c["label"])}</div>
-  <div class="tvalue">{f"${eq:,.0f}" if eq is not None else "—"}</div>{delta}</div>''')
+  <div class="tvalue">{f"${eq:,.0f}" if eq is not None else "—"}</div>{delta}{note}</div>''')
 
     # stats table (position-free)
     stat_rows = ""
@@ -57,7 +66,7 @@ def build() -> str:
                 ("max_drawdown_pct", "Max drawdown %"), ("sharpe_daily_ann", "Sharpe (ann.)"),
                 ("trading_days", "Days scored"), ("kill_switch", "Stopped out")]
         head = "<tr><th></th>" + "".join(
-            f"<th>{html.escape(r['label'].split()[0])}</th>" for r in rows) + "</tr>"
+            f"<th>{html.escape(r['label'])}</th>" for r in rows) + "</tr>"
         def fmt(v):
             if v is None:
                 return "—"
@@ -90,7 +99,7 @@ def build() -> str:
   color-scheme: light;
   --surface-1:#fcfcfb; --page:#f9f9f7; --ink-1:#0b0b0b; --ink-2:#52514e;
   --muted:#898781; --grid:#e1e0d9; --axis:#c3c2b7;
-  --series-1:#2a78d6; --series-2:#eb6834;
+  --series-1:#2a78d6; --series-2:#eb6834; --series-3:#1f9d62; --series-4:#8a5cd1; --series-5:#b8860b;
   --good-text:#006300; --crit:#d03b3b; --ring:rgba(11,11,11,0.10);
 }}
 @media (prefers-color-scheme: dark) {{
@@ -98,7 +107,7 @@ def build() -> str:
     color-scheme: dark;
     --surface-1:#1a1a19; --page:#0d0d0d; --ink-1:#ffffff; --ink-2:#c3c2b7;
     --muted:#898781; --grid:#2c2c2a; --axis:#383835;
-    --series-1:#3987e5; --series-2:#d95926;
+    --series-1:#3987e5; --series-2:#d95926; --series-3:#2fb877; --series-4:#a47ee6; --series-5:#d9a520;
     --good-text:#0ca30c; --crit:#d03b3b; --ring:rgba(255,255,255,0.10);
   }}
 }}
@@ -113,7 +122,8 @@ h1{{font-size:19px;margin:0 0 2px}}
 .tile{{background:var(--surface-1);border:1px solid var(--ring);border-radius:12px;
   padding:12px 14px}}
 .tlabel{{color:var(--ink-2);font-size:12px}}
-.tvalue{{font-size:27px;font-weight:650}}
+.tvalue{{font-size:24px;font-weight:650}}
+.tnote{{color:var(--muted);font-size:11px;margin-top:2px}}
 .delta{{font-size:14px}} .delta.up{{color:var(--good-text)}} .delta.down{{color:var(--crit)}}
 .panel{{background:var(--surface-1);border:1px solid var(--ring);border-radius:12px;
   padding:12px 14px;margin:10px 0;overflow-x:auto}}
@@ -144,8 +154,9 @@ footer{{color:var(--muted);font-size:12px;margin-top:22px}}
 <div class="tiles">{"".join(tiles)}</div>
 <div class="panel">{chart}</div>
 <div class="panel">{stat_rows}</div>
-<footer>Bot Arena · equal $50k paper accounts · scored on total return ·
-positions and signals are not published during the round (rules §2.3)</footer>
+<footer>Bot Arena · Alpaca paper accounts of different sizes, compared on % return
+from each bot's own start · the chart starts when the board began tracking ·
+positions and signals are not published (rules §2.3)</footer>
 </div>
 <script>
 document.querySelectorAll('.chartwrap').forEach(w => {{
@@ -166,7 +177,8 @@ document.querySelectorAll('.chartwrap').forEach(w => {{
     const rows = data.map(s => {{
       const p = s.points.find(q => q[0] === best.date);
       return p ? `<div><span style="color:${{s.color}}">●</span> ${{s.label}}: ` +
-             `$${{p[1].toLocaleString(undefined,{{maximumFractionDigits:0}})}}</div>` : '';
+             (w.dataset.unit === '%' ? `${{p[1] >= 0 ? '+' : ''}}${{p[1].toFixed(2)}}%`
+               : `$${{p[1].toLocaleString(undefined,{{maximumFractionDigits:0}})}}`) + '</div>' : '';
     }}).join('');
     const px = data.flatMap(s => s.points).find(q => q[0] === best.date);
     xh.setAttribute('x1', px[2]); xh.setAttribute('x2', px[2]);
