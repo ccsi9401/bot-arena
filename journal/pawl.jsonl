@@ -21,3 +21,5 @@
 {"ts": "2026-09-25T04:55:10.796954+00:00", "event": "cycle_done", "equity": 1000.0, "positions": 0, "failures": 0}
 {"ts": "2026-09-25T09:33:28.396713+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-09-25T09:33:28.717723+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
+{"ts": "2026-09-25T17:04:39.144993+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-09-25T17:04:39.528450+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
