@@ -8,3 +8,6 @@
 {"ts": "2026-09-24T17:03:55.906392+00:00", "event": "ratchet_idle", "note": "no open positions"}
 {"ts": "2026-09-24T23:10:52.047967+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-09-24T23:10:52.244710+00:00", "event": "ratchet_idle", "note": "no open positions"}
+{"ts": "2026-09-25T04:48:22.693763+00:00", "event": "cycle_start", "gate": "gate passed 1d ago, live arm = pawl_core", "mode": "paper"}
+{"ts": "2026-09-25T04:48:22.782721+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-09-25T04:48:23.063617+00:00", "event": "risk", "note": "stale data: BTC/USD: last bar 2026-09-24 is 4.8h past close; ETH/USD: last bar 2026-09-24 is 4.8h past close"}
