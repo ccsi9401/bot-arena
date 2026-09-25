@@ -99,7 +99,9 @@ floor:
 risk:
   daily_loss_halt_pct: 0.06       # halt new entries for 24h
   drawdown_kill_pct: 0.25         # flat everything, require manual re-arm
-  max_bar_age_minutes: 120        # stale data => no trading this cycle
+  max_bar_age_minutes: 720        # stale data => no trading this cycle. 12h: a DAILY bar is the signal for the whole
+                                  # next day, and GitHub cron routinely fires hours late (4.6h on 2026-09-25). A feed
+                                  # frozen for a full day still trips it.
   max_consecutive_order_failures: 2
   # Hard turnover cap. Derived, not guessed: one round trip on an average 28%
   # position costs 0.28 x 50bps = 14bps of equity. Five a month is ~0.7%/mo,

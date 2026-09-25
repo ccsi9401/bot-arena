@@ -150,10 +150,14 @@ def cmd_cycle(cfg, args):
     if not ok:
         J.log("cycle_blocked", reason=why)
         return 1
+    state = J.load_state()
+    today = datetime.now(timezone.utc).date().isoformat()
+    if state.get("last_cycle_date") == today and not getattr(args, "force", False):
+        J.log("cycle_already_done", date=today, note="one daily cycle per UTC day; the retry clock found it done")
+        return 0
     J.log("cycle_start", gate=why, mode=cfg["meta"]["mode"])
 
     api = _connect(cfg)
-    state = J.load_state()
     equity = api.equity()
     positions = api.positions()
 
@@ -230,6 +234,7 @@ def cmd_cycle(cfg, args):
 
     _place_floors(api, state, bars, cfg)
     state["equity_at_last_cycle"] = equity
+    state["last_cycle_date"] = today
     J.save_state(state)
     J.log("cycle_done", equity=equity, positions=len(state["floors"]), failures=failures)
     return 0

@@ -2,8 +2,10 @@ name: PAWL
 
 on:
   schedule:
-    # Daily signal clock -- 00:10 UTC, ten minutes after the daily bar closes.
-    - cron: "10 0 * * *"
+    # Daily signal clock -- 00:23 UTC (off the :00/:10 slots GitHub delays most), plus a
+    # 02:23 retry. The cycle runs once per UTC day, so the retry is a no-op when the first ran.
+    - cron: "23 0 * * *"
+    - cron: "23 2 * * *"
     # Ratchet clock -- every 4h. The floor itself rests AT THE BROKER between
     # these runs, so a missed ratchet leaves you protected at a slightly lower
     # price. It never leaves you unprotected.
@@ -47,7 +49,7 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.schedule }}" = "10 0 * * *" ]; then
+          elif [ "${{ github.event.schedule }}" = "23 0 * * *" ] || [ "${{ github.event.schedule }}" = "23 2 * * *" ]; then
             echo "mode=cycle" >> $GITHUB_OUTPUT
           elif [ "${{ github.event.schedule }}" = "40 23 1 * *" ]; then
             echo "mode=gate" >> $GITHUB_OUTPUT

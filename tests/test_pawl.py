@@ -315,3 +315,17 @@ def test_cycle_bars_drop_the_forming_day():
     full = run_pawl._bars(FakeApi(), ["BTC/USD"], 10)["BTC/USD"]
     done = run_pawl._bars(FakeApi(), ["BTC/USD"], 10, completed_only=True)["BTC/USD"]
     assert len(done) == len(full) - 1 and done.index[-1] < full.index[-1]
+
+
+
+def test_daily_bar_freshness_tolerates_github_cron_drift():
+    import pandas as pd
+    from datetime import datetime, timezone, timedelta
+    from pawl import risk as R
+    last = pd.Timestamp("2026-09-24", tz="UTC")
+    bars = {"BTC/USD": pd.DataFrame({"close": [1.0]}, index=[last])}
+    now = datetime(2026, 9, 25, 4, 48, tzinfo=timezone.utc)      # 4.8h past the bar's close
+    assert R.bars_are_fresh(bars, {"risk": {"max_bar_age_minutes": 120}}, now)[0] is False
+    assert R.bars_are_fresh(bars, {"risk": {"max_bar_age_minutes": 720}}, now)[0] is True
+    late = datetime(2026, 9, 25, 13, 0, tzinfo=timezone.utc)      # 13h: a frozen feed still trips it
+    assert R.bars_are_fresh(bars, {"risk": {"max_bar_age_minutes": 720}}, late)[0] is False
