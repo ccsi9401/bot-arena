@@ -11,3 +11,11 @@
 {"ts": "2026-09-25T04:48:22.693763+00:00", "event": "cycle_start", "gate": "gate passed 1d ago, live arm = pawl_core", "mode": "paper"}
 {"ts": "2026-09-25T04:48:22.782721+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-09-25T04:48:23.063617+00:00", "event": "risk", "note": "stale data: BTC/USD: last bar 2026-09-24 is 4.8h past close; ETH/USD: last bar 2026-09-24 is 4.8h past close"}
+{"ts": "2026-09-25T04:55:10.257319+00:00", "event": "cycle_start", "gate": "gate passed 1d ago, live arm = pawl_core", "mode": "paper"}
+{"ts": "2026-09-25T04:55:10.440503+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-09-25T04:55:10.688729+00:00", "event": "decision", "regime_on": true, "targets": {"ETH/USD": 0.35, "BTC/USD": 0.35}, "exits": []}
+{"ts": "2026-09-25T04:55:10.688849+00:00", "event": "reason", "symbol": "BTC/USD", "why": "entry: mom 5.1%, vol 45%, weight 35.0%"}
+{"ts": "2026-09-25T04:55:10.688905+00:00", "event": "reason", "symbol": "ETH/USD", "why": "entry: mom 7.0%, vol 48%, weight 35.0%"}
+{"ts": "2026-09-25T04:55:10.713673+00:00", "event": "buy", "symbol": "BTC/USD", "qty": 0.004147619956427475, "approx_usd": 350.0}
+{"ts": "2026-09-25T04:55:10.735525+00:00", "event": "buy", "symbol": "ETH/USD", "qty": 0.13023110439697416, "approx_usd": 350.0}
+{"ts": "2026-09-25T04:55:10.796954+00:00", "event": "cycle_done", "equity": 1000.0, "positions": 0, "failures": 0}
