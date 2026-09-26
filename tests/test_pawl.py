@@ -296,7 +296,10 @@ def test_live_runs_the_floor_mode_the_gate_chose(tmp_path, monkeypatch):
         def protective_stop(self, *a): raise AssertionError("no floor may be placed in mode none")
     state = {"floors": {"BTC/USD": {"symbol": "BTC/USD", "floor_price": 1.0}}}
     run_pawl._place_floors(FakeApi(), state, {}, cfg)
-    assert state["floors"] == {} and FakeApi.cancelled == ["BTC/USD"]
+    # mode none: the resting order is cancelled, but the position stays TRACKED (order_id None)
+    # so reconcile() does not mistake the bot's own holding for an untracked position.
+    assert FakeApi.cancelled == ["BTC/USD"]
+    assert set(state["floors"]) == {"BTC/USD"} and state["floors"]["BTC/USD"]["order_id"] is None
 
 
 def test_alpaca_adapter_is_concrete_and_fetches_bars():
