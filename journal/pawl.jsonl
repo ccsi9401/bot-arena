@@ -25,3 +25,7 @@
 {"ts": "2026-09-25T17:04:39.528450+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
 {"ts": "2026-09-25T23:16:25.300867+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-09-25T23:16:25.426814+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
+{"ts": "2026-09-26T05:11:08.149637+00:00", "event": "cycle_start", "gate": "gate passed 2d ago, live arm = pawl_core", "mode": "paper"}
+{"ts": "2026-09-26T05:11:08.228954+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-09-26T05:11:08.278971+00:00", "event": "reconcile", "note": "UNTRACKED position at broker: BTC/USD (not in PAWL state)"}
+{"ts": "2026-09-26T05:11:08.279329+00:00", "event": "halted", "reason": "untracked position at broker; refusing to trade around a bug"}

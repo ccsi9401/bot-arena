@@ -4,9 +4,9 @@
   "floor_mode": "none",
   "floors": {},
   "high_water_equity": 1000.0,
-  "last_cycle": "2026-09-25T23:16:25.369964+00:00",
+  "last_cycle": "2026-09-26T05:11:08.279078+00:00",
   "last_cycle_date": "2026-09-25",
-  "manual_halt": false,
+  "manual_halt": true,
   "rotation_enabled": false,
   "roundtrips": {}
 }
