@@ -5,7 +5,7 @@
   "days_since_anchor": 0,
   "last_cycle_date_et": "2026-09-25",
   "last_cycle_run_id": "steward_20260925_1500",
-  "checked_et": "2026-09-25T18:09:49.704337-04:00",
-  "requested_mode": "auto",
+  "checked_et": "2026-09-25T20:09:01.648321-04:00",
+  "requested_mode": "pulse",
   "resolved_mode": "pulse"
 }
