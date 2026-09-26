@@ -36,3 +36,4 @@
 {"ts": "2026-09-26T09:18:52.297815+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-09-26T09:18:52.297996+00:00", "event": "ratchet_skipped", "reason": "manual halt set"}
 {"ts": "2026-09-26T16:05:38.293800+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-09-26T16:07:34.504326+00:00", "event": "operator", "note": "halt cleared; BTC/USD and ETH/USD (bought 2026-09-25 04:55Z by the cycle) adopted into the position table. Cause: floor mode 'none' wiped state.floors each cycle, so reconcile saw the bot's own positions as UNTRACKED. Fixed in code."}

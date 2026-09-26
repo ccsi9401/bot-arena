@@ -27,7 +27,7 @@ from pawl import risk as R
 from pawl import strategy as st
 from pawl.broker import ALL_VENUES, BrokerError, capabilities, get_broker
 from pawl.data import load_csvs
-from pawl.floor import FloorState, limit_for, open_floor, ratchet as ratchet_floor, breached
+from pawl.floor import track_without_floor, FloorState, limit_for, open_floor, ratchet as ratchet_floor, breached
 from pawl.floor import enabled as floor_enabled
 
 GATE_PATH = "state/pawl_gate.json"
@@ -313,7 +313,10 @@ def _place_floors(api: Alpaca, state: dict, bars: dict, cfg: dict) -> None:
                 api.cancel_floor_for(s)
             except BrokerError as e:
                 J.log("floor_cancel_failed", symbol=s, error=str(e)[:300])
-        state["floors"] = {}
+        # state["floors"] is ALSO the position table that reconcile() checks. Wiping it here
+        # (as this code did until 2026-09-26) made the bot's own buys look UNTRACKED on the
+        # next cycle and halted it. Keep one tracking entry per held position, order_id None.
+        state["floors"] = track_without_floor(state.get("floors") or {}, positions)
         return
     for s, raw in list(state.get("floors", {}).items()):
         pos = positions.get(s)

@@ -2,11 +2,28 @@
   "consecutive_order_failures": 0,
   "equity_at_last_cycle": 1000.0,
   "floor_mode": "none",
-  "floors": {},
+  "floors": {
+    "BTC/USD": {
+      "symbol": "BTC/USD",
+      "entry_price": 84384.0,
+      "high_water": 84384.0,
+      "floor_price": 0.0,
+      "order_id": null,
+      "last_ratchet": "2026-09-26T16:07:34.504326+00:00"
+    },
+    "ETH/USD": {
+      "symbol": "ETH/USD",
+      "entry_price": 2687.5,
+      "high_water": 2687.5,
+      "floor_price": 0.0,
+      "order_id": null,
+      "last_ratchet": "2026-09-26T16:07:34.504326+00:00"
+    }
+  },
   "high_water_equity": 1000.0,
   "last_cycle": "2026-09-26T07:51:26.256742+00:00",
   "last_cycle_date": "2026-09-25",
-  "manual_halt": true,
+  "manual_halt": false,
   "rotation_enabled": false,
   "roundtrips": {}
 }

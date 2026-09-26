@@ -115,3 +115,22 @@ def breached(state: FloorState, last_price: float) -> bool:
     catches the case where the order went missing (cancelled, rejected, or
     never placed) and we must exit at market."""
     return last_price <= state.floor_price
+
+
+def track_without_floor(floors: dict, positions: dict) -> dict:
+    """Position table for floor mode 'none': one entry per held symbol (order_id None,
+    floor_price 0), existing entries kept, symbols no longer held dropped. reconcile()
+    reads this table, so it must always mirror what the bot itself holds."""
+    out = {}
+    for sym, pos in positions.items():
+        qty = abs(float(pos.get("qty", 0) or 0))
+        if qty <= 0:
+            continue
+        if sym in floors:
+            d = dict(floors[sym]); d["order_id"] = None
+            out[sym] = d
+            continue
+        px = float(pos.get("avg_entry_price") or pos.get("current_price") or 0.0)
+        out[sym] = FloorState(symbol=sym, entry_price=px, high_water=px, floor_price=0.0,
+                              order_id=None, last_ratchet=datetime.now(timezone.utc).isoformat()).to_dict()
+    return out

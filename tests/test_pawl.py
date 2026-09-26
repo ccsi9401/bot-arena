@@ -329,3 +329,17 @@ def test_daily_bar_freshness_tolerates_github_cron_drift():
     assert R.bars_are_fresh(bars, {"risk": {"max_bar_age_minutes": 720}}, now)[0] is True
     late = datetime(2026, 9, 25, 13, 0, tzinfo=timezone.utc)      # 13h: a frozen feed still trips it
     assert R.bars_are_fresh(bars, {"risk": {"max_bar_age_minutes": 720}}, late)[0] is False
+
+
+
+def test_no_floor_mode_keeps_position_table_for_reconcile():
+    from pawl.floor import track_without_floor
+    from pawl import risk as R
+    positions = {"BTC/USD": {"qty": "0.0041", "avg_entry_price": "84384.0"},
+                 "ETH/USD": {"qty": "0.13", "avg_entry_price": "2687.5"}}
+    floors = track_without_floor({}, positions)
+    assert set(floors) == {"BTC/USD", "ETH/USD"} and floors["BTC/USD"]["order_id"] is None
+    state = {"floors": floors}
+    assert R.reconcile(state, positions) == []                      # nothing untracked, nothing phantom
+    floors2 = track_without_floor(floors, {"BTC/USD": positions["BTC/USD"]})
+    assert set(floors2) == {"BTC/USD"}                              # sold ETH drops out
