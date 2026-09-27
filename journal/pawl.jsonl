@@ -51,3 +51,5 @@
 {"ts": "2026-09-27T09:57:34.032999+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
 {"ts": "2026-09-27T16:54:00.395424+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-09-27T16:54:00.553474+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
+{"ts": "2026-09-27T22:58:18.247887+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-09-27T22:58:18.642426+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
