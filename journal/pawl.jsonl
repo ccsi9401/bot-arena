@@ -61,3 +61,5 @@
 {"ts": "2026-09-28T08:48:06.592591+00:00", "event": "cycle_already_done", "date": "2026-09-28", "note": "one daily cycle per UTC day; the retry clock found it done"}
 {"ts": "2026-09-28T10:49:14.550633+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-09-28T10:49:14.824709+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
+{"ts": "2026-09-28T19:37:34.210920+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-09-28T19:37:34.703537+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
