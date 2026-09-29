@@ -1,6 +1,6 @@
 {
   "consecutive_order_failures": 0,
-  "equity_at_last_cycle": 988.79,
+  "equity_at_last_cycle": 992.52,
   "floor_mode": "none",
   "floors": {
     "BTC/USD": {
@@ -21,8 +21,8 @@
     }
   },
   "high_water_equity": 1000.94,
-  "last_cycle": "2026-09-29T00:20:15.155978+00:00",
-  "last_cycle_date": "2026-09-28",
+  "last_cycle": "2026-09-29T05:54:11.942431+00:00",
+  "last_cycle_date": "2026-09-29",
   "manual_halt": false,
   "rotation_enabled": false,
   "roundtrips": {}
