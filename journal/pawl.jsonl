@@ -70,3 +70,4 @@
 {"ts": "2026-09-29T05:54:11.915386+00:00", "event": "decision", "regime_on": true, "targets": {"ETH/USD": 0.35, "BTC/USD": 0.35}, "exits": []}
 {"ts": "2026-09-29T05:54:11.915514+00:00", "event": "no_action", "note": "every position is inside its drift band; no round trips spent"}
 {"ts": "2026-09-29T05:54:11.942731+00:00", "event": "cycle_done", "equity": 992.52, "positions": 2, "failures": 0}
+{"ts": "2026-09-29T08:43:04.881108+00:00", "event": "cycle_already_done", "date": "2026-09-29", "note": "one daily cycle per UTC day; the retry clock found it done"}
