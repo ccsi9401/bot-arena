@@ -89,3 +89,8 @@
 {"ts": "2026-09-30T17:58:25.605910+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
 {"ts": "2026-09-30T23:42:11.993841+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-09-30T23:42:12.790325+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
+{"ts": "2026-10-01T06:11:19.794808+00:00", "event": "cycle_start", "gate": "gate passed 7d ago, live arm = pawl_core", "mode": "paper"}
+{"ts": "2026-10-01T06:11:19.857360+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-10-01T06:11:20.204993+00:00", "event": "decision", "regime_on": true, "targets": {"ETH/USD": 0.35, "BTC/USD": 0.35}, "exits": []}
+{"ts": "2026-10-01T06:11:20.205102+00:00", "event": "no_action", "note": "every position is inside its drift band; no round trips spent"}
+{"ts": "2026-10-01T06:11:20.322753+00:00", "event": "cycle_done", "equity": 1002.74, "positions": 2, "failures": 0}
