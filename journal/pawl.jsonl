@@ -95,3 +95,5 @@
 {"ts": "2026-10-01T06:11:20.205102+00:00", "event": "no_action", "note": "every position is inside its drift band; no round trips spent"}
 {"ts": "2026-10-01T06:11:20.322753+00:00", "event": "cycle_done", "equity": 1002.74, "positions": 2, "failures": 0}
 {"ts": "2026-10-01T09:06:02.172038+00:00", "event": "cycle_already_done", "date": "2026-10-01", "note": "one daily cycle per UTC day; the retry clock found it done"}
+{"ts": "2026-10-01T10:53:29.880538+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-10-01T10:53:30.269641+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
