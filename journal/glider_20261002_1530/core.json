@@ -1,0 +1,21 @@
+{
+  "plan": {
+    "symbol": "SPY",
+    "mode": "always",
+    "want": true,
+    "kill": false,
+    "regime_ok": true,
+    "equity": 4979.92,
+    "current": 1456.65,
+    "target": 1456.74,
+    "overlay_mv": 3473.38,
+    "pending_buys": 0,
+    "approved_buys": 0,
+    "buffer": 49.8,
+    "action": "hold",
+    "notional": 0.0
+  },
+  "orders": [],
+  "dry_run": false,
+  "_written_et": "2026-10-02T15:30:43.302039-04:00"
+}
