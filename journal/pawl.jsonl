@@ -113,3 +113,9 @@
 {"ts": "2026-10-02T05:54:54.238484+00:00", "event": "floor_place_failed", "symbol": "ETH/USD", "error": "POST https://paper-api.alpaca.markets/v2/orders -> 422: {\"code\":40010001,\"message\":\"limit price must be \\u003e 0\"}", "note": "position is running WITHOUT a resting floor; ratchet loop is the only protection"}
 {"ts": "2026-10-02T05:54:54.238926+00:00", "event": "cycle_done", "equity": 1011.31, "positions": 2, "failures": 0}
 {"ts": "2026-10-02T08:40:24.126008+00:00", "event": "cycle_already_done", "date": "2026-10-02", "note": "one daily cycle per UTC day; the retry clock found it done"}
+{"ts": "2026-10-02T10:27:10.922423+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-10-02T10:27:11.068762+00:00", "event": "floor_raised", "symbol": "BTC/USD", "floor": 56080.5, "high_water": 86277.7, "distance_pct": 53.85}
+{"ts": "2026-10-02T10:27:11.070310+00:00", "event": "floor_raised", "symbol": "ETH/USD", "floor": 1781.05, "high_water": 2740.07, "distance_pct": 53.85}
+{"ts": "2026-10-02T10:27:11.099590+00:00", "event": "floor_resting", "symbol": "BTC/USD", "stop": 56080.5, "limit": 55519.7, "order_id": "96da21fe-7fce-4166-8cc2-c02005361519"}
+{"ts": "2026-10-02T10:27:11.118204+00:00", "event": "floor_resting", "symbol": "ETH/USD", "stop": 1781.05, "limit": 1763.24, "order_id": "dc75295c-b7b8-46c7-b697-5d69b5582f52"}
+{"ts": "2026-10-02T10:27:11.118682+00:00", "event": "ratchet_done", "moved": true, "positions": 2}
