@@ -101,3 +101,7 @@
 {"ts": "2026-10-01T18:23:25.766235+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
 {"ts": "2026-10-01T23:51:43.505615+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-10-01T23:51:43.997580+00:00", "event": "ratchet_idle", "note": "floor mode none (chosen by gate); exits come from the daily cycle"}
+{"ts": "2026-10-02T02:33:03.790732+00:00", "event": "gate_costs", "venue": "Alpaca crypto spot", "taker": 0.0025, "roundtrip": "0.50%"}
+{"ts": "2026-10-02T02:33:03.790987+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-10-02T02:33:03.931162+00:00", "event": "gate_start", "source": "Alpaca daily bars, 1800d", "symbols": 2}
+{"ts": "2026-10-02T02:33:37.695342+00:00", "event": "gate_done", "passed": true, "live_arm": "pawl_core", "rotation_enabled": false, "floor_mode": "catastrophe"}
