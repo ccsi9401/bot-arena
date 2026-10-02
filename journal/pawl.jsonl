@@ -112,3 +112,4 @@
 {"ts": "2026-10-02T05:54:54.133313+00:00", "event": "floor_place_failed", "symbol": "BTC/USD", "error": "POST https://paper-api.alpaca.markets/v2/orders -> 422: {\"code\":40010001,\"message\":\"limit price must be \\u003e 0\"}", "note": "position is running WITHOUT a resting floor; ratchet loop is the only protection"}
 {"ts": "2026-10-02T05:54:54.238484+00:00", "event": "floor_place_failed", "symbol": "ETH/USD", "error": "POST https://paper-api.alpaca.markets/v2/orders -> 422: {\"code\":40010001,\"message\":\"limit price must be \\u003e 0\"}", "note": "position is running WITHOUT a resting floor; ratchet loop is the only protection"}
 {"ts": "2026-10-02T05:54:54.238926+00:00", "event": "cycle_done", "equity": 1011.31, "positions": 2, "failures": 0}
+{"ts": "2026-10-02T08:40:24.126008+00:00", "event": "cycle_already_done", "date": "2026-10-02", "note": "one daily cycle per UTC day; the retry clock found it done"}
