@@ -1,17 +1,17 @@
 # Bot Arena — live fleet
 
-_As of 2026-10-06T20:41 ET · started 2026-09-24_
+_As of 2026-10-07T17:15 ET · started 2026-09-24_
 
 **Leader: TALON**
 
 | | TALON | PAWL | TWIN-COIN | GLIDER | STEWARD |
 |---|---|---|---|---|---|
-| Equity | 106683.92 | 1005.73 | None | 5005.07 | 5116.61 |
-| Total return % | 6.68 | 0.57 | None | 0.1 | 2.33 |
-| Today % | -0.79 | -0.18 | None | -0.08 | 0.49 |
-| Max DD % | -1.05 | -0.8 | None | -1.16 | -1.12 |
-| Sharpe (ann.) | 4.08 | 1.45 | None | -1.48 | 4.54 |
-| Days scored | 13 | 13 | None | 13 | 13 |
-| Open | ['AAVEUSD', 'AVAXUSD', 'ETHUSD', 'LINKUSD', 'SOLUSD'] | ['BTCUSD', 'ETHUSD'] | [] | ['AAPL', 'KO', 'SPY', 'XBI', 'XLV', 'XOM'] | ['GLD', 'IEF', 'QQQ', 'SHY', 'SPY'] |
+| Equity | 104470.1 | 980.15 | None | 5005.0 | 5099.23 |
+| Total return % | 4.47 | -1.99 | None | 0.1 | 1.98 |
+| Today % | -0.82 | -1.27 | None | 0.1 | -0.26 |
+| Max DD % | -3.1 | -3.33 | None | -1.16 | -1.12 |
+| Sharpe (ann.) | -0.14 | -2.77 | None | -1.43 | 3.24 |
+| Days scored | 14 | 14 | None | 14 | 14 |
+| Open | ['AAVEUSD', 'AVAXUSD', 'ETHUSD', 'LINKUSD', 'SOLUSD'] | ['BTCUSD', 'ETHUSD'] | [] | ['AAPL', 'KO', 'SPY', 'XLV', 'XOM'] | ['GLD', 'IEF', 'QQQ', 'SHY', 'SPY'] |
 | Kill switch | None | None | None | None | None |
 | Error |  |  | APIError |  |  |
