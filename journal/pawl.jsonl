@@ -210,3 +210,4 @@
 {"ts": "2026-10-07T06:12:43.177951+00:00", "event": "floor_resting", "symbol": "BTC/USD", "stop": 56080.5, "limit": 55519.7, "order_id": "79f1f738-36e8-411b-a408-8c5ab90d08f9"}
 {"ts": "2026-10-07T06:12:43.273084+00:00", "event": "floor_resting", "symbol": "ETH/USD", "stop": 1781.05, "limit": 1763.24, "order_id": "5fba532d-e7bd-445f-b111-dc082e6e6ebb"}
 {"ts": "2026-10-07T06:12:43.273391+00:00", "event": "cycle_done", "equity": 990.47, "positions": 2, "failures": 0}
+{"ts": "2026-10-07T08:52:49.284452+00:00", "event": "cycle_already_done", "date": "2026-10-07", "note": "one daily cycle per UTC day; the retry clock found it done"}
