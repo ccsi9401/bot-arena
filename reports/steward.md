@@ -1,7 +1,7 @@
-# STEWARD — 2026-10-06 21:00 ET
+# STEWARD — 2026-10-07 17:45 ET
 
-Equity: $5,114
-SPY shadow: $5,083
+Equity: $5,101
+SPY shadow: $5,071
 Regime: RISK-ON
 Last cycle: 2026-10-02
 
