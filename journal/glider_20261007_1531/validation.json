@@ -1,0 +1,55 @@
+{
+  "approved": [
+    {
+      "action": "close",
+      "symbol": "KO",
+      "reasoning": "Time stop: held 37d \u2265 10d."
+    },
+    {
+      "action": "close",
+      "symbol": "AAPL",
+      "reasoning": "Time stop: held 37d \u2265 10d."
+    },
+    {
+      "action": "close",
+      "symbol": "XOM",
+      "reasoning": "Time stop: held 37d \u2265 10d."
+    },
+    {
+      "action": "close",
+      "symbol": "XLV",
+      "reasoning": "Time stop: held 37d \u2265 10d."
+    }
+  ],
+  "rejected": [
+    {
+      "action": "buy",
+      "symbol": "MU",
+      "entry_limit": 1084.42,
+      "stop": 945.97,
+      "target": 2172.56,
+      "score": 0.5596061495681686,
+      "reasoning": "Uptrend (50>200 SMA, 11.0% off 52wk high), pullback trigger RSI2=72.2 / EMA20 touch. Stop 3.0xATR=45.43 below close 1082.26; exit_mode=trail.",
+      "checks": {
+        "uptrend": true,
+        "near_high": true,
+        "pullback": true
+      },
+      "reject_reason": "qty rounds to 0 (risk $45, 138.45/share)"
+    }
+  ],
+  "halts": [],
+  "account_snapshot": {
+    "equity": 5003.86,
+    "cash": 499.59,
+    "last_equity": 4999.99506102931,
+    "buying_power": 14610.31,
+    "status": "AccountStatus.ACTIVE",
+    "core_value": 1471.136933,
+    "gross_after": 3033.11,
+    "drawdown_pct": 1.06,
+    "drawdown_basis": "peak 5058",
+    "day_pl_pct": 0.08
+  },
+  "_written_et": "2026-10-07T15:31:29.315113-04:00"
+}
