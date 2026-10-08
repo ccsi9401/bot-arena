@@ -2,18 +2,18 @@
   "round": 2,
   "title": "Bot Arena \u2014 live fleet",
   "start_date": "2026-09-24",
-  "asof_et": "2026-10-07T20:59:09.643761-04:00",
+  "asof_et": "2026-10-08T17:15:37.865043-04:00",
   "competitors": [
     {
       "slug": "talon",
       "label": "TALON",
-      "equity": 104212.37,
+      "equity": 101199.11,
       "cash": 51613.94,
-      "total_return_pct": 4.21,
-      "day_pl_pct": -1.06,
-      "max_drawdown_pct": -3.34,
-      "sharpe_daily_ann": -0.46,
-      "trading_days": 14,
+      "total_return_pct": 1.2,
+      "day_pl_pct": -2.96,
+      "max_drawdown_pct": -6.13,
+      "sharpe_daily_ann": -3.21,
+      "trading_days": 15,
       "open_positions": [
         "AAVEUSD",
         "AVAXUSD",
@@ -26,13 +26,13 @@
     {
       "slug": "pawl",
       "label": "PAWL",
-      "equity": 980.29,
+      "equity": 960.51,
       "cash": 301.5,
-      "total_return_pct": -1.97,
-      "day_pl_pct": -1.25,
-      "max_drawdown_pct": -3.31,
-      "sharpe_daily_ann": -2.76,
-      "trading_days": 14,
+      "total_return_pct": -3.95,
+      "day_pl_pct": -1.98,
+      "max_drawdown_pct": -5.26,
+      "sharpe_daily_ann": -4.69,
+      "trading_days": 15,
       "open_positions": [
         "BTCUSD",
         "ETHUSD"
@@ -56,16 +56,17 @@
     {
       "slug": "glider",
       "label": "GLIDER",
-      "equity": 5002.35,
-      "cash": 50.03,
-      "total_return_pct": 0.05,
-      "day_pl_pct": 0.05,
+      "equity": 5038.41,
+      "cash": 51.32,
+      "total_return_pct": 0.77,
+      "day_pl_pct": 0.71,
       "max_drawdown_pct": -1.16,
-      "sharpe_daily_ann": -1.69,
-      "trading_days": 14,
+      "sharpe_daily_ann": 1.42,
+      "trading_days": 15,
       "open_positions": [
         "AAPL",
         "KO",
+        "SMH",
         "SPY",
         "XLV",
         "XOM"
@@ -75,13 +76,13 @@
     {
       "slug": "steward",
       "label": "STEWARD",
-      "equity": 5099.47,
+      "equity": 5070.34,
       "cash": 499.54,
-      "total_return_pct": 1.99,
-      "day_pl_pct": -0.26,
+      "total_return_pct": 1.41,
+      "day_pl_pct": -0.55,
       "max_drawdown_pct": -1.12,
-      "sharpe_daily_ann": 3.26,
-      "trading_days": 14,
+      "sharpe_daily_ann": 1.49,
+      "trading_days": 15,
       "open_positions": [
         "GLD",
         "IEF",
@@ -92,5 +93,5 @@
       "kill_switch": null
     }
   ],
-  "leader": "TALON"
+  "leader": "STEWARD"
 }
