@@ -1,0 +1,31 @@
+{
+  "results": [
+    {
+      "action": "close",
+      "symbol": "KO",
+      "ok": false,
+      "error": "TypeError: TradingClient.close_position() got an unexpected keyword argument 'cancel_orders'"
+    },
+    {
+      "action": "close",
+      "symbol": "AAPL",
+      "ok": false,
+      "error": "TypeError: TradingClient.close_position() got an unexpected keyword argument 'cancel_orders'"
+    },
+    {
+      "action": "close",
+      "symbol": "XOM",
+      "ok": false,
+      "error": "TypeError: TradingClient.close_position() got an unexpected keyword argument 'cancel_orders'"
+    },
+    {
+      "action": "close",
+      "symbol": "XLV",
+      "ok": false,
+      "error": "TypeError: TradingClient.close_position() got an unexpected keyword argument 'cancel_orders'"
+    }
+  ],
+  "placed": 0,
+  "failed": 4,
+  "_written_et": "2026-10-09T15:30:45.208944-04:00"
+}
