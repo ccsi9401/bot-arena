@@ -1,6 +1,6 @@
 {
   "consecutive_order_failures": 0,
-  "equity_at_last_cycle": 977.97,
+  "equity_at_last_cycle": 966.11,
   "floor_mode": "catastrophe",
   "floors": {
     "BTC/USD": {
@@ -8,7 +8,7 @@
       "floor_price": 56080.505,
       "high_water": 86438.2895,
       "last_ratchet": "2026-10-02T10:27:11.068698+00:00",
-      "order_id": "7e983610-b304-4fb8-a511-92af4af9037e",
+      "order_id": "b7ca2656-ffbf-4000-850d-5ee1e6122031",
       "symbol": "BTC/USD"
     },
     "ETH/USD": {
@@ -16,13 +16,13 @@
       "floor_price": 1781.0455000000002,
       "high_water": 2740.07,
       "last_ratchet": "2026-10-02T10:27:11.070262+00:00",
-      "order_id": "11b05c8d-3ac0-435b-ade0-103eeaf31119",
+      "order_id": "71e7c5af-eb07-4760-93a3-c952088193a2",
       "symbol": "ETH/USD"
     }
   },
   "high_water_equity": 1011.31,
-  "last_cycle": "2026-10-09T00:16:35.892777+00:00",
-  "last_cycle_date": "2026-10-08",
+  "last_cycle": "2026-10-09T06:22:44.416687+00:00",
+  "last_cycle_date": "2026-10-09",
   "manual_halt": false,
   "rotation_enabled": false,
   "roundtrips": {}
