@@ -7,30 +7,30 @@
   },
   "created_utc": "2026-09-07T16:00:41+00:00",
   "day": {
-    "date": "2026-10-08",
-    "start_equity": 104269.71
+    "date": "2026-10-09",
+    "start_equity": 100984.67
   },
   "equity_high_water": 108533.62,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-10-08T21:14:25+00:00",
+  "last_run_utc": "2026-10-09T00:00:41+00:00",
   "last_snapshot": {
-    "equity": 101195.78,
+    "equity": 100984.67,
     "halted": false,
     "high_water": 108533.62,
     "locked": 0.0,
     "open": [
       "AAVE/USD",
-      "AVAX/USD",
-      "ETH/USD",
+      "LINK/USD",
+      "LTC/USD",
       "SOL/USD",
       "UNI/USD"
     ],
     "open_count": 5,
-    "pnl_day": -3073.93,
-    "pnl_total": 1195.78,
+    "pnl_day": 0.0,
+    "pnl_total": 984.67,
     "regime_on": true,
-    "tradeable": 101195.78
+    "tradeable": 100984.67
   },
   "positions": {
     "AAVE/USD": {
@@ -42,23 +42,23 @@
       "stage": "locked_2R",
       "symbol": "AAVE/USD"
     },
-    "AVAX/USD": {
-      "cost_pad": 0.046642504084,
-      "entry": 11.660626021,
-      "floor": 10.318112099987122,
-      "high_water": 11.660626021,
-      "r_unit": 1.342513921012879,
+    "LINK/USD": {
+      "cost_pad": 0.05097810554400001,
+      "entry": 12.744526386,
+      "floor": 11.15940426991439,
+      "high_water": 12.744526386,
+      "r_unit": 1.5851221160856104,
       "stage": "basement",
-      "symbol": "AVAX/USD"
+      "symbol": "LINK/USD"
     },
-    "ETH/USD": {
-      "cost_pad": 9.898109902624,
-      "entry": 2474.527475656,
-      "floor": 2484.4255855586243,
-      "high_water": 2775.483,
-      "r_unit": 186.36547888615684,
-      "stage": "breakeven",
-      "symbol": "ETH/USD"
+    "LTC/USD": {
+      "cost_pad": 0.253406178424,
+      "entry": 63.351544606,
+      "floor": 56.17972997086571,
+      "high_water": 63.351544606,
+      "r_unit": 7.171814635134286,
+      "stage": "basement",
+      "symbol": "LTC/USD"
     },
     "SOL/USD": {
       "cost_pad": 0.413798475476,
