@@ -1,17 +1,17 @@
 # Bot Arena — live fleet
 
-_As of 2026-10-11T20:31 ET · started 2026-09-24_
+_As of 2026-10-12T17:15 ET · started 2026-09-24_
 
-**Leader: TALON**
+**Leader: GLIDER**
 
 | | TALON | PAWL | TWIN-COIN | GLIDER | STEWARD |
 |---|---|---|---|---|---|
-| Equity | 102371.26 | 977.67 | None | 5060.53 | 5103.81 |
-| Total return % | 2.37 | -2.23 | None | 1.21 | 2.08 |
-| Today % | 1.06 | 1.09 | None | 0.16 | 0.24 |
-| Max DD % | -6.46 | -5.23 | None | -1.16 | -1.12 |
-| Sharpe (ann.) | -1.71 | -2.2 | None | 2.68 | 2.8 |
-| Days scored | 18 | 18 | None | 18 | 18 |
+| Equity | 100763.97 | 969.83 | None | 5080.03 | 5073.43 |
+| Total return % | 0.76 | -3.02 | None | 1.6 | 1.47 |
+| Today % | -0.53 | 0.28 | None | 0.54 | -0.35 |
+| Max DD % | -6.54 | -5.23 | None | -1.16 | -1.12 |
+| Sharpe (ann.) | -2.8 | -2.88 | None | 3.68 | 1.34 |
+| Days scored | 19 | 19 | None | 19 | 19 |
 | Open | ['AAVEUSD', 'LINKUSD', 'LTCUSD', 'SOLUSD', 'UNIUSD'] | ['BTCUSD', 'ETHUSD'] | [] | ['AAPL', 'KO', 'SMH', 'SPY', 'XLV', 'XOM'] | ['GLD', 'IEF', 'QQQ', 'SHY', 'SPY'] |
 | Kill switch | None | None | None | None | None |
 | Error |  |  | APIError |  |  |
