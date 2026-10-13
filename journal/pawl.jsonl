@@ -326,3 +326,4 @@
 {"ts": "2026-10-13T06:55:05.477881+00:00", "event": "sell", "symbol": "ETH/USD", "qty": 0.129905522, "approx_usd": 317.49}
 {"ts": "2026-10-13T06:55:05.687105+00:00", "event": "floor_resting", "symbol": "BTC/USD", "stop": 56080.5, "limit": 55519.7, "order_id": "370c1cc3-00ec-4ea3-9d56-cf3e288c7768"}
 {"ts": "2026-10-13T06:55:05.687459+00:00", "event": "cycle_done", "equity": 976.11, "positions": 1, "failures": 0}
+{"ts": "2026-10-13T09:34:06.821941+00:00", "event": "cycle_already_done", "date": "2026-10-13", "note": "one daily cycle per UTC day; the retry clock found it done"}
