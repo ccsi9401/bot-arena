@@ -8,20 +8,20 @@
       "floor_price": 56080.505,
       "high_water": 86438.2895,
       "last_ratchet": "2026-10-02T10:27:11.068698+00:00",
-      "order_id": "a104e7ba-db39-4fe3-90f4-0720e42ed16e",
+      "order_id": "b626f929-1513-4c6e-8c5d-07c056e1eef7",
       "symbol": "BTC/USD"
     },
     "ETH/USD": {
       "entry_price": 2507.2415,
       "floor_price": 1617.2638810445687,
-      "high_water": 2507.2415,
+      "high_water": 2509.37,
       "last_ratchet": "2026-10-13T11:41:01.777652+00:00",
       "order_id": null,
       "symbol": "ETH/USD"
     }
   },
   "high_water_equity": 1011.31,
-  "last_cycle": "2026-10-13T11:41:01.963952+00:00",
+  "last_cycle": "2026-10-13T19:12:50.566851+00:00",
   "last_cycle_date": "2026-10-13",
   "manual_halt": false,
   "rotation_enabled": false,
