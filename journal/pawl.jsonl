@@ -319,3 +319,10 @@
 {"ts": "2026-10-12T21:13:54.632372+00:00", "event": "floor_resting", "symbol": "BTC/USD", "stop": 56080.5, "limit": 55519.7, "order_id": "d4fdd15e-9179-4b2d-a479-19417c5442cf"}
 {"ts": "2026-10-12T21:13:54.658408+00:00", "event": "floor_resting", "symbol": "ETH/USD", "stop": 1781.05, "limit": 1763.24, "order_id": "50908bdc-8151-46b3-b0c2-4df09582e7d4"}
 {"ts": "2026-10-12T21:13:54.659057+00:00", "event": "ratchet_done", "moved": false, "positions": 2}
+{"ts": "2026-10-13T06:55:04.777301+00:00", "event": "cycle_start", "gate": "gate passed 11d ago, live arm = pawl_core", "mode": "paper"}
+{"ts": "2026-10-13T06:55:04.833560+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-10-13T06:55:05.315422+00:00", "event": "decision", "regime_on": true, "targets": {"BTC/USD": 0.35}, "exits": ["ETH/USD"]}
+{"ts": "2026-10-13T06:55:05.315518+00:00", "event": "reason", "symbol": "ETH/USD", "why": "momentum -2.8% below exit band"}
+{"ts": "2026-10-13T06:55:05.477881+00:00", "event": "sell", "symbol": "ETH/USD", "qty": 0.129905522, "approx_usd": 317.49}
+{"ts": "2026-10-13T06:55:05.687105+00:00", "event": "floor_resting", "symbol": "BTC/USD", "stop": 56080.5, "limit": 55519.7, "order_id": "370c1cc3-00ec-4ea3-9d56-cf3e288c7768"}
+{"ts": "2026-10-13T06:55:05.687459+00:00", "event": "cycle_done", "equity": 976.11, "positions": 1, "failures": 0}
