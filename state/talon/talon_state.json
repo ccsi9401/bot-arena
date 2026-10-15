@@ -13,9 +13,9 @@
   "equity_high_water": 108533.62,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-10-15T19:49:17+00:00",
+  "last_run_utc": "2026-10-15T20:00:43+00:00",
   "last_snapshot": {
-    "equity": 99518.58,
+    "equity": 99579.08,
     "halted": false,
     "high_water": 108533.62,
     "locked": 0.0,
@@ -27,10 +27,10 @@
       "UNI/USD"
     ],
     "open_count": 5,
-    "pnl_day": 611.93,
-    "pnl_total": -481.42,
+    "pnl_day": 672.43,
+    "pnl_total": -420.92,
     "regime_on": true,
-    "tradeable": 99518.58
+    "tradeable": 99579.08
   },
   "positions": {
     "AVAX/USD": {
