@@ -1,0 +1,37 @@
+{
+  "plan": {
+    "symbol": "SPY",
+    "mode": "always",
+    "want": true,
+    "kill": false,
+    "regime_ok": true,
+    "equity": 5092.21,
+    "current": 1303.29,
+    "target": 1448.59,
+    "overlay_mv": 3191.36,
+    "pending_buys": 0,
+    "approved_buys": 401.34,
+    "buffer": 50.92,
+    "action": "buy",
+    "notional": 145.3
+  },
+  "orders": [
+    {
+      "id": "a973824f-7cfd-441e-a5f2-b01e6888e38e",
+      "symbol": "SPY",
+      "side": "buy",
+      "notional": 145.3,
+      "status": "OrderStatus.PENDING_NEW",
+      "final": {
+        "id": "a973824f-7cfd-441e-a5f2-b01e6888e38e",
+        "status": "OrderStatus.FILLED",
+        "filled_qty": 0.188227764,
+        "filled_avg_price": 771.884
+      },
+      "filled": true,
+      "ok": true
+    }
+  ],
+  "dry_run": false,
+  "_written_et": "2026-10-15T15:30:48.762765-04:00"
+}
