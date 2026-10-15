@@ -377,3 +377,7 @@
 {"ts": "2026-10-15T16:52:01.529701+00:00", "event": "floor_resting", "symbol": "BTC/USD", "stop": 56080.5, "limit": 55519.7, "order_id": "a4909084-1163-47dc-b68f-67556201e1fd"}
 {"ts": "2026-10-15T16:52:01.646718+00:00", "event": "floor_resting", "symbol": "ETH/USD", "stop": 1624.65, "limit": 1608.4, "order_id": "c13cdc31-6954-4201-b1af-6ef35b3594ec"}
 {"ts": "2026-10-15T16:52:01.647106+00:00", "event": "ratchet_done", "moved": false, "positions": 2}
+{"ts": "2026-10-15T23:00:41.304622+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-10-15T23:00:42.342581+00:00", "event": "floor_resting", "symbol": "BTC/USD", "stop": 56080.5, "limit": 55519.7, "order_id": "c964db64-6926-4032-b397-61772ef31ecb"}
+{"ts": "2026-10-15T23:00:42.425091+00:00", "event": "floor_resting", "symbol": "ETH/USD", "stop": 1624.65, "limit": 1608.4, "order_id": "c7d40c6c-25d3-433c-956f-f64fb2c1fb12"}
+{"ts": "2026-10-15T23:00:42.425562+00:00", "event": "ratchet_done", "moved": false, "positions": 2}
