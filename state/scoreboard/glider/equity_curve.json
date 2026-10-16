@@ -232,5 +232,11 @@
     "equity": 5078.71,
     "cash": 51.86,
     "note": "nightly scoreboard"
+  },
+  {
+    "ts_et": "2026-10-16T19:34:17.730920-04:00",
+    "equity": 5071.32,
+    "cash": 51.86,
+    "note": "nightly scoreboard"
   }
 ]
