@@ -1,0 +1,39 @@
+{
+  "approved": [
+    {
+      "action": "close",
+      "symbol": "KO",
+      "reasoning": "Time stop: held 46d \u2265 10d."
+    },
+    {
+      "action": "close",
+      "symbol": "AAPL",
+      "reasoning": "Time stop: held 46d \u2265 10d."
+    },
+    {
+      "action": "close",
+      "symbol": "XOM",
+      "reasoning": "Time stop: held 46d \u2265 10d."
+    },
+    {
+      "action": "close",
+      "symbol": "XLV",
+      "reasoning": "Time stop: held 46d \u2265 10d."
+    }
+  ],
+  "rejected": [],
+  "halts": [],
+  "account_snapshot": {
+    "equity": 5068.54,
+    "cash": 51.86,
+    "last_equity": 5089.77182707545,
+    "buying_power": 14254.14,
+    "status": "AccountStatus.ACTIVE",
+    "core_value": 1432.179232,
+    "gross_after": 3584.48,
+    "drawdown_pct": 0.52,
+    "drawdown_basis": "peak 5095",
+    "day_pl_pct": -0.42
+  },
+  "_written_et": "2026-10-16T15:30:51.533373-04:00"
+}
