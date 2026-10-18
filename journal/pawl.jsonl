@@ -421,3 +421,9 @@
 {"ts": "2026-10-17T22:13:01.243676+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-10-17T22:13:01.735624+00:00", "event": "floor_resting", "symbol": "BTC/USD", "stop": 56080.5, "limit": 55519.7, "order_id": "13631d3a-7ded-49e2-8d9b-d8ec2d28d82a"}
 {"ts": "2026-10-17T22:13:01.736176+00:00", "event": "ratchet_done", "moved": false, "positions": 1}
+{"ts": "2026-10-18T04:48:32.136139+00:00", "event": "cycle_start", "gate": "gate passed 16d ago, live arm = pawl_core", "mode": "paper"}
+{"ts": "2026-10-18T04:48:32.218465+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-10-18T04:48:32.524411+00:00", "event": "decision", "regime_on": true, "targets": {"BTC/USD": 0.35}, "exits": []}
+{"ts": "2026-10-18T04:48:32.524531+00:00", "event": "no_action", "note": "every position is inside its drift band; no round trips spent"}
+{"ts": "2026-10-18T04:48:32.587566+00:00", "event": "floor_resting", "symbol": "BTC/USD", "stop": 56080.5, "limit": 55519.7, "order_id": "7d23528e-b1c3-4a5f-8be9-0c2cb8357ccf"}
+{"ts": "2026-10-18T04:48:32.587995+00:00", "event": "cycle_done", "equity": 954.4, "positions": 1, "failures": 0}
