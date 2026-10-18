@@ -8,12 +8,12 @@
       "floor_price": 56080.505,
       "high_water": 86438.2895,
       "last_ratchet": "2026-10-02T10:27:11.068698+00:00",
-      "order_id": "f9cc4951-44a8-4577-aa49-971fafe24648",
+      "order_id": "375f6fa8-7674-412d-8fe5-6574ba5a9820",
       "symbol": "BTC/USD"
     }
   },
   "high_water_equity": 1011.31,
-  "last_cycle": "2026-10-18T15:46:58.928158+00:00",
+  "last_cycle": "2026-10-18T18:35:11.523547+00:00",
   "last_cycle_date": "2026-10-18",
   "manual_halt": false,
   "rotation_enabled": false,
