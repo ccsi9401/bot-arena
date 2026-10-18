@@ -427,3 +427,4 @@
 {"ts": "2026-10-18T04:48:32.524531+00:00", "event": "no_action", "note": "every position is inside its drift band; no round trips spent"}
 {"ts": "2026-10-18T04:48:32.587566+00:00", "event": "floor_resting", "symbol": "BTC/USD", "stop": 56080.5, "limit": 55519.7, "order_id": "7d23528e-b1c3-4a5f-8be9-0c2cb8357ccf"}
 {"ts": "2026-10-18T04:48:32.587995+00:00", "event": "cycle_done", "equity": 954.4, "positions": 1, "failures": 0}
+{"ts": "2026-10-18T07:18:26.451708+00:00", "event": "cycle_already_done", "date": "2026-10-18", "note": "one daily cycle per UTC day; the retry clock found it done"}
