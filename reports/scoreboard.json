@@ -2,23 +2,23 @@
   "round": 2,
   "title": "Bot Arena \u2014 live fleet",
   "start_date": "2026-09-24",
-  "asof_et": "2026-10-17T19:07:19.786640-04:00",
+  "asof_et": "2026-10-18T19:10:20.241962-04:00",
   "competitors": [
     {
       "slug": "talon",
       "label": "TALON",
-      "equity": 97903.59,
-      "cash": 58285.8,
-      "total_return_pct": -2.1,
-      "day_pl_pct": -0.99,
-      "max_drawdown_pct": -9.19,
-      "sharpe_daily_ann": -3.86,
-      "trading_days": 24,
+      "equity": 97813.99,
+      "cash": 63908.19,
+      "total_return_pct": -2.19,
+      "day_pl_pct": -1.08,
+      "max_drawdown_pct": -9.27,
+      "sharpe_daily_ann": -3.83,
+      "trading_days": 25,
       "open_positions": [
+        "AAVEUSD",
         "AVAXUSD",
         "LINKUSD",
         "LTCUSD",
-        "SOLUSD",
         "UNIUSD"
       ],
       "kill_switch": null
@@ -26,13 +26,13 @@
     {
       "slug": "pawl",
       "label": "PAWL",
-      "equity": 952.53,
+      "equity": 954.06,
       "cash": 616.31,
-      "total_return_pct": -4.75,
-      "day_pl_pct": -0.07,
+      "total_return_pct": -4.59,
+      "day_pl_pct": 0.09,
       "max_drawdown_pct": -6.05,
-      "sharpe_daily_ann": -3.4,
-      "trading_days": 24,
+      "sharpe_daily_ann": -3.2,
+      "trading_days": 25,
       "open_positions": [
         "BTCUSD"
       ],
@@ -60,8 +60,8 @@
       "total_return_pct": 1.63,
       "day_pl_pct": 0.0,
       "max_drawdown_pct": -1.16,
-      "sharpe_daily_ann": 3.14,
-      "trading_days": 24,
+      "sharpe_daily_ann": 3.07,
+      "trading_days": 25,
       "open_positions": [
         "AAPL",
         "KO",
@@ -80,8 +80,8 @@
       "total_return_pct": -1.05,
       "day_pl_pct": -0.0,
       "max_drawdown_pct": -3.49,
-      "sharpe_daily_ann": -2.01,
-      "trading_days": 24,
+      "sharpe_daily_ann": -1.97,
+      "trading_days": 25,
       "open_positions": [
         "GLD",
         "IEF",
