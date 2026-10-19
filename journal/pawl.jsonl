@@ -450,3 +450,6 @@
 {"ts": "2026-10-19T09:49:04.874786+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-10-19T09:49:05.559869+00:00", "event": "floor_resting", "symbol": "BTC/USD", "stop": 56080.5, "limit": 55519.7, "order_id": "b94f7b64-0fdb-4827-9871-db0e1966be36"}
 {"ts": "2026-10-19T09:49:05.560416+00:00", "event": "ratchet_done", "moved": false, "positions": 1}
+{"ts": "2026-10-19T18:41:22.369033+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-10-19T18:41:23.070660+00:00", "event": "floor_resting", "symbol": "BTC/USD", "stop": 56080.5, "limit": 55519.7, "order_id": "928d735a-8d3c-4ce3-a044-eba5e361ca32"}
+{"ts": "2026-10-19T18:41:23.071229+00:00", "event": "ratchet_done", "moved": false, "positions": 1}
