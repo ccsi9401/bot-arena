@@ -462,3 +462,4 @@
 {"ts": "2026-10-20T05:02:51.781990+00:00", "event": "reason", "symbol": "BTC/USD", "why": "momentum -5.5% below exit band"}
 {"ts": "2026-10-20T05:02:51.850332+00:00", "event": "sell", "symbol": "BTC/USD", "qty": 0.004137239, "approx_usd": 338.57}
 {"ts": "2026-10-20T05:02:51.871914+00:00", "event": "cycle_done", "equity": 955.39, "positions": 0, "failures": 0}
+{"ts": "2026-10-20T07:45:03.145651+00:00", "event": "cycle_already_done", "date": "2026-10-20", "note": "one daily cycle per UTC day; the retry clock found it done"}
