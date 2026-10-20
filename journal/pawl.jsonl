@@ -456,3 +456,9 @@
 {"ts": "2026-10-19T23:34:06.003911+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-10-19T23:34:06.689422+00:00", "event": "floor_resting", "symbol": "BTC/USD", "stop": 56080.5, "limit": 55519.7, "order_id": "45d06196-2e5c-4309-9fc4-996b847e257c"}
 {"ts": "2026-10-19T23:34:06.906433+00:00", "event": "ratchet_done", "moved": false, "positions": 1}
+{"ts": "2026-10-20T05:02:51.465992+00:00", "event": "cycle_start", "gate": "gate passed 18d ago, live arm = pawl_core", "mode": "paper"}
+{"ts": "2026-10-20T05:02:51.540291+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-10-20T05:02:51.781878+00:00", "event": "decision", "regime_on": true, "targets": {}, "exits": ["BTC/USD"]}
+{"ts": "2026-10-20T05:02:51.781990+00:00", "event": "reason", "symbol": "BTC/USD", "why": "momentum -5.5% below exit band"}
+{"ts": "2026-10-20T05:02:51.850332+00:00", "event": "sell", "symbol": "BTC/USD", "qty": 0.004137239, "approx_usd": 338.57}
+{"ts": "2026-10-20T05:02:51.871914+00:00", "event": "cycle_done", "equity": 955.39, "positions": 0, "failures": 0}
