@@ -6,14 +6,14 @@
     "BTC/USD": {
       "entry_price": 81414.8,
       "floor_price": 53770.412475000005,
-      "high_water": 82723.7115,
+      "high_water": 82888.968,
       "last_ratchet": "2026-10-20T16:52:28.693734+00:00",
       "order_id": null,
       "symbol": "BTC/USD"
     }
   },
   "high_water_equity": 1011.31,
-  "last_cycle": "2026-10-20T16:52:28.950547+00:00",
+  "last_cycle": "2026-10-20T23:08:41.408197+00:00",
   "last_cycle_date": "2026-10-20",
   "manual_halt": false,
   "rotation_enabled": false,
