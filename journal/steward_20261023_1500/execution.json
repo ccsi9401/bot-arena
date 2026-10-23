@@ -1,0 +1,25 @@
+{
+  "results": [
+    {
+      "symbol": "QQQ",
+      "side": "sell",
+      "qty": 0.395683,
+      "notional": null,
+      "id": "9fde2365-a9a7-4ff9-a6e6-afbbd112e46a",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "SPY",
+      "side": "buy",
+      "qty": 0.3457,
+      "notional": 262.93,
+      "id": "fe8d7a67-2350-4fbf-a8ec-d55a685ed5a9",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    }
+  ],
+  "placed": 2,
+  "failed": 0,
+  "_written_et": "2026-10-23T15:00:39.731888-04:00"
+}
