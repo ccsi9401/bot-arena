@@ -563,3 +563,9 @@
 {"ts": "2026-10-25T22:29:29.301241+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
 {"ts": "2026-10-25T22:29:29.804219+00:00", "event": "floor_place_failed", "symbol": "BTC/USD", "error": "POST https://paper-api.alpaca.markets/v2/orders -> 422: {\"code\":40010001,\"message\":\"qty must be \\u003e 0\"}", "note": "position is running WITHOUT a resting floor; ratchet loop is the only protection"}
 {"ts": "2026-10-25T22:29:29.804508+00:00", "event": "ratchet_done", "moved": false, "positions": 1}
+{"ts": "2026-10-26T05:02:02.775417+00:00", "event": "cycle_start", "gate": "gate passed 24d ago, live arm = pawl_core", "mode": "paper"}
+{"ts": "2026-10-26T05:02:02.894907+00:00", "event": "venue", "name": "Alpaca crypto spot", "floor_mode": "resting_ratchet", "roundtrip_taker": "0.50%"}
+{"ts": "2026-10-26T05:02:03.367849+00:00", "event": "decision", "regime_on": true, "targets": {}, "exits": ["BTC/USD"]}
+{"ts": "2026-10-26T05:02:03.367961+00:00", "event": "reason", "symbol": "BTC/USD", "why": "momentum -5.2% below exit band"}
+{"ts": "2026-10-26T05:02:03.576843+00:00", "event": "floor_place_failed", "symbol": "BTC/USD", "error": "POST https://paper-api.alpaca.markets/v2/orders -> 422: {\"code\":40010001,\"message\":\"qty must be \\u003e 0\"}", "note": "position is running WITHOUT a resting floor; ratchet loop is the only protection"}
+{"ts": "2026-10-26T05:02:03.577309+00:00", "event": "cycle_done", "equity": 947.58, "positions": 1, "failures": 0}
