@@ -592,5 +592,11 @@
     "equity": 4991.88,
     "cash": 0,
     "note": "spy shadow"
+  },
+  {
+    "ts_et": "2026-10-27T17:45:34.003826-04:00",
+    "equity": 5020.29,
+    "cash": 0,
+    "note": "spy shadow"
   }
 ]
