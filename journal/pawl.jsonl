@@ -585,3 +585,4 @@
 {"ts": "2026-10-27T05:18:23.133369+00:00", "event": "reason", "symbol": "BTC/USD", "why": "momentum -4.1% below exit band"}
 {"ts": "2026-10-27T05:18:23.365110+00:00", "event": "floor_place_failed", "symbol": "BTC/USD", "error": "POST https://paper-api.alpaca.markets/v2/orders -> 422: {\"code\":40010001,\"message\":\"qty must be \\u003e 0\"}", "note": "position is running WITHOUT a resting floor; ratchet loop is the only protection"}
 {"ts": "2026-10-27T05:18:23.365506+00:00", "event": "cycle_done", "equity": 947.58, "positions": 1, "failures": 0}
+{"ts": "2026-10-27T08:02:16.630504+00:00", "event": "cycle_already_done", "date": "2026-10-27", "note": "one daily cycle per UTC day; the retry clock found it done"}
