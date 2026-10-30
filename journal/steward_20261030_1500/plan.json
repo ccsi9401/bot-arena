@@ -1,0 +1,47 @@
+{
+  "targets_final": {
+    "GLD": 0.0667,
+    "IEF": 0.0667,
+    "QQQ": 0.3,
+    "SHY": 0.0667,
+    "SPY": 0.4
+  },
+  "current_weights": {
+    "GLD": 0.0602,
+    "IEF": 0.068,
+    "QQQ": 0.3394,
+    "SHY": 0.0687,
+    "SPY": 0.3573
+  },
+  "cash_target": 0.0999,
+  "projected_cash_weight": 0.1031,
+  "sizing_version": 2,
+  "cash_drag_sweep": false,
+  "orders": [
+    {
+      "symbol": "QQQ",
+      "side": "sell",
+      "qty": 0.278836,
+      "notional": null,
+      "ref_price": 685.165,
+      "from_w": 0.3394,
+      "to_w": 0.3,
+      "reason": "Trim 33.9% \u2192 30.0%"
+    },
+    {
+      "symbol": "SPY",
+      "side": "buy",
+      "qty": 0.2754,
+      "notional": 207.01,
+      "ref_price": 751.72,
+      "from_w": 0.3573,
+      "to_w": 0.4,
+      "reason": "Add 35.7% \u2192 40.0%"
+    }
+  ],
+  "notes": [],
+  "halts": [],
+  "drawdown_pct": 3.1,
+  "peak_drawdown_pct": 5.29,
+  "_written_et": "2026-10-30T15:00:44.420501-04:00"
+}
