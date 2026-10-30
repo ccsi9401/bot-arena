@@ -7,76 +7,36 @@
   },
   "created_utc": "2026-09-07T16:00:41+00:00",
   "day": {
-    "date": "2026-10-29",
-    "start_equity": 96932.3
+    "date": "2026-10-30",
+    "start_equity": 93991.14
   },
   "equity_high_water": 108533.62,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-10-29T20:59:38+00:00",
+  "last_run_utc": "2026-10-30T00:00:40+00:00",
   "last_snapshot": {
-    "equity": 94533.1,
+    "equity": 93991.14,
     "halted": false,
     "high_water": 108533.62,
     "locked": 0.0,
     "open": [
-      "AAVE/USD",
-      "AVAX/USD",
-      "LINK/USD",
-      "LTC/USD",
-      "UNI/USD"
+      "BTC/USD"
     ],
-    "open_count": 5,
-    "pnl_day": -2399.2,
-    "pnl_total": -5466.9,
+    "open_count": 1,
+    "pnl_day": 0.0,
+    "pnl_total": -6008.86,
     "regime_on": true,
-    "tradeable": 94533.1
+    "tradeable": 93991.14
   },
   "positions": {
-    "AAVE/USD": {
-      "cost_pad": 0.6083340388520001,
-      "entry": 152.083509713,
-      "floor": 130.89279823831384,
-      "high_water": 154.788,
-      "r_unit": 21.190711474686164,
+    "BTC/USD": {
+      "cost_pad": 311.47825672740794,
+      "entry": 77869.564181852,
+      "floor": 73575.39361463524,
+      "high_water": 77869.564181852,
+      "r_unit": 4294.170567216764,
       "stage": "basement",
-      "symbol": "AAVE/USD"
-    },
-    "AVAX/USD": {
-      "cost_pad": 0.040743411804,
-      "entry": 10.185852951,
-      "floor": 8.752969809298346,
-      "high_water": 10.22215,
-      "r_unit": 1.432883141701653,
-      "stage": "basement",
-      "symbol": "AVAX/USD"
-    },
-    "LINK/USD": {
-      "cost_pad": 0.05097810554400001,
-      "entry": 12.744526386,
-      "floor": 11.15940426991439,
-      "high_water": 13.3312,
-      "r_unit": 1.5851221160856104,
-      "stage": "basement",
-      "symbol": "LINK/USD"
-    },
-    "LTC/USD": {
-      "cost_pad": 0.253406178424,
-      "entry": 63.351544606,
-      "floor": 56.17972997086571,
-      "high_water": 64.58,
-      "r_unit": 7.171814635134286,
-      "stage": "basement",
-      "symbol": "LTC/USD"
-    },
-    "UNI/USD": {
-      "cost_pad": 0.031738232424,
-      "entry": 7.934558106,
-      "floor": 6.555080398131619,
-      "high_water": 7.934558106,
-      "r_unit": 1.3794777078683813,
-      "stage": "basement",
-      "symbol": "UNI/USD"
+      "symbol": "BTC/USD"
     }
   },
   "start_equity": 100000.0,
