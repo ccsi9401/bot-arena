@@ -13,9 +13,9 @@
   "equity_high_water": 108533.62,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-10-30T00:00:40+00:00",
+  "last_run_utc": "2026-10-30T04:00:45+00:00",
   "last_snapshot": {
-    "equity": 93991.14,
+    "equity": 93592.89,
     "halted": false,
     "high_water": 108533.62,
     "locked": 0.0,
@@ -23,10 +23,10 @@
       "BTC/USD"
     ],
     "open_count": 1,
-    "pnl_day": 0.0,
-    "pnl_total": -6008.86,
+    "pnl_day": -398.25,
+    "pnl_total": -6407.11,
     "regime_on": true,
-    "tradeable": 93991.14
+    "tradeable": 93592.89
   },
   "positions": {
     "BTC/USD": {
