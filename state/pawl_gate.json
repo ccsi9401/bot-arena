@@ -17,22 +17,22 @@
     {
       "check": "floor_mode",
       "pass": true,
-      "detail": "tight 0.37 / catastrophe 1.07 / none 1.07 Sharpe -> CATASTROPHE"
+      "detail": "tight 0.30 / catastrophe 0.99 / none 0.99 Sharpe -> CATASTROPHE"
     },
     {
       "check": "sharpe_vs_buy_hold",
       "pass": true,
-      "detail": "pawl_core Sharpe 1.07 vs buy-hold BTC 0.389"
+      "detail": "pawl_core Sharpe 0.987 vs buy-hold BTC 0.378"
     },
     {
       "check": "drawdown_vs_buy_hold",
       "pass": true,
-      "detail": "pawl_core max DD -0.1514 vs buy-hold BTC -0.7668"
+      "detail": "pawl_core max DD -0.1514 vs buy-hold BTC -0.7276"
     },
     {
       "check": "sharpe_vs_blend",
       "pass": true,
-      "detail": "pawl_core Sharpe 1.07 vs rebalanced blend 0.334 (BTC/USD 70%, ETH/USD 30%)"
+      "detail": "pawl_core Sharpe 0.987 vs rebalanced blend 0.305 (BTC/USD 70%, ETH/USD 30%)"
     },
     {
       "check": "drawdown_limit",
@@ -42,116 +42,116 @@
     {
       "check": "fee_drag_annual",
       "pass": true,
-      "detail": "fees run 1.8%/yr of average equity (limit 12%/yr; Alpaca base tier is 25bps taker a side)"
+      "detail": "fees run 2.0%/yr of average equity (limit 12%/yr; Alpaca base tier is 25bps taker a side)"
     }
   ],
   "arms": {
     "pawl_full": {
-      "total_return": 1.3026,
-      "cagr": 0.2104,
+      "total_return": 1.1564,
+      "cagr": 0.1924,
       "max_drawdown": -0.1514,
-      "vol_annual": 0.1966,
-      "sharpe": 1.07,
-      "sortino": 1.04,
-      "calmar": 1.39,
-      "trades": 78,
-      "fees_paid": 1262.3,
+      "vol_annual": 0.1981,
+      "sharpe": 0.987,
+      "sortino": 0.971,
+      "calmar": 1.27,
+      "trades": 82,
+      "fees_paid": 1370.59,
       "days": 1594
     },
     "pawl_core": {
-      "total_return": 1.3026,
-      "cagr": 0.2104,
+      "total_return": 1.1564,
+      "cagr": 0.1924,
       "max_drawdown": -0.1514,
-      "vol_annual": 0.1966,
-      "sharpe": 1.07,
-      "sortino": 1.04,
-      "calmar": 1.39,
-      "trades": 78,
-      "fees_paid": 1262.3,
+      "vol_annual": 0.1981,
+      "sharpe": 0.987,
+      "sortino": 0.971,
+      "calmar": 1.27,
+      "trades": 82,
+      "fees_paid": 1370.59,
       "days": 1594
     },
     "floor_tight": {
-      "total_return": 0.2354,
-      "cagr": 0.0496,
+      "total_return": 0.1797,
+      "cagr": 0.0386,
       "max_drawdown": -0.2445,
-      "vol_annual": 0.1717,
-      "sharpe": 0.368,
-      "sortino": 0.309,
-      "calmar": 0.203,
-      "trades": 88,
-      "fees_paid": 1149.73,
+      "vol_annual": 0.1728,
+      "sharpe": 0.305,
+      "sortino": 0.259,
+      "calmar": 0.158,
+      "trades": 90,
+      "fees_paid": 1179.88,
       "days": 1594
     },
     "floor_catastrophe": {
-      "total_return": 1.3026,
-      "cagr": 0.2104,
+      "total_return": 1.1564,
+      "cagr": 0.1924,
       "max_drawdown": -0.1514,
-      "vol_annual": 0.1966,
-      "sharpe": 1.07,
-      "sortino": 1.04,
-      "calmar": 1.39,
-      "trades": 78,
-      "fees_paid": 1262.3,
+      "vol_annual": 0.1981,
+      "sharpe": 0.987,
+      "sortino": 0.971,
+      "calmar": 1.27,
+      "trades": 82,
+      "fees_paid": 1370.59,
       "days": 1594
     },
     "floor_none": {
-      "total_return": 1.3026,
-      "cagr": 0.2104,
+      "total_return": 1.1564,
+      "cagr": 0.1924,
       "max_drawdown": -0.1514,
-      "vol_annual": 0.1966,
-      "sharpe": 1.07,
-      "sortino": 1.04,
-      "calmar": 1.39,
-      "trades": 78,
-      "fees_paid": 1262.3,
+      "vol_annual": 0.1981,
+      "sharpe": 0.987,
+      "sortino": 0.971,
+      "calmar": 1.27,
+      "trades": 82,
+      "fees_paid": 1370.59,
       "days": 1594
     },
     "bh_btc": {
-      "total_return": 0.3995,
-      "cagr": 0.0705,
-      "max_drawdown": -0.7668,
-      "vol_annual": 0.5125,
-      "sharpe": 0.389,
-      "sortino": 0.549,
-      "calmar": 0.092,
+      "total_return": 0.3645,
+      "cagr": 0.065,
+      "max_drawdown": -0.7276,
+      "vol_annual": 0.5075,
+      "sharpe": 0.378,
+      "sortino": 0.533,
+      "calmar": 0.089,
       "trades": 1,
       "fees_paid": 35.0,
       "days": 1800
     },
     "bh_5050": {
-      "total_return": 0.0152,
-      "cagr": 0.0031,
-      "max_drawdown": -0.7685,
-      "vol_annual": 0.5565,
-      "sharpe": 0.284,
-      "sortino": 0.396,
-      "calmar": 0.004,
+      "total_return": -0.0535,
+      "cagr": -0.0111,
+      "max_drawdown": -0.7431,
+      "vol_annual": 0.5487,
+      "sharpe": 0.255,
+      "sortino": 0.355,
+      "calmar": -0.015,
       "trades": 2,
       "fees_paid": 35.0,
       "days": 1800
     },
     "btc_regime": {
-      "total_return": 2.2821,
-      "cagr": 0.2725,
+      "total_return": 2.0263,
+      "cagr": 0.2518,
       "max_drawdown": -0.3344,
-      "vol_annual": 0.3304,
-      "sharpe": 0.894,
-      "sortino": 1.016,
-      "calmar": 0.815,
+      "vol_annual": 0.3325,
+      "sharpe": 0.841,
+      "sortino": 0.968,
+      "calmar": 0.753,
       "trades": 33,
       "fees_paid": 1155.0,
       "days": 1800
     },
     "blend": {
-      "total_return": 0.1791,
-      "cagr": 0.034,
-      "max_drawdown": -0.7632,
-      "vol_annual": 0.5442,
-      "sharpe": 0.334,
-      "sortino": 0.468,
-      "calmar": 0.045,
+      "total_return": 0.0983,
+      "cagr": 0.0192,
+      "max_drawdown": -0.7305,
+      "vol_annual": 0.5389,
+      "sharpe": 0.305,
+      "sortino": 0.428,
+      "calmar": 0.026,
       "trades": 129,
-      "fees_paid": 107.17,
+      "fees_paid": 110.37,
       "days": 1800
     }
   },
@@ -164,5 +164,5 @@
     "Fills are modelled at next-bar open with taker fees; real slippage on thin alt pairs will be worse.",
     "Crypto history is short and dominated by two bull cycles. A 4-year window is not a lot of regimes."
   ],
-  "generated_at": "2026-10-02T02:33:37.694119+00:00"
+  "generated_at": "2026-11-02T02:43:20.597226+00:00"
 }
