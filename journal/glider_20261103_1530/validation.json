@@ -1,0 +1,55 @@
+{
+  "approved": [
+    {
+      "action": "close",
+      "symbol": "KO",
+      "reasoning": "Time stop: held 64d \u2265 10d."
+    },
+    {
+      "action": "close",
+      "symbol": "AAPL",
+      "reasoning": "Time stop: held 64d \u2265 10d."
+    },
+    {
+      "action": "close",
+      "symbol": "XOM",
+      "reasoning": "Time stop: held 64d \u2265 10d."
+    },
+    {
+      "action": "close",
+      "symbol": "XLV",
+      "reasoning": "Time stop: held 64d \u2265 10d."
+    }
+  ],
+  "rejected": [
+    {
+      "action": "buy",
+      "symbol": "TMO",
+      "entry_limit": 700.69,
+      "stop": 643.95,
+      "target": 1142.0,
+      "score": 0.26665393896426687,
+      "reasoning": "Uptrend (50>200 SMA, 1.4% off 52wk high), pullback trigger RSI2=63.9 / EMA20 touch. Stop 3.0xATR=18.45 below close 699.29; exit_mode=trail.",
+      "checks": {
+        "uptrend": true,
+        "near_high": true,
+        "pullback": true
+      },
+      "reject_reason": "qty rounds to 0 (risk $46, 56.74/share)"
+    }
+  ],
+  "halts": [],
+  "account_snapshot": {
+    "equity": 5070.3,
+    "cash": 411.78,
+    "last_equity": 5099.6941060955,
+    "buying_power": 14690.99,
+    "status": "AccountStatus.ACTIVE",
+    "core_value": 1415.422343,
+    "gross_after": 3243.1,
+    "drawdown_pct": 1.73,
+    "drawdown_basis": "peak 5159",
+    "day_pl_pct": -0.58
+  },
+  "_written_et": "2026-11-03T15:31:02.202383-05:00"
+}
