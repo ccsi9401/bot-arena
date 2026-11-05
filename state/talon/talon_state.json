@@ -7,15 +7,15 @@
   },
   "created_utc": "2026-09-07T16:00:41+00:00",
   "day": {
-    "date": "2026-11-04",
-    "start_equity": 93416.26
+    "date": "2026-11-05",
+    "start_equity": 94186.29
   },
   "equity_high_water": 108533.62,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-11-04T21:00:40+00:00",
+  "last_run_utc": "2026-11-05T00:49:58+00:00",
   "last_snapshot": {
-    "equity": 94033.15,
+    "equity": 94186.29,
     "halted": false,
     "high_water": 108533.62,
     "locked": 0.0,
@@ -23,17 +23,17 @@
       "BTC/USD"
     ],
     "open_count": 1,
-    "pnl_day": 616.89,
-    "pnl_total": -5966.85,
+    "pnl_day": 0.0,
+    "pnl_total": -5813.71,
     "regime_on": true,
-    "tradeable": 94033.15
+    "tradeable": 94186.29
   },
   "positions": {
     "BTC/USD": {
       "cost_pad": 311.47825672740794,
       "entry": 77869.564181852,
       "floor": 73575.39361463524,
-      "high_water": 78233.257,
+      "high_water": 80438.0965,
       "r_unit": 4294.170567216764,
       "stage": "basement",
       "symbol": "BTC/USD"
