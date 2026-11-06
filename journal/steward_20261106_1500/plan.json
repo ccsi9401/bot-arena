@@ -1,0 +1,66 @@
+{
+  "targets_final": {
+    "GLD": 0.1667,
+    "IEF": 0.1667,
+    "SHY": 0.1667,
+    "SPY": 0.4
+  },
+  "current_weights": {
+    "GLD": 0.064,
+    "IEF": 0.0693,
+    "QQQ": 0.2931,
+    "SHY": 0.0696,
+    "SPY": 0.3988
+  },
+  "cash_target": 0.0999,
+  "projected_cash_weight": 0.1012,
+  "sizing_version": 2,
+  "cash_drag_sweep": false,
+  "orders": [
+    {
+      "symbol": "QQQ",
+      "side": "sell",
+      "qty": 2.121496657,
+      "notional": null,
+      "ref_price": 659.39,
+      "from_w": 0.2931,
+      "to_w": 0.0,
+      "reason": "Exit 29.3% \u2192 0.0%"
+    },
+    {
+      "symbol": "GLD",
+      "side": "buy",
+      "qty": 1.3157,
+      "notional": 490.01,
+      "ref_price": 372.435,
+      "from_w": 0.064,
+      "to_w": 0.1667,
+      "reason": "Add 6.4% \u2192 16.7%"
+    },
+    {
+      "symbol": "IEF",
+      "side": "buy",
+      "qty": 5.0605,
+      "notional": 464.86,
+      "ref_price": 91.86,
+      "from_w": 0.0693,
+      "to_w": 0.1667,
+      "reason": "Add 6.9% \u2192 16.7%"
+    },
+    {
+      "symbol": "SHY",
+      "side": "buy",
+      "qty": 5.6743,
+      "notional": 463.1,
+      "ref_price": 81.615,
+      "from_w": 0.0696,
+      "to_w": 0.1667,
+      "reason": "Add 7.0% \u2192 16.7%"
+    }
+  ],
+  "notes": [],
+  "halts": [],
+  "drawdown_pct": 4.57,
+  "peak_drawdown_pct": 6.72,
+  "_written_et": "2026-11-06T15:00:45.578126-05:00"
+}
