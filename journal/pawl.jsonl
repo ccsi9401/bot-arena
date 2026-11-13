@@ -846,3 +846,4 @@
 {"ts": "2026-11-13T06:58:40.249487+00:00", "event": "reason", "symbol": "BTC/USD", "why": "regime off: anchor below its long-term trend"}
 {"ts": "2026-11-13T06:58:40.563301+00:00", "event": "floor_place_failed", "symbol": "BTC/USD", "error": "POST https://paper-api.alpaca.markets/v2/orders -> 422: {\"code\":40010001,\"message\":\"qty must be \\u003e 0\"}", "note": "position is running WITHOUT a resting floor; ratchet loop is the only protection"}
 {"ts": "2026-11-13T06:58:40.563785+00:00", "event": "cycle_done", "equity": 947.58, "positions": 1, "failures": 0}
+{"ts": "2026-11-13T09:44:28.906995+00:00", "event": "cycle_already_done", "date": "2026-11-13", "note": "one daily cycle per UTC day; the retry clock found it done"}
