@@ -2,7 +2,7 @@
   "round": 2,
   "title": "Bot Arena \u2014 live fleet",
   "start_date": "2026-09-24",
-  "asof_et": "2026-11-12T20:48:57.498938-05:00",
+  "asof_et": "2026-11-13T17:15:38.905987-05:00",
   "competitors": [
     {
       "slug": "talon",
@@ -10,10 +10,10 @@
       "equity": 92064.34,
       "cash": 92064.34,
       "total_return_pct": -7.94,
-      "day_pl_pct": -0.67,
+      "day_pl_pct": 0.0,
       "max_drawdown_pct": -14.61,
-      "sharpe_daily_ann": -4.01,
-      "trading_days": 50,
+      "sharpe_daily_ann": -3.97,
+      "trading_days": 51,
       "open_positions": [],
       "kill_switch": null
     },
@@ -25,8 +25,8 @@
       "total_return_pct": -5.24,
       "day_pl_pct": -0.0,
       "max_drawdown_pct": -6.54,
-      "sharpe_daily_ann": -2.53,
-      "trading_days": 50,
+      "sharpe_daily_ann": -2.5,
+      "trading_days": 51,
       "open_positions": [
         "BTCUSD"
       ],
@@ -49,13 +49,13 @@
     {
       "slug": "glider",
       "label": "GLIDER",
-      "equity": 5154.64,
+      "equity": 5162.63,
       "cash": 52.12,
-      "total_return_pct": 3.09,
-      "day_pl_pct": 0.12,
+      "total_return_pct": 3.25,
+      "day_pl_pct": 0.31,
       "max_drawdown_pct": -3.27,
-      "sharpe_daily_ann": 1.39,
-      "trading_days": 50,
+      "sharpe_daily_ann": 1.46,
+      "trading_days": 51,
       "open_positions": [
         "AAPL",
         "ABBV",
@@ -69,13 +69,13 @@
     {
       "slug": "steward",
       "label": "STEWARD",
-      "equity": 4781.9,
+      "equity": 4752.82,
       "cash": 482.35,
-      "total_return_pct": -4.36,
-      "day_pl_pct": -0.4,
+      "total_return_pct": -4.94,
+      "day_pl_pct": -0.24,
       "max_drawdown_pct": -7.27,
-      "sharpe_daily_ann": -2.17,
-      "trading_days": 50,
+      "sharpe_daily_ann": -2.39,
+      "trading_days": 51,
       "open_positions": [
         "GLD",
         "IEF",
