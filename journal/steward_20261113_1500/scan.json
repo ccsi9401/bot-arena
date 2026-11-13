@@ -1,0 +1,65 @@
+{
+  "mode": "portfolio",
+  "asof_et": "2026-11-13T15:00:38.060775-05:00",
+  "benchmark": "SPY",
+  "universe_size": 5,
+  "scanned": 5,
+  "symbols": {
+    "GLD": {
+      "close": 355.05,
+      "last_bar_date": "2026-11-13",
+      "mom_12_1": -0.002324184576815602,
+      "mom_6m": -0.1513898515738903,
+      "sma200": 408.416825,
+      "above_200sma": false,
+      "vol_63d_ann": 0.25267024675574534,
+      "avg_dollar_vol_20d": 113308306.382,
+      "sleeve": "defensive"
+    },
+    "IEF": {
+      "close": 90.065,
+      "last_bar_date": "2026-11-13",
+      "mom_12_1": -0.06411716000827994,
+      "mom_6m": -0.03642880068471166,
+      "sma200": 93.627625,
+      "above_200sma": false,
+      "vol_63d_ann": 0.06163413884405814,
+      "avg_dollar_vol_20d": 36726300.32875,
+      "sleeve": "defensive"
+    },
+    "QQQ": {
+      "close": 679.75,
+      "last_bar_date": "2026-11-13",
+      "mom_12_1": 0.1667187166126991,
+      "mom_6m": -0.036758349983703975,
+      "sma200": 682.20445,
+      "above_200sma": false,
+      "vol_63d_ann": 0.2327260673916922,
+      "avg_dollar_vol_20d": 494434094.31825,
+      "sleeve": "index"
+    },
+    "SHY": {
+      "close": 81.19,
+      "last_bar_date": "2026-11-13",
+      "mom_12_1": -0.0173298713845782,
+      "mom_6m": -0.01096357656230973,
+      "sma200": 82.0407,
+      "above_200sma": false,
+      "vol_63d_ann": 0.018992287943808063,
+      "avg_dollar_vol_20d": 8353288.44775,
+      "sleeve": "defensive"
+    },
+    "SPY": {
+      "close": 753.65,
+      "last_bar_date": "2026-11-13",
+      "mom_12_1": 0.1357968663978455,
+      "mom_6m": 0.020652762730227536,
+      "sma200": 731.887975,
+      "above_200sma": true,
+      "vol_63d_ann": 0.14536759705677363,
+      "avg_dollar_vol_20d": 1071013383.4557499,
+      "sleeve": "index"
+    }
+  },
+  "_written_et": "2026-11-13T15:00:38.060799-05:00"
+}

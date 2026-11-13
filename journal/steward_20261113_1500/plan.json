@@ -1,0 +1,24 @@
+{
+  "targets_final": {
+    "GLD": 0.1667,
+    "IEF": 0.1667,
+    "SHY": 0.1667,
+    "SPY": 0.4
+  },
+  "current_weights": {
+    "GLD": 0.1595,
+    "IEF": 0.1641,
+    "SHY": 0.1664,
+    "SPY": 0.4086
+  },
+  "cash_target": 0.0999,
+  "projected_cash_weight": 0.1015,
+  "sizing_version": 2,
+  "cash_drag_sweep": false,
+  "orders": [],
+  "notes": [],
+  "halts": [],
+  "drawdown_pct": 4.93,
+  "peak_drawdown_pct": 7.07,
+  "_written_et": "2026-11-13T15:00:38.554356-05:00"
+}

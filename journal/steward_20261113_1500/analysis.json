@@ -1,0 +1,19 @@
+{
+  "regime_on": true,
+  "targets": {
+    "GLD": 0.1667,
+    "IEF": 0.1667,
+    "SHY": 0.1667,
+    "SPY": 0.4
+  },
+  "cash_weight": 0.1,
+  "index_residue_pp": 0.0,
+  "momentum_leaderboard": [],
+  "notes": [
+    "Regime: RISK-ON \u2014 SPY above its 200-day SMA.",
+    "Index sleeve: SPY 40.0% (per-position cap 40%).",
+    "Index sleeve short 30.0pp (1 of 2 index ETFs above trend, capped at 40%) \u2014 residue routed to the defensive ballast rather than left idle in cash.",
+    "Defensive ballast: 50% split across GLD, IEF, SHY \u2014 always on."
+  ],
+  "_written_et": "2026-11-13T15:00:38.061089-05:00"
+}
