@@ -13,18 +13,18 @@
   "equity_high_water": 108533.62,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-11-13T00:59:14+00:00",
+  "last_run_utc": "2026-11-13T01:00:42+00:00",
   "last_snapshot": {
-    "equity": 92128.23,
+    "equity": 92064.34,
     "halted": false,
     "high_water": 108533.62,
     "locked": 0.0,
     "open": [],
     "open_count": 0,
-    "pnl_day": 0.0,
-    "pnl_total": -7871.77,
+    "pnl_day": -63.89,
+    "pnl_total": -7935.66,
     "regime_on": false,
-    "tradeable": 92128.23
+    "tradeable": 92064.34
   },
   "positions": {},
   "start_equity": 100000.0,
