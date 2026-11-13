@@ -1,0 +1,5 @@
+{"date": "2026-11-13", "event": "new_day", "mode": "cycle", "run_id": "20261113_005913_c0c784", "start_equity": 92128.23, "ts": "2026-11-13T00:59:13+00:00"}
+{"event": "exit_signal", "floor": 73575.39361463524, "mark": 71096.85, "mode": "cycle", "price": 71372.674, "r": -1.51, "reason": "floor breached on completed bar", "run_id": "20261113_005913_c0c784", "stage": "basement", "symbol": "BTC/USD", "ts": "2026-11-13T00:59:14+00:00"}
+{"event": "exit", "mode": "cycle", "order_id": "1400acc1-306b-436f-ab9c-018bc686ab09", "run_id": "20261113_005913_c0c784", "symbol": "BTC/USD", "ts": "2026-11-13T00:59:14+00:00"}
+{"candidates": [], "event": "plan", "mode": "cycle", "notes": ["Regime OFF: benchmark below its 200-day SMA \u2014 no new entries."], "regime_on": false, "run_id": "20261113_005913_c0c784", "targets": {}, "tradeable": 92128.23, "ts": "2026-11-13T00:59:14+00:00"}
+{"equity": 92128.23, "event": "snapshot", "halted": false, "high_water": 108533.62, "locked": 0.0, "mode": "cycle", "open": [], "open_count": 0, "pnl_day": 0.0, "pnl_total": -7871.77, "regime_on": false, "run_id": "20261113_005913_c0c784", "tradeable": 92128.23, "ts": "2026-11-13T00:59:14+00:00"}
