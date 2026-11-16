@@ -2,10 +2,10 @@
   "due": false,
   "overdue": false,
   "week_anchor_et": "2026-11-13",
-  "days_since_anchor": 0,
+  "days_since_anchor": 3,
   "last_cycle_date_et": "2026-11-13",
   "last_cycle_run_id": "steward_20261113_1500",
-  "checked_et": "2026-11-13T20:46:36.859700-05:00",
-  "requested_mode": "pulse",
-  "resolved_mode": "pulse"
+  "checked_et": "2026-11-16T10:45:38.251836-05:00",
+  "requested_mode": "catchup",
+  "resolved_mode": "noop"
 }
