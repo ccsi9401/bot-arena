@@ -1,0 +1,16 @@
+{
+  "regime_on": false,
+  "targets": {
+    "GLD": 0.2,
+    "IEF": 0.2,
+    "SHY": 0.2
+  },
+  "cash_weight": 0.4,
+  "index_residue_pp": 0.0,
+  "momentum_leaderboard": [],
+  "notes": [
+    "Regime: RISK-OFF \u2014 SPY below its 200-day SMA.",
+    "Defensive ballast: 60% split across GLD, IEF, SHY \u2014 always on."
+  ],
+  "_written_et": "2026-11-20T15:00:41.442091-05:00"
+}

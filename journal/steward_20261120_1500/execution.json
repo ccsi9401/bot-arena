@@ -1,0 +1,43 @@
+{
+  "results": [
+    {
+      "symbol": "SPY",
+      "side": "sell",
+      "qty": 2.578016395,
+      "notional": null,
+      "id": "67a93a3f-8680-4918-bf77-83a88c8a7771",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "GLD",
+      "side": "buy",
+      "qty": 0.6879,
+      "notional": 221.71,
+      "id": "7d930a7e-22e7-4a55-87df-1535d6bb4d81",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "IEF",
+      "side": "buy",
+      "qty": 1.2693,
+      "notional": 116.43,
+      "id": "633da6ce-b91a-474f-8b03-4fbc8fdd746c",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    },
+    {
+      "symbol": "SHY",
+      "side": "buy",
+      "qty": 1.4072,
+      "notional": 114.89,
+      "id": "ad4a271e-b014-4853-bf96-c1f4ecb2096f",
+      "status": "OrderStatus.PENDING_NEW",
+      "ok": true
+    }
+  ],
+  "placed": 4,
+  "failed": 0,
+  "_written_et": "2026-11-20T15:00:42.108168-05:00"
+}
