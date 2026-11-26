@@ -2,7 +2,7 @@
   "round": 2,
   "title": "Bot Arena \u2014 live fleet",
   "start_date": "2026-09-24",
-  "asof_et": "2026-11-25T22:32:27.456973-05:00",
+  "asof_et": "2026-11-26T17:15:36.636572-05:00",
   "competitors": [
     {
       "slug": "talon",
@@ -12,8 +12,8 @@
       "total_return_pct": -7.94,
       "day_pl_pct": 0.0,
       "max_drawdown_pct": -14.61,
-      "sharpe_daily_ann": -3.54,
-      "trading_days": 63,
+      "sharpe_daily_ann": -3.51,
+      "trading_days": 64,
       "open_positions": [],
       "kill_switch": null
     },
@@ -25,8 +25,8 @@
       "total_return_pct": -5.24,
       "day_pl_pct": -0.0,
       "max_drawdown_pct": -6.54,
-      "sharpe_daily_ann": -2.24,
-      "trading_days": 63,
+      "sharpe_daily_ann": -2.22,
+      "trading_days": 64,
       "open_positions": [
         "BTCUSD"
       ],
@@ -52,10 +52,10 @@
       "equity": 5018.49,
       "cash": 52.66,
       "total_return_pct": 0.37,
-      "day_pl_pct": -0.36,
+      "day_pl_pct": -0.0,
       "max_drawdown_pct": -5.54,
       "sharpe_daily_ann": 0.05,
-      "trading_days": 63,
+      "trading_days": 64,
       "open_positions": [
         "AAPL",
         "ABBV",
@@ -72,10 +72,10 @@
       "equity": 4570.02,
       "cash": 1820.9,
       "total_return_pct": -8.6,
-      "day_pl_pct": 0.23,
+      "day_pl_pct": 0.0,
       "max_drawdown_pct": -11.08,
-      "sharpe_daily_ann": -3.31,
-      "trading_days": 63,
+      "sharpe_daily_ann": -3.28,
+      "trading_days": 64,
       "open_positions": [
         "GLD",
         "IEF",

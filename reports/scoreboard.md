@@ -1,6 +1,6 @@
 # Bot Arena — live fleet
 
-_As of 2026-11-25T22:32 ET · started 2026-09-24_
+_As of 2026-11-26T17:15 ET · started 2026-09-24_
 
 **Leader: GLIDER**
 
@@ -8,10 +8,10 @@ _As of 2026-11-25T22:32 ET · started 2026-09-24_
 |---|---|---|---|---|---|
 | Equity | 92064.34 | 947.58 | None | 5018.49 | 4570.02 |
 | Total return % | -7.94 | -5.24 | None | 0.37 | -8.6 |
-| Today % | 0.0 | -0.0 | None | -0.36 | 0.23 |
+| Today % | 0.0 | -0.0 | None | -0.0 | 0.0 |
 | Max DD % | -14.61 | -6.54 | None | -5.54 | -11.08 |
-| Sharpe (ann.) | -3.54 | -2.24 | None | 0.05 | -3.31 |
-| Days scored | 63 | 63 | None | 63 | 63 |
+| Sharpe (ann.) | -3.51 | -2.22 | None | 0.05 | -3.28 |
+| Days scored | 64 | 64 | None | 64 | 64 |
 | Open | [] | ['BTCUSD'] | [] | ['AAPL', 'ABBV', 'KO', 'SPY', 'XLV', 'XOM'] | ['GLD', 'IEF', 'SHY'] |
 | Kill switch | None | None | None | None | None |
 | Error |  |  | APIError |  |  |
