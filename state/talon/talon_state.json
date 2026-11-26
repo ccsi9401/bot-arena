@@ -7,13 +7,13 @@
   },
   "created_utc": "2026-09-07T16:00:41+00:00",
   "day": {
-    "date": "2026-11-25",
+    "date": "2026-11-26",
     "start_equity": 92064.34
   },
   "equity_high_water": 108533.62,
   "halt_reason": "",
   "halted": false,
-  "last_run_utc": "2026-11-25T21:00:48+00:00",
+  "last_run_utc": "2026-11-26T00:08:30+00:00",
   "last_snapshot": {
     "equity": 92064.34,
     "halted": false,
