@@ -2,7 +2,7 @@
   "round": 2,
   "title": "Bot Arena \u2014 live fleet",
   "start_date": "2026-09-24",
-  "asof_et": "2026-11-26T17:15:36.636572-05:00",
+  "asof_et": "2026-11-26T22:38:00.684388-05:00",
   "competitors": [
     {
       "slug": "talon",
@@ -49,12 +49,12 @@
     {
       "slug": "glider",
       "label": "GLIDER",
-      "equity": 5018.49,
+      "equity": 5042.81,
       "cash": 52.66,
-      "total_return_pct": 0.37,
-      "day_pl_pct": -0.0,
+      "total_return_pct": 0.86,
+      "day_pl_pct": 0.48,
       "max_drawdown_pct": -5.54,
-      "sharpe_daily_ann": 0.05,
+      "sharpe_daily_ann": 0.23,
       "trading_days": 64,
       "open_positions": [
         "AAPL",
@@ -69,12 +69,12 @@
     {
       "slug": "steward",
       "label": "STEWARD",
-      "equity": 4570.02,
+      "equity": 4583.07,
       "cash": 1820.9,
-      "total_return_pct": -8.6,
-      "day_pl_pct": 0.0,
+      "total_return_pct": -8.34,
+      "day_pl_pct": 0.29,
       "max_drawdown_pct": -11.08,
-      "sharpe_daily_ann": -3.28,
+      "sharpe_daily_ann": -3.18,
       "trading_days": 64,
       "open_positions": [
         "GLD",
